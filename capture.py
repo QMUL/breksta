@@ -31,7 +31,7 @@ class Experiment(Base):
     Add whatever else we need.
     '''
     __tablename__ = "experiment"
-    
+
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(64))
     start: Mapped[datetime]
@@ -42,26 +42,26 @@ class PmtReading(Base):
     '''Store the readings against each experiment here.
     Might as well have wall-clock time as the time-stamp so
     it can be a unique primary key.
-    
+
     '''
     __tablename__ = "reading"
-    
+
     experiment: Mapped[int] = mapped_column(ForeignKey("experiment.id"))
     value: Mapped[int]
     ts: Mapped[datetime] = mapped_column(primary_key=True)
-    
+
 class PmtDb(object):
-    
+
     def __init__(self):
         engine = create_engine('sqlite:///pmt.db')
         Base.metadata.create_all(engine)
-        self.Session = sessionmaker(engine)        
+        self.Session = sessionmaker(engine)
         self.experiment_id = None
         self.start_time = None
-        
+
     def start_experiment(self, name):
         assert self.experiment_id is None
-        
+
         with self.Session() as sess:
             self.start_time = datetime.now()
             exp = Experiment(name=name, start=self.start_time)
@@ -69,11 +69,11 @@ class PmtDb(object):
             sess.commit()
             # Need to refresh the model to get the auto-incremented ID:
             sess.refresh(exp)
-        
+
         self.experiment_id = exp.id
-        
+
         return self.experiment_id
-        
+
     def stop_experiment(self):
         assert not self.experiment_id is None
         self.start_time = None
@@ -82,17 +82,17 @@ class PmtDb(object):
             sess.end = datetime.now()
             sess.commit()
         self.experiment_id = None
-        
+
     def write_reading(self, val):
         with self.Session() as sess:
             sess.add(PmtReading(experiment=self.experiment_id,
                 value=val, ts=datetime.now()))
             sess.commit()
-            
+
     def latest_readings(self, experiment=None, since=None):
         '''Return a DataFrame of readings for an experiment, (default current)
         with the timestamps as integer seconds relative to the start time.
-        
+
         TODO: If we're continuing with the web-app for charting, cache the DB queries
         with Memcached or similar, query only the latest values.
         '''
@@ -103,29 +103,29 @@ class PmtDb(object):
                 experiment = expt.id
             else:
                 expt = sess.query(Experiment).filter(Experiment.id==experiment).first()
-                
+
             if since is None:
                 query = sess.query(PmtReading.ts, PmtReading.value).filter(
                     PmtReading.experiment==experiment)
             else:
                 query = sess.query(PmtReading.ts, PmtReading.value).filter(
                     PmtReading.experiment==experiment, PmtReading.ts > since)
-                
+
             df = pd.DataFrame(query)
-                        
+
             df['ts'] = (df.ts - expt.start).dt.total_seconds()
-            
+
         return df
-                                        
+
 class DevCapture(PmtDb):
     '''Subclass PmtDb again to read from the Pi ADC.
     TODO: How can we tell if we're running on a real Pi?
     '''
     def __init__(self):
         PmtDb.__init__(self)
-        
+
         self.omega = 2.0 * math.pi / 60
-        
+
     def take_reading(self):
         noise = (0.08 * random.random()) - 0.04
         signal = 0.92 * math.sin(self.omega * (datetime.now() - self.start_time).seconds)
@@ -133,4 +133,3 @@ class DevCapture(PmtDb):
         self.write_reading(reading)
         print(reading)
         return reading
-        

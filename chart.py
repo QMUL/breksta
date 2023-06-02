@@ -27,13 +27,13 @@ def draw_chart(pathname, n):
     parsed = urllib.parse.urlparse(pathname)
 
     # We can pass in the ID of the experiment as a GET parameter
-    parsed_dict = urllib.parse.parse_qs(parsed.query)    
+    parsed_dict = urllib.parse.parse_qs(parsed.query)
     experiment = parsed_dict.get('experiment')
-    
+
     db = PmtDb()
-    
+
     df = db.latest_readings(experiment=experiment)
-    
+
     # TODO: More proper logging here:
     print('ping...')
     
@@ -41,5 +41,3 @@ def draw_chart(pathname, n):
 
 if __name__ == '__main__':
     app.run_server(debug=True)
-
-
