@@ -157,12 +157,21 @@ class CaptureWidget(QWidget):
 
 class ExportWidget(QWidget):
 
-    def __init__(self):
+    def __init__(self, width):
 
         QWidget.__init__(self)
 
+        layout = QHBoxLayout()
+
         self.export_button = QPushButton("Export", self)
         self.export_button.clicked.connect(self.on_export_button_clicked)
+
+        self.export_button.setFixedWidth(int(0.25 * width))
+        self.export_button.setEnabled(True)
+
+        layout.addWidget(self.export_button)
+
+        self.setLayout(layout)
 
     def on_export_button_clicked(self):
         # This function will be called when the button is clicked
@@ -188,7 +197,7 @@ class MainWindow(QMainWindow):
         self.setFixedSize(win_width, win_height)
 
         capture = CaptureWidget(win_width)
-        export = ExportWidget()
+        export = ExportWidget(win_width)
 
         tabs = QTabWidget()
         tabs.setTabPosition(QTabWidget.North)
