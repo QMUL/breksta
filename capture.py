@@ -117,6 +117,42 @@ class PmtDb(object):
 
         return df
 
+    def export_data(self):
+        # Query the database and get data
+        data = self.query_database()
+
+        # Convert data into a DataFrame
+        df = pd.DataFrame(data)
+
+        # Save DataFrame as a CSV file
+        df.to_csv('export.csv')
+
+    def query_database(self):
+        '''Return a DataFrame of all readings in the database,
+        with the timestamps as integer seconds relative to the start time of each experiment.'''
+        with self.Session() as sess:
+            # Get a list of all experiments
+            experiments = sess.query(Experiment).all()
+
+            # Initialize an empty list to hold the data from all experiments
+            data = []
+
+            for expt in experiments:
+                # Query the readings for the current experiment
+                query = sess.query(PmtReading.ts, PmtReading.value).filter(PmtReading.experiment == expt.id)
+
+                df = pd.DataFrame(query)
+
+                df['ts'] = (df.ts - expt.start).dt.total_seconds()
+
+                # Add the experiment data to the overall data
+                data.append(df)
+
+        # Concatenate all data into a single DataFrame
+        all_data = pd.concat(data)
+
+        return all_data
+
 class DevCapture(PmtDb):
     '''Subclass PmtDb again to read from the Pi ADC.
     TODO: How can we tell if we're running on a real Pi?

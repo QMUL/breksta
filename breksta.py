@@ -9,6 +9,7 @@ from PySide6.QtWidgets import (QApplication, QComboBox, QHBoxLayout, QLabel, QLi
 from PySide6.QtWebEngineWidgets import QWebEngineView
 
 from capture import DevCapture
+from capture import PmtDb
 
 class CaptureControl(QWidget):
     '''
@@ -174,8 +175,18 @@ class ExportWidget(QWidget):
         self.setLayout(layout)
 
     def on_export_button_clicked(self):
-        # This function will be called when the button is clicked
-        print("Export button clicked")
+        # Disable button upon clicking. Acknowledge.
+        self.export_button.setEnabled(False)
+        print("Export button clicked. Exporting in progress...")
+
+        # Initialize the database connection
+        db = PmtDb()
+
+        # Export the data
+        db.export_data()
+
+        print("Export complete!")
+        self.export_button.setEnabled(True)
 
 # https://doc.qt.io/qtforpython/tutorials/datavisualize/
 class MainWindow(QMainWindow):
