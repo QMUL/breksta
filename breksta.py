@@ -159,9 +159,16 @@ class ExportWidget(QWidget):
 
     def __init__(self):
 
-        QWidget.__init__(self) 
-         
-# https://doc.qt.io/qtforpython/tutorials/datavisualize/ 
+        QWidget.__init__(self)
+
+        self.export_button = QPushButton("Export", self)
+        self.export_button.clicked.connect(self.on_export_button_clicked)
+
+    def on_export_button_clicked(self):
+        # This function will be called when the button is clicked
+        print("Export button clicked")
+
+# https://doc.qt.io/qtforpython/tutorials/datavisualize/
 class MainWindow(QMainWindow):
 
     def __init__(self):
