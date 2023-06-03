@@ -2,10 +2,12 @@
 
 import sys
 
-from PySide6.QtCore import QProcess, QTimer, QUrl, Signal, Slot
+from PySide6.QtCore import QProcess, QTimer, QUrl, Signal, Slot, Qt
 from PySide6.QtGui import QAction, QKeySequence
 from PySide6.QtWidgets import (QApplication, QComboBox, QHBoxLayout, QLabel, QLineEdit,
-    QMainWindow, QPushButton, QTabWidget, QVBoxLayout, QWidget, QTableWidget)
+    QMainWindow, QPushButton, QTabWidget, QVBoxLayout, QWidget, QTableWidget,
+    QTableWidgetItem, QStyledItemDelegate
+    )
 from PySide6.QtWebEngineWidgets import QWebEngineView
 
 from capture import DevCapture
@@ -202,13 +204,19 @@ class TableWidget(QTableWidget):
         # set the column labels
         self.setHorizontalHeaderLabels(['Name', 'Date', 'Exported Status'])
 
-        # adjust the column width. Dynamic way?
-        self.setColumnWidth(0, int(0.1 * width))
-        self.setColumnWidth(1, int(0.1 * width))
+        # make the rows selectable
+        self.setSelectionBehavior(QTableWidget.SelectRows)
+
+        # adjust the column width
+        self.setColumnWidth(0, int(0.2 * width))
+        self.setColumnWidth(1, int(0.2 * width))
         self.setColumnWidth(2, int(0.2 * width))
 
         # retrieve the experiment data
         self.populate_table()
+
+        # QTableWidgetItem can access the following - needed for text alignment
+        self.setItemDelegate(QStyledItemDelegate())
 
 
     def populate_table(self):
@@ -218,16 +226,16 @@ class TableWidget(QTableWidget):
 
         # Assume get_experiments() returns a list of tuples, each containing (name, date, exported status)
         experiments = db.get_experiments()
+        self.setRowCount(len(experiments))
 
-        for name, date, exported_status in experiments:
-            row_position = self.rowCount()
-            self.insertRow(row_position)
+        for row, experiment in enumerate(experiments):
+            for col, entry in enumerate(experiment):
+                new_item = QTableWidgetItem(str(entry))
+                new_item.setTextAlignment(Qt.AlignCenter)  # Sets text alignment to center
+                new_item.setFlags(new_item.flags() & ~Qt.ItemIsEditable)  # Makes item non-editable
+                self.setItem(row, col, new_item)
 
-            # add data to each cell
-            self.setItem(row_position, 0, QTableWidgetItem(name))
-            self.setItem(row_position, 1, QTableWidgetItem(str(date)))  # make sure date is a string
-            self.setItem(row_position, 2, QTableWidgetItem('Yes' if exported_status else 'No'))
-
+        # self.resizeColumnsToContents()  # Resizes columns to fit content
 
 # https://doc.qt.io/qtforpython/tutorials/datavisualize/
 class MainWindow(QMainWindow):
