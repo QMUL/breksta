@@ -5,7 +5,7 @@ import sys
 from PySide6.QtCore import QProcess, QTimer, QUrl, Signal, Slot
 from PySide6.QtGui import QAction, QKeySequence
 from PySide6.QtWidgets import (QApplication, QComboBox, QHBoxLayout, QLabel, QLineEdit,
-    QMainWindow, QPushButton, QTabWidget, QVBoxLayout, QWidget)
+    QMainWindow, QPushButton, QTabWidget, QVBoxLayout, QWidget, QTableWidget)
 from PySide6.QtWebEngineWidgets import QWebEngineView
 
 from capture import DevCapture
@@ -163,6 +163,7 @@ class ExportWidget(QWidget):
         QWidget.__init__(self)
 
         layout = QHBoxLayout()
+        table = TableWidget(width)
 
         self.export_button = QPushButton("Export", self)
         self.export_button.clicked.connect(self.on_export_button_clicked)
@@ -170,7 +171,10 @@ class ExportWidget(QWidget):
         self.export_button.setFixedWidth(int(0.25 * width))
         self.export_button.setEnabled(True)
 
+        table.setFixedWidth(int(0.61 * width))
+
         layout.addWidget(self.export_button)
+        layout.addWidget(table)
 
         self.setLayout(layout)
 
@@ -187,6 +191,16 @@ class ExportWidget(QWidget):
 
         print("Export complete!")
         self.export_button.setEnabled(True)
+
+class TableWidget(QTableWidget):
+
+    def __init__(self, width):
+
+        # Initialise Table with 0 rows, 3 columns, to be populated
+        QTableWidget.__init__(self, 0, 3)
+
+        # set the column labels
+        self.setHorizontalHeaderLabels(['Name', 'Date', 'Exported Status'])
 
 # https://doc.qt.io/qtforpython/tutorials/datavisualize/
 class MainWindow(QMainWindow):
