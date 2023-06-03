@@ -202,6 +202,33 @@ class TableWidget(QTableWidget):
         # set the column labels
         self.setHorizontalHeaderLabels(['Name', 'Date', 'Exported Status'])
 
+        # adjust the column width. Dynamic way?
+        self.setColumnWidth(0, int(0.1 * width))
+        self.setColumnWidth(1, int(0.1 * width))
+        self.setColumnWidth(2, int(0.2 * width))
+
+        # retrieve the experiment data
+        self.populate_table()
+
+
+    def populate_table(self):
+
+        # Initialize the database connection
+        db = PmtDb()
+
+        # Assume get_experiments() returns a list of tuples, each containing (name, date, exported status)
+        experiments = db.get_experiments()
+
+        for name, date, exported_status in experiments:
+            row_position = self.rowCount()
+            self.insertRow(row_position)
+
+            # add data to each cell
+            self.setItem(row_position, 0, QTableWidgetItem(name))
+            self.setItem(row_position, 1, QTableWidgetItem(str(date)))  # make sure date is a string
+            self.setItem(row_position, 2, QTableWidgetItem('Yes' if exported_status else 'No'))
+
+
 # https://doc.qt.io/qtforpython/tutorials/datavisualize/
 class MainWindow(QMainWindow):
 
