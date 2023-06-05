@@ -154,15 +154,11 @@ class PmtDb(object):
         return all_data
 
     def get_experiments(self):
-        # This is a placeholder function that returns a list of tuples
-        # Each tuple contains an experiment name, a date, and a boolean indicating exported status
+        with self.Session() as sess:
+            experiments = sess.query(Experiment).all()
+            # Create a list of tuples, each containing the id, name, start time, end time of each experiment
+            return [(expt.id, expt.name, expt.start, expt.end) for expt in experiments]
 
-        # Placeholder data
-        return [
-            ('Experiment 1', '2023-01-01', True),
-            ('Experiment 2', '2023-02-01', False),
-            ('Experiment 3', '2023-03-01', True),
-        ]
 
 class DevCapture(PmtDb):
     '''Subclass PmtDb again to read from the Pi ADC.

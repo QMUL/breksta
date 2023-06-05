@@ -222,19 +222,21 @@ class TableWidget(QTableWidget):
 
     def __init__(self, width):
 
-        # Initialise Table with 0 rows, 3 columns, to be populated
-        QTableWidget.__init__(self, 0, 3)
+        # Initialise Table with 0 rows, 5 columns, to be populated
+        QTableWidget.__init__(self, 0, 5)
 
         # set the column labels
-        self.setHorizontalHeaderLabels(['Name', 'Date', 'Exported Status'])
+        self.setHorizontalHeaderLabels(['Id', 'Name', 'Date started', 'Date ended', 'Exported'])
 
         # make the rows selectable
         self.setSelectionBehavior(QTableWidget.SelectRows)
 
         # adjust the column width
-        self.setColumnWidth(0, int(0.2 * width))
-        self.setColumnWidth(1, int(0.2 * width))
-        self.setColumnWidth(2, int(0.2 * width))
+        self.setColumnWidth(0, int(0.03 * width))
+        self.setColumnWidth(1, int(0.15 * width))
+        self.setColumnWidth(2, int(0.15 * width))
+        self.setColumnWidth(3, int(0.15 * width))
+        self.setColumnWidth(4, int(0.1 * width))
 
         # retrieve the experiment data
         self.populate_table()
@@ -248,9 +250,15 @@ class TableWidget(QTableWidget):
         # Initialize the database connection
         db = PmtDb()
 
-        # Assume get_experiments() returns a list of tuples, each containing (name, date, exported status)
+        # get_experiments() returns a list of tuples, each containing:
+        # (id, name, date, date_fin)
         experiments = db.get_experiments()
+
+        # set num of rows to num of experiments in database
         self.setRowCount(len(experiments))
+
+        # Set num of columns to length of tuple (for now)
+        col = self.setColumnCount(len(experiments[0])+1)
 
         for row, experiment in enumerate(experiments):
             for col, entry in enumerate(experiment):
@@ -259,7 +267,16 @@ class TableWidget(QTableWidget):
                 new_item.setFlags(new_item.flags() & ~Qt.ItemIsEditable)  # Makes item non-editable
                 self.setItem(row, col, new_item)
 
+            self.is_exported(row)
         # self.resizeColumnsToContents()  # Resizes columns to fit content
+
+    def is_exported(self, row):
+        exported = True
+        set_status = QTableWidgetItem(str(exported))
+        set_status.setTextAlignment(Qt.AlignCenter)  # Sets text alignment to center
+        set_status.setFlags(set_status.flags() & ~Qt.ItemIsEditable)  # Makes item non-editable
+        self.setItem(row, 4, set_status)
+
 
 # https://doc.qt.io/qtforpython/tutorials/datavisualize/
 class MainWindow(QMainWindow):
