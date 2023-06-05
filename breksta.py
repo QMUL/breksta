@@ -1,6 +1,6 @@
 
 
-import sys
+import sys, datetime
 
 from PySide6.QtCore import QProcess, QTimer, QUrl, Signal, Slot, Qt
 from PySide6.QtGui import QAction, QKeySequence
@@ -262,7 +262,7 @@ class TableWidget(QTableWidget):
 
         for row, experiment in enumerate(experiments):
             for col, entry in enumerate(experiment):
-                new_item = QTableWidgetItem(str(entry))
+                new_item = QTableWidgetItem(entry.strftime('%Y-%m-%d %H:%M') if isinstance(entry, datetime.datetime) else str(entry))
                 new_item.setTextAlignment(Qt.AlignCenter)  # Sets text alignment to center
                 new_item.setFlags(new_item.flags() & ~Qt.ItemIsEditable)  # Makes item non-editable
                 self.setItem(row, col, new_item)

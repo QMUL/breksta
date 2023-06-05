@@ -79,7 +79,7 @@ class PmtDb(object):
         self.start_time = None
         with self.Session() as sess:
             exp = sess.get(Experiment, self.experiment_id)
-            sess.end = datetime.now()
+            exp.end = datetime.now()
             sess.commit()
         self.experiment_id = None
 
