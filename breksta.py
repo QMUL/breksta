@@ -251,14 +251,14 @@ class TableWidget(QTableWidget):
         db = PmtDb()
 
         # get_experiments() returns a list of tuples, each containing:
-        # (id, name, date, date_fin)
+        # (id, name, date start, date end, exported status)
         experiments = db.get_experiments()
 
         # set num of rows to num of experiments in database
         self.setRowCount(len(experiments))
 
-        # Set num of columns to length of tuple (for now)
-        col = self.setColumnCount(len(experiments[0])+1)
+        # Set num of columns to length of tuple
+        col = self.setColumnCount(len(experiments[0]))
 
         for row, experiment in enumerate(experiments):
             for col, entry in enumerate(experiment):
@@ -267,15 +267,7 @@ class TableWidget(QTableWidget):
                 new_item.setFlags(new_item.flags() & ~Qt.ItemIsEditable)  # Makes item non-editable
                 self.setItem(row, col, new_item)
 
-            self.is_exported(row)
         # self.resizeColumnsToContents()  # Resizes columns to fit content
-
-    def is_exported(self, row):
-        exported = True
-        set_status = QTableWidgetItem(str(exported))
-        set_status.setTextAlignment(Qt.AlignCenter)  # Sets text alignment to center
-        set_status.setFlags(set_status.flags() & ~Qt.ItemIsEditable)  # Makes item non-editable
-        self.setItem(row, 4, set_status)
 
 
 # https://doc.qt.io/qtforpython/tutorials/datavisualize/

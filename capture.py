@@ -157,7 +157,7 @@ class PmtDb(object):
         with self.Session() as sess:
             experiments = sess.query(Experiment).all()
             # Create a list of tuples, each containing the id, name, start time, end time of each experiment
-            return [(expt.id, expt.name, expt.start, expt.end) for expt in experiments]
+            return [(expt.id, expt.name, expt.start, expt.end, expt.exported) for expt in experiments]
 
 
 class DevCapture(PmtDb):
