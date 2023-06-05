@@ -112,6 +112,9 @@ class PmtDb(object):
                     PmtReading.experiment==experiment, PmtReading.ts > since)
 
             df = pd.DataFrame(query)
+            if df.empty:
+                print(f"No readings found for experiment {experiment}")
+                return None
 
             df['ts'] = (df.ts - expt.start).dt.total_seconds()
 
@@ -131,6 +134,9 @@ class PmtDb(object):
 
         # create dataframe for "experiment_id"
         df = self.latest_readings(experiment_id)
+        if df is None:
+                print(f"Cannot export data for experiment {experiment_id} because there are no readings")
+                return
 
         # create filename string and save to file
         filename = f"experiment_{experiment_id}.csv"
@@ -173,9 +179,15 @@ class PmtDb(object):
 
     def mark_exported(self, experiment_id):
         with self.Session() as sess:
-            exp = sess.get(Experiment, experiment_id)
-            exp.exported = True
-            sess.commit()
+            if experiment_id is not None:
+                exp = sess.get(Experiment, experiment_id)
+                if exp is not None:
+                    exp.exported = True
+                    sess.commit()
+                else:
+                    print(f"No experiment found with ID {experiment_id}")
+            else:
+                print("Experiment ID is None")
 
 
 class DevCapture(PmtDb):
