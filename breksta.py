@@ -160,7 +160,7 @@ class CaptureWidget(QWidget):
 
 class ExportControl(QWidget):
 
-    def __init__(self):
+    def __init__(self, tableWidget):
 
         QWidget.__init__(self)
 
@@ -182,6 +182,10 @@ class ExportControl(QWidget):
         # Initialize the box
         self.setLayout(layout)
 
+        # link to TableWidget class
+        # grants access to `selected_experiment_id`
+        self.table = tableWidget
+
     def on_export_button_clicked(self):
         # Disable button upon clicking. Acknowledge.
         self.export_button.setEnabled(False)
@@ -191,10 +195,13 @@ class ExportControl(QWidget):
         db = PmtDb()
 
         # Export the data
-        db.export_data_single(1)
+        db.export_data_single(self.table.selected_experiment_id)
 
         print("Export complete!")
         self.export_button.setEnabled(True)
+
+        print("Refresh list...")
+        self.table.populate_table()
 
     def on_refresh_button_clicked(self):
         print("Refreshing experiment list...")
@@ -208,10 +215,10 @@ class ExportWidget(QWidget):
         # Horizontal box
         layout = QHBoxLayout()
 
-        controls = ExportControl()
-        controls.setFixedWidth(int(0.25 * width))
         table = TableWidget(width)
         table.setFixedWidth(int(0.61 * width))
+        controls = ExportControl(table)
+        controls.setFixedWidth(int(0.25 * width))
 
         layout.addWidget(controls)
         layout.addWidget(table)
@@ -224,6 +231,9 @@ class TableWidget(QTableWidget):
 
         # Initialise Table with 0 rows, 5 columns, to be populated
         QTableWidget.__init__(self, 0, 5)
+
+        # initialise with invalid id, test
+        self.selected_experiment_id = -1
 
         # set the column labels
         self.setHorizontalHeaderLabels(['Id', 'Name', 'Date started', 'Date ended', 'Exported'])
@@ -244,6 +254,8 @@ class TableWidget(QTableWidget):
         # QTableWidgetItem can access the following - needed for text alignment
         self.setItemDelegate(QStyledItemDelegate())
 
+        # grab experiment - table click signal
+        self.cellClicked.connect(self.on_cell_click)
 
     def populate_table(self):
 
@@ -269,6 +281,13 @@ class TableWidget(QTableWidget):
 
         # self.resizeColumnsToContents()  # Resizes columns to fit content
 
+    def on_cell_click(self, row):
+
+        # assuming that the experiment ID is in the first column
+        item = self.item(row, 0)
+        if item is not None:
+            self.selected_experiment_id = int(item.text())
+            print(item.text())
 
 # https://doc.qt.io/qtforpython/tutorials/datavisualize/
 class MainWindow(QMainWindow):
