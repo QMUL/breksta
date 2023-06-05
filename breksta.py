@@ -158,26 +158,28 @@ class CaptureWidget(QWidget):
         self.setLayout(layout)
 
 
-class ExportWidget(QWidget):
+class ExportControl(QWidget):
 
-    def __init__(self, width):
+    def __init__(self):
 
         QWidget.__init__(self)
 
-        layout = QHBoxLayout()
-        table = TableWidget(width)
+        # Create vertical box
+        layout = QVBoxLayout()
 
+        # Set Export button
         self.export_button = QPushButton("Export", self)
         self.export_button.clicked.connect(self.on_export_button_clicked)
-
-        self.export_button.setFixedWidth(int(0.25 * width))
         self.export_button.setEnabled(True)
-
-        table.setFixedWidth(int(0.61 * width))
-
         layout.addWidget(self.export_button)
-        layout.addWidget(table)
 
+        # Set Refresh button
+        self.refresh_button = QPushButton("Refresh", self)
+        self.refresh_button.clicked.connect(self.on_refresh_button_clicked)
+        self.refresh_button.setEnabled(True)
+        layout.addWidget(self.refresh_button)
+
+        # Initialize the box
         self.setLayout(layout)
 
     def on_export_button_clicked(self):
@@ -193,6 +195,28 @@ class ExportWidget(QWidget):
 
         print("Export complete!")
         self.export_button.setEnabled(True)
+
+    def on_refresh_button_clicked(self):
+        print("Refreshing experiment list...")
+
+class ExportWidget(QWidget):
+
+    def __init__(self, width):
+
+        QWidget.__init__(self)
+
+        # Horizontal box
+        layout = QHBoxLayout()
+
+        controls = ExportControl()
+        controls.setFixedWidth(int(0.25 * width))
+        table = TableWidget(width)
+        table.setFixedWidth(int(0.61 * width))
+
+        layout.addWidget(controls)
+        layout.addWidget(table)
+
+        self.setLayout(layout)
 
 class TableWidget(QTableWidget):
 
