@@ -136,6 +136,9 @@ class PmtDb(object):
         filename = f"experiment_{experiment_id}.csv"
         df.to_csv(filename)
 
+        # set status to "True"
+        self.mark_exported(experiment_id)
+
     def query_database(self):
         '''Return a DataFrame of all readings in the database,
         with the timestamps as integer seconds relative to the start time of each experiment.'''
@@ -167,6 +170,12 @@ class PmtDb(object):
             experiments = sess.query(Experiment).all()
             # Create a list of tuples, each containing the id, name, start time, end time of each experiment
             return [(expt.id, expt.name, expt.start, expt.end, expt.exported) for expt in experiments]
+
+    def mark_exported(self, experiment_id):
+        with self.Session() as sess:
+            exp = sess.get(Experiment, experiment_id)
+            exp.exported = True
+            sess.commit()
 
 
 class DevCapture(PmtDb):

@@ -191,7 +191,6 @@ class ExportControl(QWidget):
         db = PmtDb()
 
         # Export the data
-        db.export_data()
         db.export_data_single(1)
 
         print("Export complete!")
