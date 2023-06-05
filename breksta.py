@@ -192,6 +192,7 @@ class ExportControl(QWidget):
 
         # Export the data
         db.export_data()
+        db.export_data_single(1)
 
         print("Export complete!")
         self.export_button.setEnabled(True)

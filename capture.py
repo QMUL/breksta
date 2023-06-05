@@ -127,6 +127,15 @@ class PmtDb(object):
         # Save DataFrame as a CSV file
         df.to_csv('export.csv')
 
+    def export_data_single(self, experiment_id):
+
+        # create dataframe for "experiment_id"
+        df = self.latest_readings(experiment_id)
+
+        # create filename string and save to file
+        filename = f"experiment_{experiment_id}.csv"
+        df.to_csv(filename)
+
     def query_database(self):
         '''Return a DataFrame of all readings in the database,
         with the timestamps as integer seconds relative to the start time of each experiment.'''
