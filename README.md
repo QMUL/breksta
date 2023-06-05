@@ -1,12 +1,29 @@
 # breksta
-Data Acquisition for photomultiplier tubes to a Raspberry Pi via an ADC.
 
-Uses (at the moment) Qt, (Pyside6) pandas, plotly/dash and SQLAlchemy.
+## Introduction
 
-Assuming Qt is installed:
+Breksta is a data acquisition project for photomultiplier tubes. It uses a Raspberry Pi via an ADC and leverages technologies such as Qt (Pyside6), pandas, plotly/dash, and SQLAlchemy.
 
-* pip3 install -r requirements.txt
-* python3 breksta.py
+## Pre-requisites
+
+- Python 3.8 or above
+- Qt installed
+- Linux OS (preferred)
+
+## Installation and Setup
+
+### First time setup:
+
+- Create a virtual environment: `python3 -m venv env`
+- Activate the virtual environment: `source env/bin/activate`
+- Install the required packages: `pip3 install -r requirements.txt`
+
+### Running the application
+
+Each time you open a new terminal, you should:
+- Add the current directory to the PYTHONPATH: `export PYTHONPATH="$PWD:$PYTHONPATH"`
+- Activate the virtual environment: `source env/bin/activate`
+- Start the application: `python3 app/breksta.py`
 
 ## Debugging
 
@@ -42,3 +59,12 @@ If there are any issues with the session or committing changes to the database.
 from sqlalchemy.exc import SQLAlchemyError
 except sqlalchemy.exc.SQLAlchemyError as e:
 ```
+
+## Contributing
+Please send a pull request with any suggested changes or improvements.
+
+## License
+This project is licensed under the MIT License.
+
+## Contact
+If you have any questions or suggestions, please contact us at [email] or open an issue on this project.
