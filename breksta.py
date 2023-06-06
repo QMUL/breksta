@@ -322,6 +322,16 @@ class TableWidget(QTableWidget):
             self.selected_experiment_id = int(item.text())
             print(item.text())
 
+    def mousePressEvent(self, event):
+        """
+        Overrides the QTableWidget's mousePressEvent to maintain selection when a user clicks outside a valid item.
+        """
+        # sticky table line selection
+        index = self.indexAt(event.pos())
+        if not index.isValid():
+            return
+        super().mousePressEvent(event)
+
 # https://doc.qt.io/qtforpython/tutorials/datavisualize/
 class MainWindow(QMainWindow):
 
