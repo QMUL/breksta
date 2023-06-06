@@ -159,9 +159,13 @@ class CaptureWidget(QWidget):
 
 
 class ExportControl(QWidget):
-
+    """
+    A QWidget subclass that provides control buttons and functionalities for exporting data from the PMT database.
+    """
     def __init__(self, tableWidget):
-
+        """
+        Initializes the export control panel with the 'Export' and 'Refresh' buttons. Refresh is placeholder
+        """
         QWidget.__init__(self)
 
         # Create vertical box
@@ -187,7 +191,10 @@ class ExportControl(QWidget):
         self.table = tableWidget
 
     def on_export_button_clicked(self):
-
+        """
+        Exports the data of the selected experiment when the export button is clicked.
+        Also refreshes the table widget after the export.
+        """
         # if `selected_experiment_id` is still default, user hasn't clicked on table
         # return control to parent
         if self.table.selected_experiment_id == -1:
@@ -220,7 +227,10 @@ class ExportControl(QWidget):
         print("Refreshing experiment list...")
 
 class ExportWidget(QWidget):
-
+    """
+    A QWidget subclass that provides an interface for exporting PMT data. It includes TableWidget for displaying the
+    experiment information and ExportControl for controlling the data export and refreshing the table.
+    """
     def __init__(self, width):
 
         QWidget.__init__(self)
@@ -240,10 +250,15 @@ class ExportWidget(QWidget):
         self.setLayout(layout)
 
 class TableWidget(QTableWidget):
-
+    """
+    A QTableWidget subclass that displays PMT experiment information in a table format. It includes functionalities
+    for populating the table with data from the PMT database and for handling user interaction with the table.
+    """
     def __init__(self, width):
-
-        # Initialise Table with 0 rows, 5 columns, to be populated
+        """
+        Initializes the table widget with 0 rows and 5 columns. The columns are labeled with 'Id', 'Name', 'Date started',
+        'Date ended', 'Exported', and the table is populated with data from the PMT database.
+        """
         QTableWidget.__init__(self, 0, 5)
 
         # initialise with invalid id, test
@@ -272,7 +287,9 @@ class TableWidget(QTableWidget):
         self.cellClicked.connect(self.on_cell_click)
 
     def populate_table(self):
-
+        """
+        Populates the table with data from the PMT database. Each row in the table corresponds to an experiment from the database.
+        """
         # Initialize the database connection
         db = PmtDb()
 
@@ -296,8 +313,10 @@ class TableWidget(QTableWidget):
         # self.resizeColumnsToContents()  # Resizes columns to fit content
 
     def on_cell_click(self, row):
-
-        # assuming that the experiment ID is in the first column
+        """
+        Handles user click on a cell in the table. The ID of the clicked experiment is stored for future use.
+        """
+        # assume that the experiment ID is in the first column
         item = self.item(row, 0)
         if item is not None:
             self.selected_experiment_id = int(item.text())

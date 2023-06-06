@@ -121,6 +121,9 @@ class PmtDb(object):
         return df
 
     def export_data(self):
+        """
+        Exports the data of all experiments to a CSV file.
+        """
         # Query the database and get data
         data = self.query_database()
 
@@ -131,7 +134,13 @@ class PmtDb(object):
         df.to_csv('export.csv')
 
     def export_data_single(self, experiment_id):
-
+        """
+        Exports the data of a single experiment to a CSV file.
+        Args:
+            experiment_id (int): The id of the experiment to export.
+        Returns:
+            None
+        """
         # create dataframe for "experiment_id"
         df = self.latest_readings(experiment_id)
         if df is None:
@@ -146,8 +155,13 @@ class PmtDb(object):
         self.mark_exported(experiment_id)
 
     def query_database(self):
-        '''Return a DataFrame of all readings in the database,
-        with the timestamps as integer seconds relative to the start time of each experiment.'''
+        '''
+        Query the database and return a DataFrame of all readings,
+        with the timestamps as integer seconds relative to the start time of each experiment.
+
+        Returns:
+            all_data (DataFrame): DataFrame containing all readings from the database.
+        '''
         with self.Session() as sess:
             # Get a list of all experiments
             experiments = sess.query(Experiment).all()
