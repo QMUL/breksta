@@ -2,7 +2,7 @@
 
 import sys, datetime, traceback
 
-from PySide6.QtCore import QProcess, QTimer, QUrl, Signal, Slot, Qt
+from PySide6.QtCore import QProcess, QTimer, QUrl, Signal, Slot, Qt, QDir
 from PySide6.QtGui import QAction, QKeySequence
 from PySide6.QtWidgets import (QApplication, QComboBox, QHBoxLayout, QLabel, QLineEdit,
     QMainWindow, QPushButton, QTabWidget, QVBoxLayout, QWidget, QTableWidget,
@@ -208,8 +208,14 @@ class ExportControl(QWidget):
         self.export_button.setEnabled(False)
         print("Export button clicked. Exporting in progress...")
 
+        # first time export is invoked, choose export folder
+        # if cancelled, return control to parent
         if self.folder_path is None:
             self.choose_directory()
+            if self.folder_path is None:
+                print("No folder chosen.. Please, try again")
+                self.export_button.setEnabled(True)
+                return
 
         try:
             # Initialize the database connection
@@ -237,8 +243,21 @@ class ExportControl(QWidget):
         print("Refreshing experiment list...")
 
     def choose_directory(self):
+        """
+        Opens a dialog for the user to choose an export folder for the experiment data.
+        The default directory opened in the dialog is the user's home directory (`$HOME`).
+        Note: To open the dialog at the current working directory (`$CWD`) instead, replace `QDir.homePath()` with `QDir.currentPath()`.
+
+        Returns:
+            str or None: The chosen directory path, or None if no directory was chosen.
+        """
         self.dialog = QFileDialog()
-        self.folder_path = self.dialog.getExistingDirectory(None, "Select Folder")
+        self.folder_path = self.dialog.getExistingDirectory(None, "Select Folder", QDir.homePath())
+
+        # Upon cancelling, folder_path will return an empty string, reset
+        if self.folder_path == '':
+            self.folder_path = None
+
         return self.folder_path
 
 class ExportWidget(QWidget):
