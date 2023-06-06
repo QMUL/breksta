@@ -1,6 +1,6 @@
 
 
-import sys, datetime
+import sys, datetime, traceback
 
 from PySide6.QtCore import QProcess, QTimer, QUrl, Signal, Slot, Qt
 from PySide6.QtGui import QAction, QKeySequence
@@ -187,21 +187,34 @@ class ExportControl(QWidget):
         self.table = tableWidget
 
     def on_export_button_clicked(self):
+
+        # if `selected_experiment_id` is still default, user hasn't clicked on table
+        # return control to parent
+        if self.table.selected_experiment_id == -1:
+            print("To export, please choose an experiment from the list")
+            return
+
         # Disable button upon clicking. Acknowledge.
         self.export_button.setEnabled(False)
         print("Export button clicked. Exporting in progress...")
 
-        # Initialize the database connection
-        db = PmtDb()
+        try:
+            # Initialize the database connection
+            db = PmtDb()
 
-        # Export the data
-        db.export_data_single(self.table.selected_experiment_id)
+            # Export the data
+            db.export_data_single(self.table.selected_experiment_id)
 
-        print("Export complete!")
-        self.export_button.setEnabled(True)
+            print("Export complete!")
+            self.export_button.setEnabled(True)
 
-        print("Refresh list...")
-        self.table.populate_table()
+            print("Refresh list...")
+            self.table.populate_table()
+
+        except Exception as e:
+            # if export gone wrong
+            print(f"Export failed due to: {e}")
+            print(traceback.format_exc())
 
     def on_refresh_button_clicked(self):
         print("Refreshing experiment list...")
@@ -215,6 +228,7 @@ class ExportWidget(QWidget):
         # Horizontal box
         layout = QHBoxLayout()
 
+        # controls depends on table to set `selected_experiment_id`
         table = TableWidget(width)
         table.setFixedWidth(int(0.61 * width))
         controls = ExportControl(table)
