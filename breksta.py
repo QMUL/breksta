@@ -6,7 +6,7 @@ from PySide6.QtCore import QProcess, QTimer, QUrl, Signal, Slot, Qt
 from PySide6.QtGui import QAction, QKeySequence
 from PySide6.QtWidgets import (QApplication, QComboBox, QHBoxLayout, QLabel, QLineEdit,
     QMainWindow, QPushButton, QTabWidget, QVBoxLayout, QWidget, QTableWidget,
-    QTableWidgetItem, QStyledItemDelegate
+    QTableWidgetItem, QStyledItemDelegate, QFileDialog
     )
 from PySide6.QtWebEngineWidgets import QWebEngineView
 
@@ -190,6 +190,9 @@ class ExportControl(QWidget):
         # grants access to `selected_experiment_id`
         self.table = tableWidget
 
+        # No folder path set
+        self.folder_path = None
+
     def on_export_button_clicked(self):
         """
         Exports the data of the selected experiment when the export button is clicked.
@@ -204,6 +207,9 @@ class ExportControl(QWidget):
         # Disable button upon clicking. Acknowledge.
         self.export_button.setEnabled(False)
         print("Export button clicked. Exporting in progress...")
+
+        if self.folder_path is None:
+            self.choose_directory()
 
         try:
             # Initialize the database connection
@@ -229,6 +235,11 @@ class ExportControl(QWidget):
 
     def on_refresh_button_clicked(self):
         print("Refreshing experiment list...")
+
+    def choose_directory(self):
+        self.dialog = QFileDialog()
+        self.folder_path = self.dialog.getExistingDirectory(None, "Select Folder")
+        return self.folder_path
 
 class ExportWidget(QWidget):
     """
