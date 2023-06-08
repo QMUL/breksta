@@ -331,7 +331,7 @@ class TableWidget(QTableWidget):
         Overrides the QTableWidget's mousePressEvent to maintain selection when a user clicks outside a valid item.
         """
         # sticky table line selection
-        index = self.indexAt(event.pos())
+        index = self.indexAt(event.position().toPoint())
         if not index.isValid():
             return
         super().mousePressEvent(event)
