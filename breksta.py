@@ -212,16 +212,20 @@ class ExportControl(QWidget):
             # Export the data
             db.export_data_single(self.table.selected_experiment_id)
 
-            print("Export complete!")
-            self.export_button.setEnabled(True)
-
-            print("Refresh list...")
-            self.table.populate_table()
-
         except Exception as e:
             # if export gone wrong
             print(f"Export failed due to: {e}")
             print(traceback.format_exc())
+
+        else:
+            # only runs if try is successful
+            print("Export complete!")
+            print("Refresh list...")
+            self.table.populate_table()
+
+        finally:
+            # always runs - return control to button
+            self.export_button.setEnabled(True)
 
     def on_refresh_button_clicked(self):
         print("Refreshing experiment list...")

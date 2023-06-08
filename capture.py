@@ -141,18 +141,24 @@ class PmtDb(object):
         Returns:
             None
         """
-        # create dataframe for "experiment_id"
-        df = self.latest_readings(experiment_id)
-        if df is None:
-                print(f"Cannot export data for experiment {experiment_id} because there are no readings")
-                return
+        try:
+            # create dataframe for "experiment_id"
+            df = self.latest_readings(experiment_id)
+            if df is None:
+                    print(f"Cannot export data for experiment {experiment_id} because there are no readings")
+                    return
 
-        # create filename string and save to file
-        filename = f"experiment_{experiment_id}.csv"
-        df.to_csv(filename)
+            # create filename string and save to file
+            filename = f"experiment_{experiment_id}.csv"
+            df.to_csv(filename)
 
-        # set status to "True"
-        self.mark_exported(experiment_id)
+        except Exception as e:
+            print(f"Export failed due to: {e}")
+
+        else:
+            # only run if `try:` is successful. set exported status to "True"
+            self.mark_exported(experiment_id)
+            print("`export_data_single` complete")
 
     def query_database(self):
         '''
@@ -192,17 +198,35 @@ class PmtDb(object):
             return [(expt.id, expt.name, expt.start, expt.end, expt.exported) for expt in experiments]
 
     def mark_exported(self, experiment_id):
-        with self.Session() as sess:
-            if experiment_id is not None:
-                exp = sess.get(Experiment, experiment_id)
-                if exp is not None:
-                    exp.exported = True
-                    sess.commit()
-                else:
-                    print(f"No experiment found with ID {experiment_id}")
-            else:
-                print("Experiment ID is None")
+        """
+        Marks an experiment as exported in the database.
 
+        Args:
+            experiment_id (int): The ID of the experiment to mark as exported.
+
+        Returns:
+            bool: True if the experiment was successfully marked as exported, False otherwise.
+        """
+        try:
+            with self.Session() as sess:
+                if experiment_id is not None:
+                    # Attempt to retrieve the experiment
+                    exp = sess.get(Experiment, experiment_id)
+                    if exp is not None:
+                        # Mark the experiment as exported and commit the changes
+                        exp.exported = True
+                        sess.commit()
+                        return True
+                    else:
+                        print(f"No experiment found with ID {experiment_id}")
+                else:
+                    print("Experiment ID is None")
+
+        except Exception as e:
+            print(f"Failed to mark experiment as exported due to: {e}")
+
+        # Return False if the function did not return True earlier
+        return False
 
 class DevCapture(PmtDb):
     '''Subclass PmtDb again to read from the Pi ADC.
