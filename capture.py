@@ -18,6 +18,7 @@ from datetime import datetime
 import math
 import random
 from typing import Optional
+from pathvalidate import sanitize_filename
 
 import pandas as pd
 from sqlalchemy import create_engine, ForeignKey, String
@@ -148,8 +149,14 @@ class PmtDb(object):
                     print(f"Cannot export data for experiment {experiment_id} because there are no readings")
                     return
 
+            # Attempt to retrieve the experiment's start date
+            with self.Session() as sess:
+                exp = sess.get(Experiment, experiment_id)
+                stamp = exp.start.strftime("%Y%m%d-%H%M")
+                name = exp.name
+
             # create filename string and save to file
-            filename = f"experiment_{experiment_id}.csv"
+            filename = sanitize_filename(f"{name}-{stamp}.csv")
             df.to_csv(filename)
 
         except Exception as e:

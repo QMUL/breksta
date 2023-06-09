@@ -3,3 +3,4 @@ pandas
 plotly
 pyside6
 sqlalchemy
+pathvalidate
