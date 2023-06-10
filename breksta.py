@@ -1,6 +1,7 @@
 
 
 import sys, datetime, traceback
+import plotly.graph_objects as go
 
 from PySide6.QtCore import QProcess, QTimer, QUrl, Signal, Slot, Qt, QDir
 from PySide6.QtGui import QAction, QKeySequence
@@ -164,20 +165,22 @@ class ExportControl(QWidget):
     """
     def __init__(self, tableWidget):
         """
-        Initializes the export control panel with the 'Export' and 'Refresh' buttons. Refresh is placeholder
+        Initializes the export control panel with the 'Export' and 'Refresh' buttons. Refresh is placeholder.
+        Args:
+            tableWidget (TableWidget): A TableWidget instance to interact with.
         """
         QWidget.__init__(self)
 
         # Create vertical box
         layout = QVBoxLayout()
 
-        # Set Export button
+        # Set up Export button
         self.export_button = QPushButton("Export", self)
         self.export_button.clicked.connect(self.on_export_button_clicked)
         self.export_button.setEnabled(True)
         layout.addWidget(self.export_button)
 
-        # Set Refresh button
+        # Set up Refresh button
         self.refresh_button = QPushButton("Refresh", self)
         self.refresh_button.clicked.connect(self.on_refresh_button_clicked)
         self.refresh_button.setEnabled(True)
@@ -186,8 +189,7 @@ class ExportControl(QWidget):
         # Initialize the box
         self.setLayout(layout)
 
-        # link to TableWidget class
-        # grants access to `selected_experiment_id`
+        # Link to TableWidget instance, allows access to `selected_experiment_id`
         self.table = tableWidget
 
         # No folder path set
@@ -199,12 +201,11 @@ class ExportControl(QWidget):
         Also refreshes the table widget after the export.
         """
         # if `selected_experiment_id` is still default, user hasn't clicked on table
-        # return control to parent
         if self.table.selected_experiment_id == -1:
             print("To export, please choose an experiment from the list")
             return
 
-        # Disable button upon clicking. Acknowledge.
+        # Disable button during the exporting process
         self.export_button.setEnabled(False)
         print("Export button clicked. Exporting in progress...")
 
@@ -272,14 +273,16 @@ class ExportWidget(QWidget):
         # Horizontal box
         layout = QHBoxLayout()
 
+        # add experiment widget
+        exp_data = ExperimentWidget(width)
+        exp_data.setFixedWidth(int(0.61 * width))
         # controls depends on table to set `selected_experiment_id`
         table = TableWidget(width)
-        table.setFixedWidth(int(0.61 * width))
         controls = ExportControl(table)
         controls.setFixedWidth(int(0.25 * width))
 
         layout.addWidget(controls)
-        layout.addWidget(table)
+        layout.addWidget(exp_data)
 
         self.setLayout(layout)
 
@@ -370,6 +373,104 @@ class TableWidget(QTableWidget):
         if not index.isValid():
             return
         super().mousePressEvent(event)
+
+class ExperimentGraph(QWebEngineView):
+    """
+    A QWebEngineView subclass that displays a Plotly graph for the selected experiment.
+    """
+    def __init__(self, width, tableWidget):
+        QWebEngineView.__init__(self)
+
+        # Reference to TableWidget instance, used to access `selected_experiment_id`
+        self.table = tableWidget
+
+        # Connect the cellClicked signal from the table to the `refresh_graph` function
+        self.table.cellClicked.connect(self.refresh_graph)
+
+        # Display a placeholder graph initially
+        self.display_placeholder_graph(width)
+
+    def display_placeholder_graph(self, width):
+        """
+        Display a placeholder graph before an experiment is selected.
+        """
+        fig = go.Figure()
+
+        fig.add_trace(go.Scatter(
+            x=[0, 1],
+            y=[0, 1],
+            mode='markers',
+            marker=dict(size=[0, 0])  # invisible points
+        ))
+
+        fig.update_layout(
+            annotations=[
+                go.layout.Annotation(
+                    x=0.5,
+                    y=0.5,
+                    text="GRAPH",
+                    showarrow=False,
+                    font=dict(
+                        size=84
+                    )
+                )
+            ],
+            xaxis=dict(showgrid=False, zeroline=False, visible=False),
+            yaxis=dict(showgrid=False, zeroline=False, visible=False),
+            autosize=False,
+            width=width/2,
+            height=width/4,
+        )
+
+        # Convert the Plotly figure to HTML and load it
+        raw_html = fig.to_html(full_html=False, include_plotlyjs='cdn')
+        self.setHtml(raw_html)
+
+    def refresh_graph(self):
+        """
+        Refresh the graph to reflect the data for the currently selected experiment.
+        """
+
+        if self.table.selected_experiment_id == -1:
+            print("No experiment selected")
+            return
+
+        # Initialize the database connection
+        db = PmtDb()
+
+        exp_data = db.latest_readings(self.table.selected_experiment_id)
+
+        if exp_data is not None:
+            # Create a scatter plot with timestamp as x and value as y
+            fig = go.Figure(data=go.Scatter(x=exp_data['ts'], y=exp_data['value']))
+
+            # Convert the Plotly figure to HTML and load it
+            raw_html = fig.to_html(full_html=False, include_plotlyjs='cdn')
+            self.setHtml(raw_html)
+        else:
+            print("No data to plot for the selected experiment")
+
+class ExperimentWidget(QWidget):
+    """
+    A QWidget subclass that provides an interface for viewing PMT experiment data.
+    It includes a TableWidget for displaying the experiment list and an ExperimentGraph for displaying experiment data.
+    """
+    def __init__(self, width):
+
+        QWidget.__init__(self)
+
+        # Vertical box layout
+        layout = QVBoxLayout()
+
+        # Create table and graph widgets
+        table = TableWidget(width)
+        graph = ExperimentGraph(width, table)
+
+        # Add widgets to layout in order: table first, graph second
+        layout.addWidget(table)
+        layout.addWidget(graph)
+
+        self.setLayout(layout)
 
 # https://doc.qt.io/qtforpython/tutorials/datavisualize/
 class MainWindow(QMainWindow):
