@@ -1,6 +1,6 @@
 
 
-import sys, datetime, traceback, os
+import sys, datetime, traceback, logging, os
 # Programmatically set PYTHONPATH for breksta ONLY
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
@@ -501,6 +501,11 @@ class MainWindow(QMainWindow):
 
         QMainWindow.__init__(self)
 
+        self.my_app = "Breksta"
+
+        # Initialize logging
+        self.logger = self.setup_logger()
+
         # Launch the plotly/dash web-app in here:
         self.web_process = QProcess(self)
         # Connect a slot to QProcess.finished to cleanup when your process ends
@@ -526,6 +531,8 @@ class MainWindow(QMainWindow):
         tabs.addTab(export, 'Export')
 
         self.setCentralWidget(tabs)
+
+        self.test_logger()
 
         exit_action = QAction("Exit", self)
         exit_action.setShortcut(QKeySequence.Quit)
@@ -587,6 +594,35 @@ class MainWindow(QMainWindow):
                 self.web_process.kill()
         # Accept the close event, allowing the main window to close
         event.accept()
+
+    def setup_logger(self):
+        logger = logging.getLogger(self.my_app)
+        logger.setLevel(logging.DEBUG)
+
+        # Create handlers
+        c_handler = logging.StreamHandler()
+        f_handler = logging.FileHandler('file.log')
+        c_handler.setLevel(logging.WARNING)
+        f_handler.setLevel(logging.DEBUG)
+
+        # Create formatters and add it to handlers
+        c_format = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
+        f_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        c_handler.setFormatter(c_format)
+        f_handler.setFormatter(f_format)
+
+        # Add handlers to the logger
+        logger.addHandler(c_handler)
+        logger.addHandler(f_handler)
+
+        return logger
+
+    def test_logger(self):
+        self.logger.debug('This is a debug message')
+        self.logger.info('This is an info message')
+        self.logger.warning('This is a warning message')
+        self.logger.error('This is an error message')
+        self.logger.critical('This is a critical message')
 
 if __name__ == "__main__":
     app = QApplication()
