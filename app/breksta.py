@@ -1,6 +1,6 @@
 
 
-import sys, datetime, traceback, os
+import sys, datetime, traceback, os, shutil
 # Programmatically set PYTHONPATH for breksta ONLY
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
@@ -287,6 +287,27 @@ class ExportControl(QWidget):
             self.folder_path = None
 
         return self.folder_path
+
+    def backup_database(self):
+        '''
+        Creates a database backup. The backup file is named with a timestamp,
+        like "backup_20230614_103030.db", to avoid overwriting previous backups.
+        '''
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        db_path = os.path.join(self.folder_path, 'pmt.db')
+        backup_path = os.path.join(self.folder_path, f'backup_{timestamp}.db')
+        shutil.copy(db_path, backup_path)
+
+    def restore_database(self, backup_file):
+        '''
+        Restores the database from a backup.
+        The backup file is provided as a parameter.
+        '''
+        if not os.path.isfile(backup_file):
+            raise Exception(f"Backup file {backup_file} does not exist.")
+
+        db_path = os.path.join(self.folder_path, 'pmt.db')
+        shutil.copy(backup_file, db_path)
 
 class ExportWidget(QWidget):
     """
