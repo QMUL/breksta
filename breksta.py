@@ -163,11 +163,11 @@ class ExportControl(QWidget):
     """
     A QWidget subclass that provides control buttons and functionalities for exporting data from the PMT database.
     """
-    def __init__(self, tableWidget):
+    def __init__(self, table):
         """
         Initializes the export control panel with the 'Export' and 'Refresh' buttons. Refresh is placeholder.
         Args:
-            tableWidget (TableWidget): A TableWidget instance to interact with.
+            table: A TableWidget instance to interact with.
         """
         QWidget.__init__(self)
 
@@ -189,8 +189,7 @@ class ExportControl(QWidget):
         # Initialize the box
         self.setLayout(layout)
 
-        # Link to TableWidget instance, allows access to `selected_experiment_id`
-        self.table = tableWidget
+        self.table = table
 
         # No folder path set
         self.folder_path = None
@@ -266,23 +265,23 @@ class ExportWidget(QWidget):
     A QWidget subclass that provides an interface for exporting PMT data. It includes TableWidget for displaying the
     experiment information and ExportControl for controlling the data export and refreshing the table.
     """
-    def __init__(self, width):
+    def __init__(self, width, table):
 
         QWidget.__init__(self)
 
         # Horizontal box
         layout = QHBoxLayout()
 
-        # add experiment widget
-        exp_data = ExperimentWidget(width)
-        exp_data.setFixedWidth(int(0.61 * width))
-        # controls depends on table to set `selected_experiment_id`
-        table = TableWidget(width)
+        # add export controls
         controls = ExportControl(table)
         controls.setFixedWidth(int(0.25 * width))
 
+        # add experiment widget
+        experiment_data = ExperimentWidget(width, table, controls)
+        experiment_data.setFixedWidth(int(0.61 * width))
+
         layout.addWidget(controls)
-        layout.addWidget(exp_data)
+        layout.addWidget(experiment_data)
 
         self.setLayout(layout)
 
@@ -378,11 +377,11 @@ class ExperimentGraph(QWebEngineView):
     """
     A QWebEngineView subclass that displays a Plotly graph for the selected experiment.
     """
-    def __init__(self, width, tableWidget):
+    def __init__(self, width, table):
         QWebEngineView.__init__(self)
 
         # Reference to TableWidget instance, used to access `selected_experiment_id`
-        self.table = tableWidget
+        self.table = table
 
         # Connect the cellClicked signal from the table to the `refresh_graph` function
         self.table.cellClicked.connect(self.refresh_graph)
@@ -455,7 +454,7 @@ class ExperimentWidget(QWidget):
     A QWidget subclass that provides an interface for viewing PMT experiment data.
     It includes a TableWidget for displaying the experiment list and an ExperimentGraph for displaying experiment data.
     """
-    def __init__(self, width):
+    def __init__(self, width, table, export_control):
 
         QWidget.__init__(self)
 
@@ -491,8 +490,10 @@ class MainWindow(QMainWindow):
 
         self.setFixedSize(win_width, win_height)
 
+        self.table = TableWidget(win_width)  # Only create one instance of TableWidget
+
         capture = CaptureWidget(win_width)
-        export = ExportWidget(win_width)
+        export = ExportWidget(win_width, self.table)
 
         tabs = QTabWidget()
         tabs.setTabPosition(QTabWidget.North)
