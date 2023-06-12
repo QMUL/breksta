@@ -159,7 +159,7 @@ class PmtDb(object):
             filename = sanitize_filename(f"{name}-{stamp}.csv")
             df.to_csv(filename)
 
-        except Exception as e:
+        except (ValueError, AttributeError, OSError) as e:
             print(f"Export failed due to: {e}")
 
         else:

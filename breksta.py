@@ -212,9 +212,9 @@ class ExportControl(QWidget):
             # Export the data
             db.export_data_single(self.table.selected_experiment_id)
 
-        except Exception as e:
-            # if export gone wrong
-            print(f"Export failed due to: {e}")
+        except (OSError) as e:
+            # if export gone wrong - OSError might catch pmt.db permissions issues
+            print(f"Export button failed due to: {e}")
             print(traceback.format_exc())
 
         else:
