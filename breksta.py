@@ -189,7 +189,20 @@ class ExportControl(QWidget):
         # Initialize the box
         self.setLayout(layout)
 
+        # Initialize the experiment_id to receive signal
+        self.selected_experiment_id = -1
+
+        # Link to TableWidget instance
         self.table = table
+        self.table.experimentSelected.connect(self.update_selected_experiment)
+
+    @Slot(int)
+    def update_selected_experiment(self, experiment_id):
+        try:
+            self.selected_experiment_id = experiment_id
+            print(f"signal received {self.selected_experiment_id}. ID {id(self)}")
+        except Exception as e:
+            print(f"{e}")
 
         # No folder path set
         self.folder_path = None
@@ -200,7 +213,7 @@ class ExportControl(QWidget):
         Also refreshes the table widget after the export.
         """
         # if `selected_experiment_id` is still default, user hasn't clicked on table
-        if self.table.selected_experiment_id == -1:
+        if self.selected_experiment_id == -1:
             print("To export, please choose an experiment from the list")
             return
 
@@ -222,7 +235,7 @@ class ExportControl(QWidget):
             db = PmtDb()
 
             # Export the data
-            db.export_data_single(self.table.selected_experiment_id)
+            db.export_data_single(self.selected_experiment_id)
 
         except (OSError) as e:
             # if export gone wrong - OSError might catch pmt.db permissions issues
@@ -290,6 +303,10 @@ class TableWidget(QTableWidget):
     A QTableWidget subclass that displays PMT experiment information in a table format. It includes functionalities
     for populating the table with data from the PMT database and for handling user interaction with the table.
     """
+
+    # create a signal that carries an integer
+    experimentSelected = Signal(int)
+
     def __init__(self, width):
         """
         Initializes the table widget with 0 rows and 5 columns. The columns are labeled with 'Id', 'Name', 'Date started',
@@ -319,7 +336,7 @@ class TableWidget(QTableWidget):
         # QTableWidgetItem can access the following - needed for text alignment
         self.setItemDelegate(QStyledItemDelegate())
 
-        # grab experiment - table click signal
+        # connect cell clicked event to the appropriate method
         self.cellClicked.connect(self.on_cell_click)
 
     def populate_table(self):
@@ -361,7 +378,9 @@ class TableWidget(QTableWidget):
         item = self.item(row, 0)
         if item is not None:
             self.selected_experiment_id = int(item.text())
-            print(item.text())
+            # emit the signal
+            self.experimentSelected.emit(self.selected_experiment_id)
+            print(f"Cell clicked, row {row}, experiment id {self.selected_experiment_id}")
 
     def mousePressEvent(self, event):
         """
@@ -382,9 +401,6 @@ class ExperimentGraph(QWebEngineView):
 
         # Reference to TableWidget instance, used to access `selected_experiment_id`
         self.table = table
-
-        # Connect the cellClicked signal from the table to the `refresh_graph` function
-        self.table.cellClicked.connect(self.refresh_graph)
 
         # Display a placeholder graph initially
         self.display_placeholder_graph(width)
@@ -462,14 +478,18 @@ class ExperimentWidget(QWidget):
         layout = QVBoxLayout()
 
         # Create table and graph widgets
-        table = TableWidget(width)
-        graph = ExperimentGraph(width, table)
+        self.graph = ExperimentGraph(width, table)
+        self.export_control = export_control
 
         # Add widgets to layout in order: table first, graph second
         layout.addWidget(table)
-        layout.addWidget(graph)
+        layout.addWidget(self.graph)
 
         self.setLayout(layout)
+
+        # connect the experimentSelected signal to the slots
+        table.experimentSelected.connect(self.graph.refresh_graph)
+        table.experimentSelected.connect(self.export_control.update_selected_experiment)
 
 # https://doc.qt.io/qtforpython/tutorials/datavisualize/
 class MainWindow(QMainWindow):
