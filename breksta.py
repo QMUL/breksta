@@ -301,6 +301,11 @@ class TableWidget(QTableWidget):
         # (id, name, date start, date end, exported status)
         experiments = db.get_experiments()
 
+        # check if database has data
+        if not experiments: # list is empty
+            print("Database has no data... table is empty")
+            return
+
         # set num of rows to num of experiments in database
         self.setRowCount(len(experiments))
 
