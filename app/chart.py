@@ -1,5 +1,5 @@
 
-import urllib.parse
+import urllib.parse, logging
 
 from dash import Dash, html, dcc
 from dash.dependencies import Input, Output
@@ -25,18 +25,22 @@ TODO: Add components only visible remotely to faciliate remote .csv download.
 @app.callback(Output('chart-content', 'figure'), [Input('url', 'pathname'),
     Input('interval-component', 'n_intervals')])
 def draw_chart(pathname, n):
+
+    logger = logging.getLogger(__name__)
+
+    logger.debug(f"draw_chart called with pathname={pathname}, n={n}")
+
     parsed = urllib.parse.urlparse(pathname)
 
     # We can pass in the ID of the experiment as a GET parameter
     parsed_dict = urllib.parse.parse_qs(parsed.query)
     experiment = parsed_dict.get('experiment')
 
-    db = PmtDb()
+    db = PmtDb(logger)
 
     df = db.latest_readings(experiment=experiment)
 
-    # TODO: More proper logging here:
-    print('ping...')
+    logger.debug('ping...')
 
     return px.line(df, x='ts', y='value')
 

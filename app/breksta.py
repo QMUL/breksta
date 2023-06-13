@@ -28,16 +28,19 @@ class CaptureControl(QWidget):
     # external signal for the slot in the ChartWidget
     started = Signal(int)
 
-    def __init__(self):
+    def __init__(self, logger):
 
         QWidget.__init__(self)
+
+        # Set logger
+        self.logger = logger
 
         self.experiment_id = None
 
         self.sample_frequency = 2
         self.duration = 1
 
-        self.device = DevCapture()
+        self.device = DevCapture(self.logger)
         # https://doc.qt.io/qtforpython/PySide6/QtCore/QTimer.html
         self.sample_timer = QTimer()
         # Here, the repeating timer provokes the data capture:
@@ -104,10 +107,9 @@ class CaptureControl(QWidget):
 
     def set_freq(self, txt):
         self.sample_frequency = int(txt)
-        # TODO Tidy away DEBUG prints, use a propper Python logger.
         # Set log-level from an Env Var?
         # Detect if we're running a Pi?
-        print(self.sample_frequency)
+        self.logger.debug(self.sample_frequency)
 
 
 class ChartWidget(QWebEngineView):
@@ -138,15 +140,18 @@ class CaptureWidget(QWidget):
     '''
     Stick the capture and chart widgets in a parent layout.
     '''
-    def __init__(self, width):
+    def __init__(self, width, logger):
 
         QWidget.__init__(self)
+
+        # Set logger
+        self.logger = logger
 
         layout = QHBoxLayout()
 
         # Partition the window real-estate how thou wilt:
 
-        controls = CaptureControl()
+        controls = CaptureControl(self.logger)
         controls.setFixedWidth(int(0.25 * width))
 
         chart = ChartWidget()
@@ -166,13 +171,16 @@ class ExportControl(QWidget):
     """
     A QWidget subclass that provides control buttons and functionalities for exporting data from the PMT database.
     """
-    def __init__(self, table):
+    def __init__(self, table, logger):
         """
         Initializes the export control panel with the 'Export' and 'Refresh' buttons. Refresh is placeholder.
         Args:
             table: A TableWidget instance to interact with.
         """
         QWidget.__init__(self)
+
+        # set up logger
+        self.logger = logger
 
         # Create vertical box
         layout = QVBoxLayout()
@@ -203,9 +211,9 @@ class ExportControl(QWidget):
     def update_selected_experiment(self, experiment_id):
         try:
             self.selected_experiment_id = experiment_id
-            print(f"signal received {self.selected_experiment_id}. ID {id(self)}")
+            self.logger.debug(f"signal received {self.selected_experiment_id}. ID {id(self)}")
         except Exception as e:
-            print(f"{e}")
+            self.logger.debug(f"update_selected_experiment failed unexpectedly: {e}")
 
         # No folder path set
         self.folder_path = None
@@ -217,38 +225,37 @@ class ExportControl(QWidget):
         """
         # if `selected_experiment_id` is still default, user hasn't clicked on table
         if self.selected_experiment_id == -1:
-            print("To export, please choose an experiment from the list")
+            self.logger.warning("To export, please choose an experiment from the list")
             return
 
         # Disable button during the exporting process
         self.export_button.setEnabled(False)
-        print("Export button clicked. Exporting in progress...")
+        self.logger.info("Export button clicked. Exporting in progress...")
 
         # first time export is invoked, choose export folder
         # if cancelled, return control to parent
         if self.folder_path is None:
             self.choose_directory()
             if self.folder_path is None:
-                print("No folder chosen.. Please, try again")
+                self.logger.warning("No folder chosen.. Please, try again")
                 self.export_button.setEnabled(True)
                 return
 
         try:
             # Initialize the database connection
-            db = PmtDb()
+            db = PmtDb(self.logger)
 
             # Export the data
             db.export_data_single(self.selected_experiment_id)
 
         except (OSError) as e:
             # if export gone wrong - OSError might catch pmt.db permissions issues
-            print(f"Export button failed due to: {e}")
-            print(traceback.format_exc())
+            self.logger.critical(f"Export button failed due to: {e}")
+            self.logger.critical(traceback.format_exc())
 
         else:
             # only runs if try is successful
-            print("Export complete!")
-            print("Refresh list...")
+            self.logger.info("Export complete! Refresh table list...")
             self.table.populate_table()
 
         finally:
@@ -256,7 +263,7 @@ class ExportControl(QWidget):
             self.export_button.setEnabled(True)
 
     def on_refresh_button_clicked(self):
-        print("Refreshing experiment list...")
+        self.logger.info("Refreshing experiment list...")
 
     def choose_directory(self):
         """
@@ -281,19 +288,22 @@ class ExportWidget(QWidget):
     A QWidget subclass that provides an interface for exporting PMT data. It includes TableWidget for displaying the
     experiment information and ExportControl for controlling the data export and refreshing the table.
     """
-    def __init__(self, width, table):
+    def __init__(self, width, table, logger):
 
         QWidget.__init__(self)
+
+        # set up logger
+        self.logger = logger
 
         # Horizontal box
         layout = QHBoxLayout()
 
         # add export controls
-        controls = ExportControl(table)
+        controls = ExportControl(table, self.logger)
         controls.setFixedWidth(int(0.25 * width))
 
         # add experiment widget
-        experiment_data = ExperimentWidget(width, table, controls)
+        experiment_data = ExperimentWidget(width, table, controls, self.logger)
         experiment_data.setFixedWidth(int(0.61 * width))
 
         layout.addWidget(controls)
@@ -310,12 +320,15 @@ class TableWidget(QTableWidget):
     # create a signal that carries an integer
     experimentSelected = Signal(int)
 
-    def __init__(self, width):
+    def __init__(self, width, logger):
         """
         Initializes the table widget with 0 rows and 5 columns. The columns are labeled with 'Id', 'Name', 'Date started',
         'Date ended', 'Exported', and the table is populated with data from the PMT database.
         """
         QTableWidget.__init__(self, 0, 5)
+
+        # Set logger
+        self.logger = logger
 
         # initialise with invalid id, test
         self.selected_experiment_id = -1
@@ -347,7 +360,7 @@ class TableWidget(QTableWidget):
         Populates the table with data from the PMT database. Each row in the table corresponds to an experiment from the database.
         """
         # Initialize the database connection
-        db = PmtDb()
+        db = PmtDb(self.logger)
 
         # get_experiments() returns a list of tuples, each containing:
         # (id, name, date start, date end, exported status)
@@ -355,7 +368,7 @@ class TableWidget(QTableWidget):
 
         # check if database has data
         if not experiments: # list is empty
-            print("Database has no data... table is empty")
+            self.logger.warning("Database has no data... table is empty")
             return
 
         # set num of rows to num of experiments in database
@@ -383,7 +396,7 @@ class TableWidget(QTableWidget):
             self.selected_experiment_id = int(item.text())
             # emit the signal
             self.experimentSelected.emit(self.selected_experiment_id)
-            print(f"Cell clicked, row {row}, experiment id {self.selected_experiment_id}")
+            self.logger.debug(f"Cell clicked, row {row}, experiment id {self.selected_experiment_id}")
 
     def mousePressEvent(self, event):
         """
@@ -399,8 +412,11 @@ class ExperimentGraph(QWebEngineView):
     """
     A QWebEngineView subclass that displays a Plotly graph for the selected experiment.
     """
-    def __init__(self, width, table):
+    def __init__(self, width, table, logger):
         QWebEngineView.__init__(self)
+
+        # Set up logger
+        self.logger = logger
 
         # Reference to TableWidget instance, used to access `selected_experiment_id`
         self.table = table
@@ -450,11 +466,11 @@ class ExperimentGraph(QWebEngineView):
         """
 
         if self.table.selected_experiment_id == -1:
-            print("No experiment selected")
+            self.logger.debug("Cannot refresh preview graph. No experiment selected.")
             return
 
         # Initialize the database connection
-        db = PmtDb()
+        db = PmtDb(self.logger)
 
         exp_data = db.latest_readings(self.table.selected_experiment_id)
 
@@ -466,22 +482,25 @@ class ExperimentGraph(QWebEngineView):
             raw_html = fig.to_html(full_html=False, include_plotlyjs='cdn')
             self.setHtml(raw_html)
         else:
-            print("No data to plot for the selected experiment")
+            self.logger.warning("No data to plot for the selected experiment.")
 
 class ExperimentWidget(QWidget):
     """
     A QWidget subclass that provides an interface for viewing PMT experiment data.
     It includes a TableWidget for displaying the experiment list and an ExperimentGraph for displaying experiment data.
     """
-    def __init__(self, width, table, export_control):
+    def __init__(self, width, table, export_control, logger):
 
         QWidget.__init__(self)
+
+        # Set up logger
+        self.logger = logger
 
         # Vertical box layout
         layout = QVBoxLayout()
 
         # Create table and graph widgets
-        self.graph = ExperimentGraph(width, table)
+        self.graph = ExperimentGraph(width, table, self.logger)
         self.export_control = export_control
 
         # Add widgets to layout in order: table first, graph second
@@ -520,10 +539,10 @@ class MainWindow(QMainWindow):
 
         self.setFixedSize(win_width, win_height)
 
-        self.table = TableWidget(win_width)  # Only create one instance of TableWidget
+        self.table = TableWidget(win_width, self.logger)  # Only create one instance of TableWidget
 
-        capture = CaptureWidget(win_width)
-        export = ExportWidget(win_width, self.table)
+        capture = CaptureWidget(win_width, self.logger)
+        export = ExportWidget(win_width, self.table, self.logger)
 
         tabs = QTabWidget()
         tabs.setTabPosition(QTabWidget.North)
@@ -531,8 +550,6 @@ class MainWindow(QMainWindow):
         tabs.addTab(export, 'Export')
 
         self.setCentralWidget(tabs)
-
-        self.test_logger()
 
         exit_action = QAction("Exit", self)
         exit_action.setShortcut(QKeySequence.Quit)
@@ -557,21 +574,21 @@ class MainWindow(QMainWindow):
             self.web_process.start("python3", ["-m", "app.chart"])
             # Wait for the process to start, print a failure message if it doesn't
             if not self.web_process.waitForStarted():
-                print("Failed to start web process.")
+                self.logger.critical("Failed to start web process.")
         except Exception as e:
-            print('web process fell over:', str(e))
+            self.logger.debug('web process fell over:', str(e))
         else:
-            print("starting web process")
+            self.logger.info("starting web process")
 
     def handle_error(self, error):
         # Function to handle errors that occur in the web process
-        print("An error occurred in the web process:", error)
+        self.logger.debug("An error occurred in the web process:", error)
 
     def handle_stderr(self):
         # Function to handle standard error output from the web process
         # Reads the standard error output, decodes it, and prints it
         stderr = self.web_process.readAllStandardError().data().decode()
-        print(stderr)
+        self.logger.debug(stderr)
 
     def on_process_finished(self):
         # Function to handle the process finishing
@@ -616,13 +633,6 @@ class MainWindow(QMainWindow):
         logger.addHandler(f_handler)
 
         return logger
-
-    def test_logger(self):
-        self.logger.debug('This is a debug message')
-        self.logger.info('This is an info message')
-        self.logger.warning('This is a warning message')
-        self.logger.error('This is an error message')
-        self.logger.critical('This is a critical message')
 
 if __name__ == "__main__":
     app = QApplication()

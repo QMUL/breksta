@@ -16,7 +16,7 @@ QuestDB, a column-store for IOT time-series:
 
 from datetime import datetime
 import math
-import random
+import random, logging
 from typing import Optional
 from pathvalidate import sanitize_filename
 
@@ -53,7 +53,11 @@ class PmtReading(Base):
 
 class PmtDb(object):
 
-    def __init__(self):
+    def __init__(self, logger=None):
+
+        # set up logger
+        self.logger = logger
+
         engine = create_engine('sqlite:///pmt.db')
         Base.metadata.create_all(engine)
         self.Session = sessionmaker(engine)
@@ -114,7 +118,7 @@ class PmtDb(object):
 
             df = pd.DataFrame(query)
             if df.empty:
-                print(f"No readings found for experiment {experiment}")
+                self.logger.warning(f"No readings found for experiment {experiment}")
                 return None
 
             df['ts'] = (df.ts - expt.start).dt.total_seconds()
@@ -146,7 +150,7 @@ class PmtDb(object):
             # create dataframe for "experiment_id"
             df = self.latest_readings(experiment_id)
             if df is None:
-                    print(f"Cannot export data for experiment {experiment_id} because there are no readings")
+                    self.logger.critical(f"Cannot export data for experiment {experiment_id} because there are no readings.")
                     return
 
             # Attempt to retrieve the experiment's start date
@@ -160,12 +164,12 @@ class PmtDb(object):
             df.to_csv(filename)
 
         except (ValueError, AttributeError, OSError) as e:
-            print(f"Export failed due to: {e}")
+            self.logger.debug(f"Export failed due to: {e}")
 
         else:
             # only run if `try:` is successful. set exported status to "True"
             self.mark_exported(experiment_id)
-            print("`export_data_single` complete")
+            self.logger.debug("`export_data_single` complete")
 
     def query_database(self):
         '''
@@ -225,12 +229,12 @@ class PmtDb(object):
                         sess.commit()
                         return True
                     else:
-                        print(f"No experiment found with ID {experiment_id}")
+                        self.logger.critical(f"No experiment found with ID {experiment_id}")
                 else:
-                    print("Experiment ID is None")
+                    self.logger.debug("Experiment ID is None")
 
         except Exception as e:
-            print(f"Failed to mark experiment as exported due to: {e}")
+            self.logger.debug(f"Failed to mark experiment as exported due to: {e}")
 
         # Return False if the function did not return True earlier
         return False
@@ -239,8 +243,10 @@ class DevCapture(PmtDb):
     '''Subclass PmtDb again to read from the Pi ADC.
     TODO: How can we tell if we're running on a real Pi?
     '''
-    def __init__(self):
-        PmtDb.__init__(self)
+    def __init__(self, logger):
+        PmtDb.__init__(self, logger)
+
+        self.logger = logger
 
         self.omega = 2.0 * math.pi / 60
 
@@ -249,5 +255,5 @@ class DevCapture(PmtDb):
         signal = 0.92 * math.sin(self.omega * (datetime.now() - self.start_time).seconds)
         reading = 32768 + int(32768 * (signal + noise))
         self.write_reading(reading)
-        print(reading)
+        self.logger.debug(reading)
         return reading
