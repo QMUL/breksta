@@ -299,8 +299,60 @@ class ExportControl(QWidget):
         self.delete_button.setEnabled(False)
         print("Delete button clicked. Deleting in progress...")
 
+        try:
+            # Initialize the database connection
+            db = PmtDb()
+
+            # Confirm deletion and backup database
+            experiment = db.get_experiment(self.selected_experiment_id)
+            if not self.confirm_delete(experiment):
+                print("Deletion cancelled.")
+                self.delete_button.setEnabled(True)
+                return
+
+            self.backup_database()
+
         # always runs - return control to button
         self.delete_button.setEnabled(True)
+        except Exception as e:
+            # if delete gone wrong - restore the database
+            print(f"Delete button failed due to: {e}")
+            print(traceback.format_exc())
+            self.restore_database()
+
+        else:
+            # only runs if try is successful
+            print("Deletion complete!")
+            print("Refresh list...")
+            self.table.populate_table()
+
+        finally:
+            # always runs - return control to button
+            self.delete_button.setEnabled(True)
+
+    def confirm_delete(self, experiment):
+        '''
+        This function prompts the user to confirm the deletion of an experiment.
+        If the experiment hasn't been exported yet, it prompts for an additional confirmation.
+        Returns True if deletion is confirmed, False otherwise.
+        '''
+        from PySide6.QtWidgets import QMessageBox
+
+        if not experiment.is_exported:
+            # Warn user that they are about to delete unexported data.
+            reply = QMessageBox.question(self, 'Delete Unexported Experiment',
+                "This experiment has not been exported. Are you sure you want to delete?",
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+
+            if reply == QMessageBox.No:
+                return False
+
+        # Final confirmation from user before deleting
+        reply = QMessageBox.question(self, 'Delete Experiment',
+            "Are you sure you want to delete this experiment?",
+            QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+
+        return reply == QMessageBox.Yes
 
     def backup_database(self):
         '''
