@@ -1,6 +1,9 @@
 
 
-import sys, datetime, traceback
+import sys, datetime, traceback, os
+# Programmatically set PYTHONPATH
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
+
 import plotly.graph_objects as go
 
 from PySide6.QtCore import QProcess, QTimer, QUrl, Signal, Slot, Qt, QDir
@@ -11,8 +14,8 @@ from PySide6.QtWidgets import (QApplication, QComboBox, QHBoxLayout, QLabel, QLi
     )
 from PySide6.QtWebEngineWidgets import QWebEngineView
 
-from capture import DevCapture
-from capture import PmtDb
+from app.capture import DevCapture
+from app.capture import PmtDb
 
 class CaptureControl(QWidget):
     '''
@@ -529,8 +532,24 @@ class MainWindow(QMainWindow):
     # https://www.pythonguis.com/tutorials/pyside-qprocess-external-programs/
     # https://doc.qt.io/qtforpython/PySide6/QtCore/QProcess.html
     def start_web(self):
-        self.web_process.start("python3", ['chart.py'])
+        '''
+        Starts the Dash server, runs "chart.py". Has own thread.
+        Assumes "chart.py" in same dir as "breksta.py".
+        '''
+        try:
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            chart_path = os.path.join(current_dir, 'chart.py')
+            self.web_process.errorOccurred.connect(self.handle_error)
+            self.web_process.start("python3", [chart_path])
+            if not self.web_process.waitForStarted():
+                print("Failed to start web process.")
+        except Exception as e:
+            print('web process fell over:', str(e))
+        else:
+            print("starting web process")
 
+    def handle_error(self, error):
+        print("Error occurred while starting web process:", error)
 
 if __name__ == "__main__":
     app = QApplication()

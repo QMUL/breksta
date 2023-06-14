@@ -1,10 +1,11 @@
 
 import urllib.parse
 
-from dash import Dash, html, dcc, callback, Output, Input
+from dash import Dash, html, dcc
+from dash.dependencies import Input, Output
 import plotly.express as px
 
-from capture import PmtDb
+from app.capture import PmtDb
 
 app = Dash(__name__)
 
@@ -36,7 +37,7 @@ def draw_chart(pathname, n):
 
     # TODO: More proper logging here:
     print('ping...')
-    
+
     return px.line(df, x='ts', y='value')
 
 if __name__ == '__main__':

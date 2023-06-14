@@ -21,9 +21,20 @@ Breksta is a data acquisition project for photomultiplier tubes. It uses a Raspb
 ### Running the application
 
 Each time you open a new terminal, you should:
+
 - Add the current directory to the PYTHONPATH: `export PYTHONPATH="$PWD:$PYTHONPATH"`
 - Activate the virtual environment: `source env/bin/activate`
-- Start the application: `python3 app/breksta.py`
+- Start the application - Default (as a module): `python3 -m app.breksta`
+- Start the application - alternatively: `python3 app/breksta.py`
+
+## Contributing
+Please send a pull request with any suggested changes or improvements. (placeholder)
+
+## License
+This project is licensed under the MIT License. (placeholder)
+
+## Contact
+If you have any questions or suggestions, please contact us at [email] or open an issue on this project. (placeholder)
 
 ## Debugging
 
@@ -59,12 +70,3 @@ If there are any issues with the session or committing changes to the database.
 from sqlalchemy.exc import SQLAlchemyError
 except sqlalchemy.exc.SQLAlchemyError as e:
 ```
-
-## Contributing
-Please send a pull request with any suggested changes or improvements.
-
-## License
-This project is licensed under the MIT License.
-
-## Contact
-If you have any questions or suggestions, please contact us at [email] or open an issue on this project.
