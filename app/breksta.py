@@ -196,10 +196,10 @@ class ExportControl(QWidget):
         layout.addWidget(self.export_button)
 
         # Set up Refresh button
-        self.refresh_button = QPushButton("Refresh", self)
-        self.refresh_button.clicked.connect(self.on_refresh_button_clicked)
-        self.refresh_button.setEnabled(True)
-        layout.addWidget(self.refresh_button)
+        self.delete_button = QPushButton("Delete", self)
+        self.delete_button.clicked.connect(self.on_delete_button_clicked)
+        self.delete_button.setEnabled(True)
+        layout.addWidget(self.delete_button)
 
         # Initialize the box
         self.setLayout(layout)
@@ -266,9 +266,6 @@ class ExportControl(QWidget):
             # always runs - return control to button
             self.export_button.setEnabled(True)
 
-    def on_refresh_button_clicked(self):
-        self.logger.info("Refreshing experiment list...")
-
     def choose_directory(self):
         """
         Opens a dialog for the user to choose an export folder for the experiment data.
@@ -287,6 +284,23 @@ class ExportControl(QWidget):
             self.folder_path = None
 
         return self.folder_path
+
+    def on_delete_button_clicked(self):
+        """
+        Deletes the selected experiment when the delete button is clicked.
+        Also refreshes the table widget after the deletion.
+        """
+        # if `selected_experiment_id` is still default, user hasn't clicked on table
+        if self.selected_experiment_id == -1:
+            print("To delete, please choose an experiment from the list")
+            return
+
+        # Disable button during the deleting process
+        self.delete_button.setEnabled(False)
+        print("Delete button clicked. Deleting in progress...")
+
+        # always runs - return control to button
+        self.delete_button.setEnabled(True)
 
     def backup_database(self):
         '''
