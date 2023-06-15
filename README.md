@@ -24,8 +24,7 @@ Each time you open a new terminal, you should:
 
 - Add the current directory to the PYTHONPATH: `export PYTHONPATH="$PWD:$PYTHONPATH"`
 - Activate the virtual environment: `source env/bin/activate`
-- Start the application - Default (as a module): `python3 -m app.breksta`
-- Start the application - alternatively: `python3 app/breksta.py`
+- Start the application: `python3 -m app.breksta`
 
 ## Contributing
 Please send a pull request with any suggested changes or improvements. (placeholder)

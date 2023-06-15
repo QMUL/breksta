@@ -1,7 +1,7 @@
 
 
 import sys, datetime, traceback, os
-# Programmatically set PYTHONPATH
+# Programmatically set PYTHONPATH for breksta ONLY
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
 import plotly.graph_objects as go
@@ -502,7 +502,9 @@ class MainWindow(QMainWindow):
         QMainWindow.__init__(self)
 
         # Launch the plotly/dash web-app in here:
-        self.web_process = QProcess()
+        self.web_process = QProcess(self)
+        # Connect a slot to QProcess.finished to cleanup when your process ends
+        self.web_process.finished.connect(self.on_process_finished)
 
         self.setWindowTitle("Breksta")
 
@@ -533,14 +535,20 @@ class MainWindow(QMainWindow):
     # https://doc.qt.io/qtforpython/PySide6/QtCore/QProcess.html
     def start_web(self):
         '''
-        Starts the Dash server, runs "chart.py". Has own thread.
-        Assumes "chart.py" in same dir as "breksta.py".
+        Initializes the web process to start the Dash server running "chart.py".
+        This function assumes that "chart.py" resides in the same directory as "breksta.py".
+        The process is run in its own thread.
         '''
+        # Connect the readyReadStandardError signal to the handle_stderr slot
+        # This allows us to read any error messages output by the web process
+        self.web_process.readyReadStandardError.connect(self.handle_stderr)
         try:
-            current_dir = os.path.dirname(os.path.abspath(__file__))
-            chart_path = os.path.join(current_dir, 'chart.py')
+            # Connect the errorOccurred signal to the handle_error slot
+            # This allows us to react to errors that occur while the process is running
             self.web_process.errorOccurred.connect(self.handle_error)
-            self.web_process.start("python3", [chart_path])
+            # Start the web process using python3 and the module path to chart.py
+            self.web_process.start("python3", ["-m", "app.chart"])
+            # Wait for the process to start, print a failure message if it doesn't
             if not self.web_process.waitForStarted():
                 print("Failed to start web process.")
         except Exception as e:
@@ -549,7 +557,36 @@ class MainWindow(QMainWindow):
             print("starting web process")
 
     def handle_error(self, error):
-        print("Error occurred while starting web process:", error)
+        # Function to handle errors that occur in the web process
+        print("An error occurred in the web process:", error)
+
+    def handle_stderr(self):
+        # Function to handle standard error output from the web process
+        # Reads the standard error output, decodes it, and prints it
+        stderr = self.web_process.readAllStandardError().data().decode()
+        print(stderr)
+
+    def on_process_finished(self):
+        # Function to handle the process finishing
+        # Closes the web process when it finishes running
+        self.web_process.close()
+
+    def closeEvent(self, event):
+        '''
+        Override the QMainWindow close event to properly shut down the web process.
+        If the web process is running, it is terminated, with a timeout for graceful termination.
+        If the process does not terminate within the timeout, it is forcibly killed.
+        '''
+        # Check if the web process is running
+        if self.web_process.state() == QProcess.Running:
+            # If it is, terminate the process
+            self.web_process.terminate()
+            # Wait a moment for the process to finish
+            # If it doesn't finish within the timeout, forcibly kill the process
+            if not self.web_process.waitForFinished(1000):
+                self.web_process.kill()
+        # Accept the close event, allowing the main window to close
+        event.accept()
 
 if __name__ == "__main__":
     app = QApplication()
