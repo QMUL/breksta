@@ -16,7 +16,7 @@ QuestDB, a column-store for IOT time-series:
 
 from datetime import datetime
 import math
-import random, logging
+import random
 from typing import Optional
 from pathvalidate import sanitize_filename
 

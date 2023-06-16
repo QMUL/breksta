@@ -1,11 +1,12 @@
 
-import urllib.parse, logging
+import urllib.parse
 
 from dash import Dash, html, dcc
 from dash.dependencies import Input, Output
 import plotly.express as px
 
 from app.capture import PmtDb
+from app.logger_config import setup_logger
 
 app = Dash(__name__)
 
@@ -26,7 +27,7 @@ TODO: Add components only visible remotely to faciliate remote .csv download.
     Input('interval-component', 'n_intervals')])
 def draw_chart(pathname, n):
 
-    logger = logging.getLogger(__name__)
+    logger = setup_logger()
 
     logger.debug(f"draw_chart called with pathname={pathname}, n={n}")
 

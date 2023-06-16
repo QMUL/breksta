@@ -1,6 +1,6 @@
 
 
-import sys, datetime, traceback, logging, os
+import sys, datetime, traceback, os
 # Programmatically set PYTHONPATH for breksta ONLY
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
@@ -16,6 +16,7 @@ from PySide6.QtWebEngineWidgets import QWebEngineView
 
 from app.capture import DevCapture
 from app.capture import PmtDb
+from app.logger_config import setup_logger
 
 class CaptureControl(QWidget):
     '''
@@ -520,10 +521,8 @@ class MainWindow(QMainWindow):
 
         QMainWindow.__init__(self)
 
-        self.my_app = "Breksta"
-
         # Initialize logging
-        self.logger = self.setup_logger()
+        self.logger = setup_logger()
 
         # Launch the plotly/dash web-app in here:
         self.web_process = QProcess(self)
@@ -582,7 +581,7 @@ class MainWindow(QMainWindow):
 
     def handle_error(self, error):
         # Function to handle errors that occur in the web process
-        self.logger.debug("An error occurred in the web process:", error)
+        self.logger.debug("An error occurred in the web process: %s", error)
 
     def handle_stderr(self):
         # Function to handle standard error output from the web process
@@ -611,28 +610,6 @@ class MainWindow(QMainWindow):
                 self.web_process.kill()
         # Accept the close event, allowing the main window to close
         event.accept()
-
-    def setup_logger(self):
-        logger = logging.getLogger(self.my_app)
-        logger.setLevel(logging.DEBUG)
-
-        # Create handlers
-        c_handler = logging.StreamHandler()
-        f_handler = logging.FileHandler('file.log')
-        c_handler.setLevel(logging.WARNING)
-        f_handler.setLevel(logging.DEBUG)
-
-        # Create formatters and add it to handlers
-        c_format = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
-        f_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        c_handler.setFormatter(c_format)
-        f_handler.setFormatter(f_format)
-
-        # Add handlers to the logger
-        logger.addHandler(c_handler)
-        logger.addHandler(f_handler)
-
-        return logger
 
 if __name__ == "__main__":
     app = QApplication()
