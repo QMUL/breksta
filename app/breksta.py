@@ -41,7 +41,7 @@ class CaptureControl(QWidget):
         self.sample_frequency = 2
         self.duration = 1
 
-        self.device = DevCapture(self.logger)
+        self.device = DevCapture()
         # https://doc.qt.io/qtforpython/PySide6/QtCore/QTimer.html
         self.sample_timer = QTimer()
         # Here, the repeating timer provokes the data capture:
@@ -244,7 +244,7 @@ class ExportControl(QWidget):
 
         try:
             # Initialize the database connection
-            db = PmtDb(self.logger)
+            db = PmtDb()
 
             # Export the data
             db.export_data_single(self.selected_experiment_id)
@@ -361,7 +361,7 @@ class TableWidget(QTableWidget):
         Populates the table with data from the PMT database. Each row in the table corresponds to an experiment from the database.
         """
         # Initialize the database connection
-        db = PmtDb(self.logger)
+        db = PmtDb()
 
         # get_experiments() returns a list of tuples, each containing:
         # (id, name, date start, date end, exported status)
@@ -471,7 +471,7 @@ class ExperimentGraph(QWebEngineView):
             return
 
         # Initialize the database connection
-        db = PmtDb(self.logger)
+        db = PmtDb()
 
         exp_data = db.latest_readings(self.table.selected_experiment_id)
 

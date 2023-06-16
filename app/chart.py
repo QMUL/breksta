@@ -37,7 +37,7 @@ def draw_chart(pathname, n):
     parsed_dict = urllib.parse.parse_qs(parsed.query)
     experiment = parsed_dict.get('experiment')
 
-    db = PmtDb(logger)
+    db = PmtDb()
 
     df = db.latest_readings(experiment=experiment)
 

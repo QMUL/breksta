@@ -23,6 +23,7 @@ from pathvalidate import sanitize_filename
 import pandas as pd
 from sqlalchemy import create_engine, ForeignKey, String
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
+from app.logger_config import setup_logger
 
 class Base(DeclarativeBase):
     pass
@@ -53,10 +54,10 @@ class PmtReading(Base):
 
 class PmtDb(object):
 
-    def __init__(self, logger=None):
+    def __init__(self):
 
         # set up logger
-        self.logger = logger
+        self.logger = setup_logger()
 
         engine = create_engine('sqlite:///pmt.db')
         Base.metadata.create_all(engine)
@@ -243,10 +244,10 @@ class DevCapture(PmtDb):
     '''Subclass PmtDb again to read from the Pi ADC.
     TODO: How can we tell if we're running on a real Pi?
     '''
-    def __init__(self, logger):
-        PmtDb.__init__(self, logger)
+    def __init__(self):
+        PmtDb.__init__(self)
 
-        self.logger = logger
+        self.logger = setup_logger()
 
         self.omega = 2.0 * math.pi / 60
 
