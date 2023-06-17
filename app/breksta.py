@@ -29,12 +29,12 @@ class CaptureControl(QWidget):
     # external signal for the slot in the ChartWidget
     started = Signal(int)
 
-    def __init__(self, logger):
+    def __init__(self):
 
         QWidget.__init__(self)
 
         # Set logger
-        self.logger = logger
+        self.logger = setup_logger()
 
         self.experiment_id = None
 
@@ -141,18 +141,18 @@ class CaptureWidget(QWidget):
     '''
     Stick the capture and chart widgets in a parent layout.
     '''
-    def __init__(self, width, logger):
+    def __init__(self, width):
 
         QWidget.__init__(self)
 
         # Set logger
-        self.logger = logger
+        self.logger = setup_logger()
 
         layout = QHBoxLayout()
 
         # Partition the window real-estate how thou wilt:
 
-        controls = CaptureControl(self.logger)
+        controls = CaptureControl()
         controls.setFixedWidth(int(0.25 * width))
 
         chart = ChartWidget()
@@ -172,7 +172,7 @@ class ExportControl(QWidget):
     """
     A QWidget subclass that provides control buttons and functionalities for exporting data from the PMT database.
     """
-    def __init__(self, table, logger):
+    def __init__(self, table):
         """
         Initializes the export control panel with the 'Export' and 'Refresh' buttons. Refresh is placeholder.
         Args:
@@ -181,7 +181,7 @@ class ExportControl(QWidget):
         QWidget.__init__(self)
 
         # set up logger
-        self.logger = logger
+        self.logger = setup_logger()
 
         # Create vertical box
         layout = QVBoxLayout()
@@ -289,22 +289,22 @@ class ExportWidget(QWidget):
     A QWidget subclass that provides an interface for exporting PMT data. It includes TableWidget for displaying the
     experiment information and ExportControl for controlling the data export and refreshing the table.
     """
-    def __init__(self, width, table, logger):
+    def __init__(self, width, table):
 
         QWidget.__init__(self)
 
         # set up logger
-        self.logger = logger
+        self.logger = setup_logger()
 
         # Horizontal box
         layout = QHBoxLayout()
 
         # add export controls
-        controls = ExportControl(table, self.logger)
+        controls = ExportControl(table)
         controls.setFixedWidth(int(0.25 * width))
 
         # add experiment widget
-        experiment_data = ExperimentWidget(width, table, controls, self.logger)
+        experiment_data = ExperimentWidget(width, table, controls)
         experiment_data.setFixedWidth(int(0.61 * width))
 
         layout.addWidget(controls)
@@ -321,7 +321,7 @@ class TableWidget(QTableWidget):
     # create a signal that carries an integer
     experimentSelected = Signal(int)
 
-    def __init__(self, width, logger):
+    def __init__(self, width):
         """
         Initializes the table widget with 0 rows and 5 columns. The columns are labeled with 'Id', 'Name', 'Date started',
         'Date ended', 'Exported', and the table is populated with data from the PMT database.
@@ -329,7 +329,7 @@ class TableWidget(QTableWidget):
         QTableWidget.__init__(self, 0, 5)
 
         # Set logger
-        self.logger = logger
+        self.logger = setup_logger()
 
         # initialise with invalid id, test
         self.selected_experiment_id = -1
@@ -413,11 +413,11 @@ class ExperimentGraph(QWebEngineView):
     """
     A QWebEngineView subclass that displays a Plotly graph for the selected experiment.
     """
-    def __init__(self, width, table, logger):
+    def __init__(self, width, table):
         QWebEngineView.__init__(self)
 
         # Set up logger
-        self.logger = logger
+        self.logger = setup_logger()
 
         # Reference to TableWidget instance, used to access `selected_experiment_id`
         self.table = table
@@ -490,18 +490,18 @@ class ExperimentWidget(QWidget):
     A QWidget subclass that provides an interface for viewing PMT experiment data.
     It includes a TableWidget for displaying the experiment list and an ExperimentGraph for displaying experiment data.
     """
-    def __init__(self, width, table, export_control, logger):
+    def __init__(self, width, table, export_control):
 
         QWidget.__init__(self)
 
         # Set up logger
-        self.logger = logger
+        self.logger = setup_logger()
 
         # Vertical box layout
         layout = QVBoxLayout()
 
         # Create table and graph widgets
-        self.graph = ExperimentGraph(width, table, self.logger)
+        self.graph = ExperimentGraph(width, table)
         self.export_control = export_control
 
         # Add widgets to layout in order: table first, graph second
@@ -538,10 +538,10 @@ class MainWindow(QMainWindow):
 
         self.setFixedSize(win_width, win_height)
 
-        self.table = TableWidget(win_width, self.logger)  # Only create one instance of TableWidget
+        self.table = TableWidget(win_width)  # Only create one instance of TableWidget
 
-        capture = CaptureWidget(win_width, self.logger)
-        export = ExportWidget(win_width, self.table, self.logger)
+        capture = CaptureWidget(win_width)
+        export = ExportWidget(win_width, self.table)
 
         tabs = QTabWidget()
         tabs.setTabPosition(QTabWidget.North)
