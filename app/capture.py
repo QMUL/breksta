@@ -173,6 +173,24 @@ class PmtDb(object):
             self.mark_exported(experiment_id)
             self.logger.debug("`export_data_single` complete")
 
+    def delete_experiment(self, experiment_id):
+        '''
+        Deletes the data of a single experiment from the database
+        Args:
+            experiment_id (int): The id of the experiment to export.
+        Returns:
+            None
+        '''
+        try:
+            # create dataframe for "experiment_id"
+            df = self.latest_readings(experiment_id)
+            if df is None:
+                self.logger.critical(f"Cannot delete data for experiment {experiment_id} because there are no readings.")
+                return
+
+        except Exception as e:
+            self.logger.critical("Deleting experiment failed {e}")
+
     def query_database(self):
         '''
         Query the database and return a DataFrame of all readings,

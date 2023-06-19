@@ -10,7 +10,7 @@ from PySide6.QtCore import QProcess, QTimer, QUrl, Signal, Slot, Qt, QDir
 from PySide6.QtGui import QAction, QKeySequence
 from PySide6.QtWidgets import (QApplication, QComboBox, QHBoxLayout, QLabel, QLineEdit,
     QMainWindow, QPushButton, QTabWidget, QVBoxLayout, QWidget, QTableWidget,
-    QTableWidgetItem, QStyledItemDelegate, QFileDialog
+    QTableWidgetItem, QStyledItemDelegate, QFileDialog, QMessageBox
     )
 from PySide6.QtWebEngineWidgets import QWebEngineView
 
@@ -308,18 +308,24 @@ class ExportControl(QWidget):
                 self.delete_button.setEnabled(True)
                 return
 
+        # Initialize the database connection
+        db = PmtDb()
+
         try:
-            # Initialize the database connection
-            db = PmtDb()
-
-            # Confirm deletion and backup database
-            experiment = db.get_experiment(self.selected_experiment_id)
-            if not self.confirm_delete(experiment):
-                print("Deletion cancelled.")
-                self.delete_button.setEnabled(True)
-                return
-
+            # backup the database in preparation of destructive manipulation
             self.backup_database()
+            # find if exported and handle deletion user prompting
+            item = self.table.item(self.table.selected_row,4)
+            # item.text() does not return a boolean
+            is_exported = item.text() == "True" if item else None
+
+            self.logger.debug(f"selected row is: {self.table.selected_row}")
+            self.logger.debug(f"Experiment is {'exported' if is_exported else 'not exported'}")
+
+            reply = self.confirm_delete(is_exported)
+            self.logger.debug("User wants to delete ID %s: %s", self.selected_experiment_id, reply)
+
+            # db.delete_experiment(self.selected_experiment_id)
 
         except Exception as e:
             # if delete gone wrong - restore the database
@@ -336,15 +342,13 @@ class ExportControl(QWidget):
             # always runs - return control to button
             self.delete_button.setEnabled(True)
 
-    def confirm_delete(self, experiment):
+    def confirm_delete(self, is_exported):
         '''
         This function prompts the user to confirm the deletion of an experiment.
         If the experiment hasn't been exported yet, it prompts for an additional confirmation.
         Returns True if deletion is confirmed, False otherwise.
         '''
-        from PySide6.QtWidgets import QMessageBox
-
-        if not experiment.is_exported:
+        if not is_exported:
             # Warn user that they are about to delete unexported data.
             reply = QMessageBox.question(self, 'Delete Unexported Experiment',
                 "This experiment has not been exported. Are you sure you want to delete?",
@@ -450,6 +454,7 @@ class TableWidget(QTableWidget):
 
         # initialise with invalid id, test
         self.selected_experiment_id = -1
+        self.selected_row = -1
 
         # set the column labels
         self.setHorizontalHeaderLabels(['Id', 'Name', 'Date started', 'Date ended', 'Exported'])
@@ -512,6 +517,7 @@ class TableWidget(QTableWidget):
         item = self.item(row, 0)
         if item is not None:
             self.selected_experiment_id = int(item.text())
+            self.selected_row = row
             # emit the signal
             self.experimentSelected.emit(self.selected_experiment_id)
             self.logger.debug(f"Cell clicked, row {row}, experiment id {self.selected_experiment_id}")
