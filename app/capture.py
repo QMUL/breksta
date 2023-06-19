@@ -16,7 +16,7 @@ QuestDB, a column-store for IOT time-series:
 
 from datetime import datetime
 import math
-import random
+import random, os
 from typing import Optional
 from pathvalidate import sanitize_filename
 
@@ -139,7 +139,7 @@ class PmtDb(object):
         # Save DataFrame as a CSV file
         df.to_csv('export.csv')
 
-    def export_data_single(self, experiment_id):
+    def export_data_single(self, experiment_id, folder_path):
         """
         Exports the data of a single experiment to a CSV file.
         Args:
@@ -162,7 +162,8 @@ class PmtDb(object):
 
             # create filename string and save to file
             filename = sanitize_filename(f"{name}-{stamp}.csv")
-            df.to_csv(filename)
+            full_path = os.path.join(folder_path, filename)
+            df.to_csv(full_path)
 
         except (ValueError, AttributeError, OSError) as e:
             self.logger.debug(f"Export failed due to: {e}")
