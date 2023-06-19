@@ -199,6 +199,9 @@ class ExportControl(QWidget):
         self.table = table
         self.table.experimentSelected.connect(self.update_selected_experiment)
 
+        # No folder path set
+        self.folder_path = None
+
     @Slot(int)
     def update_selected_experiment(self, experiment_id):
         try:
@@ -206,9 +209,6 @@ class ExportControl(QWidget):
             print(f"signal received {self.selected_experiment_id}. ID {id(self)}")
         except Exception as e:
             print(f"{e}")
-
-        # No folder path set
-        self.folder_path = None
 
     def on_export_button_clicked(self):
         """
@@ -238,7 +238,7 @@ class ExportControl(QWidget):
             db = PmtDb()
 
             # Export the data
-            db.export_data_single(self.selected_experiment_id)
+            db.export_data_single(self.selected_experiment_id, self.folder_path)
 
         except (OSError) as e:
             # if export gone wrong - OSError might catch pmt.db permissions issues
@@ -269,6 +269,7 @@ class ExportControl(QWidget):
         """
         self.dialog = QFileDialog()
         self.folder_path = self.dialog.getExistingDirectory(None, "Select Folder", QDir.homePath())
+        self.logger.debug("Exporting directory chosen as: " + self.folder_path)
 
         # Upon cancelling, folder_path will return an empty string, reset
         if self.folder_path == '':
