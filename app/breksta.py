@@ -312,8 +312,6 @@ class ExportControl(QWidget):
 
             self.backup_database()
 
-        # always runs - return control to button
-        self.delete_button.setEnabled(True)
         except Exception as e:
             # if delete gone wrong - restore the database
             print(f"Delete button failed due to: {e}")
@@ -354,26 +352,46 @@ class ExportControl(QWidget):
 
         return reply == QMessageBox.Yes
 
-    def backup_database(self):
+    def backup_database(self, filename=None):
         '''
         Creates a database backup. The backup file is named with a timestamp,
         like "backup_20230614_103030.db", to avoid overwriting previous backups.
+        If a filename is provided, it is used as the name
+        for the backup file. Otherwise, a default name "backup.db" is used.
         '''
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        db_path = os.path.join(self.folder_path, 'pmt.db')
-        backup_path = os.path.join(self.folder_path, f'backup_{timestamp}.db')
+
+        db_path = self.get_root_dir()
+
+        # assume that backup is done to the export folder
+        backup_path = os.path.join(self.folder_path, f'backup_{timestamp}.db') if filename else os.path.join(self.folder_path, 'backup.db')
         shutil.copy(db_path, backup_path)
+        return backup_path  # Return the backup path for potential further use
 
-    def restore_database(self, backup_file):
+    def restore_database(self, filename=None):
         '''
-        Restores the database from a backup.
-        The backup file is provided as a parameter.
+        Restores the database from a backup. If a filename is provided, it is used as
+        the name of the backup file. Otherwise, a default name "backup.db" is used.
         '''
-        if not os.path.isfile(backup_file):
-            raise Exception(f"Backup file {backup_file} does not exist.")
+        db_path = self.get_root_dir()
 
-        db_path = os.path.join(self.folder_path, 'pmt.db')
-        shutil.copy(backup_file, db_path)
+        # Set backup_path based on whether filename is provided or not
+        backup_path = os.path.join(self.folder_path, filename) if filename else os.path.join(self.folder_path, 'backup.db')
+
+        # Then check if backup file exists
+        if not os.path.isfile(backup_path):
+            raise Exception(f"Backup file {backup_path} does not exist.")
+
+        shutil.copy(backup_path, db_path)
+
+    def get_root_dir(self):
+        '''
+        Grabs root directory - by default where we save 'pmt.db'
+        '''
+        script_path = os.path.dirname(os.path.realpath(__file__))
+        root_path = os.path.dirname(script_path)
+        db_path = os.path.join(root_path, 'pmt.db')
+        return db_path
 
 class ExportWidget(QWidget):
     """
