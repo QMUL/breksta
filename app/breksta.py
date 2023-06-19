@@ -29,12 +29,14 @@ class CaptureControl(QWidget):
     # external signal for the slot in the ChartWidget
     started = Signal(int)
 
-    def __init__(self):
+    def __init__(self, table):
 
         QWidget.__init__(self)
 
         # Set logger
         self.logger = setup_logger()
+        # propagate table
+        self.table = table
 
         self.experiment_id = None
 
@@ -105,6 +107,7 @@ class CaptureControl(QWidget):
         # TODO: Send another signal here:
         self.experiment_id = None
         self.start_button.setEnabled(True)
+        self.table.populate_table()
 
     def set_freq(self, txt):
         self.sample_frequency = int(txt)
@@ -141,7 +144,7 @@ class CaptureWidget(QWidget):
     '''
     Stick the capture and chart widgets in a parent layout.
     '''
-    def __init__(self, width):
+    def __init__(self, width, table):
 
         QWidget.__init__(self)
 
@@ -152,7 +155,7 @@ class CaptureWidget(QWidget):
 
         # Partition the window real-estate how thou wilt:
 
-        controls = CaptureControl()
+        controls = CaptureControl(table)
         controls.setFixedWidth(int(0.25 * width))
 
         chart = ChartWidget()
@@ -541,7 +544,7 @@ class MainWindow(QMainWindow):
 
         self.table = TableWidget(win_width)  # Only create one instance of TableWidget
 
-        capture = CaptureWidget(win_width)
+        capture = CaptureWidget(win_width, self.table)
         export = ExportWidget(win_width, self.table)
 
         tabs = QTabWidget()
