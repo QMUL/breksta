@@ -292,12 +292,21 @@ class ExportControl(QWidget):
         """
         # if `selected_experiment_id` is still default, user hasn't clicked on table
         if self.selected_experiment_id == -1:
-            print("To delete, please choose an experiment from the list")
+            self.logger.info("To delete, please choose an experiment from the list")
             return
 
         # Disable button during the deleting process
         self.delete_button.setEnabled(False)
-        print("Delete button clicked. Deleting in progress...")
+        self.logger.info("Delete button clicked. Deleting in progress...")
+
+        # first time delete is invoked, choose database folder
+        # if cancelled, return control to parent
+        if self.folder_path is None:
+            self.choose_directory()
+            if self.folder_path is None:
+                self.logger.warning("No folder chosen.. Please, try again")
+                self.delete_button.setEnabled(True)
+                return
 
         try:
             # Initialize the database connection
@@ -314,14 +323,13 @@ class ExportControl(QWidget):
 
         except Exception as e:
             # if delete gone wrong - restore the database
-            print(f"Delete button failed due to: {e}")
-            print(traceback.format_exc())
+            self.logger.exception(f"Delete button failed due to: {e}")
+            self.logger.exception(traceback.format_exc())
             self.restore_database()
 
         else:
             # only runs if try is successful
-            print("Deletion complete!")
-            print("Refresh list...")
+            self.logger.info("Deletion complete! Refresh experiment list...")
             self.table.populate_table()
 
         finally:
