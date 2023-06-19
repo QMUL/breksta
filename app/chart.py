@@ -6,6 +6,7 @@ from dash.dependencies import Input, Output
 import plotly.express as px
 
 from app.capture import PmtDb
+from app.logger_config import setup_logger
 
 app = Dash(__name__)
 
@@ -25,6 +26,11 @@ TODO: Add components only visible remotely to faciliate remote .csv download.
 @app.callback(Output('chart-content', 'figure'), [Input('url', 'pathname'),
     Input('interval-component', 'n_intervals')])
 def draw_chart(pathname, n):
+
+    logger = setup_logger()
+
+    logger.debug(f"draw_chart called with pathname={pathname}, n={n}")
+
     parsed = urllib.parse.urlparse(pathname)
 
     # We can pass in the ID of the experiment as a GET parameter
@@ -35,8 +41,7 @@ def draw_chart(pathname, n):
 
     df = db.latest_readings(experiment=experiment)
 
-    # TODO: More proper logging here:
-    print('ping...')
+    logger.debug('ping...')
 
     return px.line(df, x='ts', y='value')
 

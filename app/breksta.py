@@ -16,6 +16,7 @@ from PySide6.QtWebEngineWidgets import QWebEngineView
 
 from app.capture import DevCapture
 from app.capture import PmtDb
+from app.logger_config import setup_logger
 
 class CaptureControl(QWidget):
     '''
@@ -31,6 +32,9 @@ class CaptureControl(QWidget):
     def __init__(self):
 
         QWidget.__init__(self)
+
+        # Set logger
+        self.logger = setup_logger()
 
         self.experiment_id = None
 
@@ -104,10 +108,9 @@ class CaptureControl(QWidget):
 
     def set_freq(self, txt):
         self.sample_frequency = int(txt)
-        # TODO Tidy away DEBUG prints, use a propper Python logger.
         # Set log-level from an Env Var?
         # Detect if we're running a Pi?
-        print(self.sample_frequency)
+        self.logger.debug(self.sample_frequency)
 
 
 class ChartWidget(QWebEngineView):
@@ -142,6 +145,9 @@ class CaptureWidget(QWidget):
 
         QWidget.__init__(self)
 
+        # Set logger
+        self.logger = setup_logger()
+
         layout = QHBoxLayout()
 
         # Partition the window real-estate how thou wilt:
@@ -174,6 +180,9 @@ class ExportControl(QWidget):
         """
         QWidget.__init__(self)
 
+        # set up logger
+        self.logger = setup_logger()
+
         # Create vertical box
         layout = QVBoxLayout()
 
@@ -203,9 +212,9 @@ class ExportControl(QWidget):
     def update_selected_experiment(self, experiment_id):
         try:
             self.selected_experiment_id = experiment_id
-            print(f"signal received {self.selected_experiment_id}. ID {id(self)}")
+            self.logger.debug(f"signal received {self.selected_experiment_id}. ID {id(self)}")
         except Exception as e:
-            print(f"{e}")
+            self.logger.debug(f"update_selected_experiment failed unexpectedly: {e}")
 
         # No folder path set
         self.folder_path = None
@@ -217,19 +226,19 @@ class ExportControl(QWidget):
         """
         # if `selected_experiment_id` is still default, user hasn't clicked on table
         if self.selected_experiment_id == -1:
-            print("To export, please choose an experiment from the list")
+            self.logger.warning("To export, please choose an experiment from the list")
             return
 
         # Disable button during the exporting process
         self.export_button.setEnabled(False)
-        print("Export button clicked. Exporting in progress...")
+        self.logger.info("Export button clicked. Exporting in progress...")
 
         # first time export is invoked, choose export folder
         # if cancelled, return control to parent
         if self.folder_path is None:
             self.choose_directory()
             if self.folder_path is None:
-                print("No folder chosen.. Please, try again")
+                self.logger.warning("No folder chosen.. Please, try again")
                 self.export_button.setEnabled(True)
                 return
 
@@ -242,13 +251,12 @@ class ExportControl(QWidget):
 
         except (OSError) as e:
             # if export gone wrong - OSError might catch pmt.db permissions issues
-            print(f"Export button failed due to: {e}")
-            print(traceback.format_exc())
+            self.logger.critical(f"Export button failed due to: {e}")
+            self.logger.critical(traceback.format_exc())
 
         else:
             # only runs if try is successful
-            print("Export complete!")
-            print("Refresh list...")
+            self.logger.info("Export complete! Refresh table list...")
             self.table.populate_table()
 
         finally:
@@ -256,7 +264,7 @@ class ExportControl(QWidget):
             self.export_button.setEnabled(True)
 
     def on_refresh_button_clicked(self):
-        print("Refreshing experiment list...")
+        self.logger.info("Refreshing experiment list...")
 
     def choose_directory(self):
         """
@@ -284,6 +292,9 @@ class ExportWidget(QWidget):
     def __init__(self, width, table):
 
         QWidget.__init__(self)
+
+        # set up logger
+        self.logger = setup_logger()
 
         # Horizontal box
         layout = QHBoxLayout()
@@ -316,6 +327,9 @@ class TableWidget(QTableWidget):
         'Date ended', 'Exported', and the table is populated with data from the PMT database.
         """
         QTableWidget.__init__(self, 0, 5)
+
+        # Set logger
+        self.logger = setup_logger()
 
         # initialise with invalid id, test
         self.selected_experiment_id = -1
@@ -355,7 +369,7 @@ class TableWidget(QTableWidget):
 
         # check if database has data
         if not experiments: # list is empty
-            print("Database has no data... table is empty")
+            self.logger.warning("Database has no data... table is empty")
             return
 
         # set num of rows to num of experiments in database
@@ -383,7 +397,7 @@ class TableWidget(QTableWidget):
             self.selected_experiment_id = int(item.text())
             # emit the signal
             self.experimentSelected.emit(self.selected_experiment_id)
-            print(f"Cell clicked, row {row}, experiment id {self.selected_experiment_id}")
+            self.logger.debug(f"Cell clicked, row {row}, experiment id {self.selected_experiment_id}")
 
     def mousePressEvent(self, event):
         """
@@ -401,6 +415,9 @@ class ExperimentGraph(QWebEngineView):
     """
     def __init__(self, width, table):
         QWebEngineView.__init__(self)
+
+        # Set up logger
+        self.logger = setup_logger()
 
         # Reference to TableWidget instance, used to access `selected_experiment_id`
         self.table = table
@@ -450,7 +467,7 @@ class ExperimentGraph(QWebEngineView):
         """
 
         if self.table.selected_experiment_id == -1:
-            print("No experiment selected")
+            self.logger.debug("Cannot refresh preview graph. No experiment selected.")
             return
 
         # Initialize the database connection
@@ -466,7 +483,7 @@ class ExperimentGraph(QWebEngineView):
             raw_html = fig.to_html(full_html=False, include_plotlyjs='cdn')
             self.setHtml(raw_html)
         else:
-            print("No data to plot for the selected experiment")
+            self.logger.warning("No data to plot for the selected experiment.")
 
 class ExperimentWidget(QWidget):
     """
@@ -476,6 +493,9 @@ class ExperimentWidget(QWidget):
     def __init__(self, width, table, export_control):
 
         QWidget.__init__(self)
+
+        # Set up logger
+        self.logger = setup_logger()
 
         # Vertical box layout
         layout = QVBoxLayout()
@@ -500,6 +520,9 @@ class MainWindow(QMainWindow):
     def __init__(self):
 
         QMainWindow.__init__(self)
+
+        # Initialize logging
+        self.logger = setup_logger()
 
         # Launch the plotly/dash web-app in here:
         self.web_process = QProcess(self)
@@ -550,21 +573,21 @@ class MainWindow(QMainWindow):
             self.web_process.start("python3", ["-m", "app.chart"])
             # Wait for the process to start, print a failure message if it doesn't
             if not self.web_process.waitForStarted():
-                print("Failed to start web process.")
+                self.logger.critical("Failed to start web process.")
         except Exception as e:
-            print('web process fell over:', str(e))
+            self.logger.debug('web process fell over:', str(e))
         else:
-            print("starting web process")
+            self.logger.info("starting web process")
 
     def handle_error(self, error):
         # Function to handle errors that occur in the web process
-        print("An error occurred in the web process:", error)
+        self.logger.debug("An error occurred in the web process: %s", error)
 
     def handle_stderr(self):
         # Function to handle standard error output from the web process
         # Reads the standard error output, decodes it, and prints it
         stderr = self.web_process.readAllStandardError().data().decode()
-        print(stderr)
+        self.logger.debug(stderr)
 
     def on_process_finished(self):
         # Function to handle the process finishing
