@@ -182,11 +182,18 @@ class PmtDb(object):
             None
         '''
         try:
-            # create dataframe for "experiment_id"
-            df = self.latest_readings(experiment_id)
-            if df is None:
-                self.logger.critical(f"Cannot delete data for experiment {experiment_id} because there are no readings.")
-                return
+            with self.Session() as sess:
+                # Query for the experiment to delete
+                experiment = sess.query(Experiment).filter(Experiment.id==experiment_id).first()
+
+                if experiment is None:
+                    self.logger.critical(f"Cannot delete data for experiment {experiment_id} because there are no readings.")
+                    return
+
+            # Delete the experiment and commit the changes
+            sess.delete(experiment)
+            sess.commit()
+            self.logger.debug(f"Experiment {experiment_id} deleted successfully.")
 
         except Exception as e:
             self.logger.critical("Deleting experiment failed {e}")

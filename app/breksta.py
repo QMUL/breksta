@@ -325,7 +325,7 @@ class ExportControl(QWidget):
             reply = self.confirm_delete(is_exported)
             self.logger.debug("User wants to delete ID %s: %s", self.selected_experiment_id, reply)
 
-            # db.delete_experiment(self.selected_experiment_id)
+            db.delete_experiment(self.selected_experiment_id)
 
         except Exception as e:
             # if delete gone wrong - restore the database
