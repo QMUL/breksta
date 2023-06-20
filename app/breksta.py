@@ -98,6 +98,9 @@ class CaptureControl(QWidget):
         # signal to the ChartWidget is sent here:
         self.started.emit(self.experiment_id)
         self.stop_button.setEnabled(True)
+        self.freq_box.setEnabled(False)
+        self.dur_box.setEnabled(False)
+        self.name_box.setEnabled(False)
 
     def stop(self):
         self.stop_button.setEnabled(False)
@@ -107,6 +110,9 @@ class CaptureControl(QWidget):
         # TODO: Send another signal here:
         self.experiment_id = None
         self.start_button.setEnabled(True)
+        self.freq_box.setEnabled(True)
+        self.dur_box.setEnabled(True)
+        self.name_box.setEnabled(True)
         self.table.populate_table()
 
     def set_freq(self, txt):
