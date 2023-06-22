@@ -38,10 +38,12 @@ class CaptureControl(QWidget):
         # propagate table
         self.table = table
 
+        # Initialize important variables
         self.experiment_id = None
-
         self.sample_frequency = 2
         self.duration = 1
+        self.logger.debug("Default experiment values: Sampling frequency: %ss, Experiment duration: %sh",
+                          self.sample_frequency, self.duration)
 
         self.device = DevCapture()
         # https://doc.qt.io/qtforpython/PySide6/QtCore/QTimer.html
@@ -116,10 +118,13 @@ class CaptureControl(QWidget):
         self.table.populate_table()
 
     def set_freq(self, txt):
+        '''
+        Sets the sampling frequency from the drop-down menu
+        '''
         self.sample_frequency = int(txt)
         # Set log-level from an Env Var?
         # Detect if we're running a Pi?
-        self.logger.debug(self.sample_frequency)
+        self.logger.debug("Selected sampling frequency: %ss",self.sample_frequency)
 
 
 class ChartWidget(QWebEngineView):
