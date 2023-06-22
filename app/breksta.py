@@ -85,6 +85,7 @@ class CaptureControl(QWidget):
         dur_label = QLabel('experiment duration (hr)')
         self.dur_box = QComboBox()
         self.dur_box.addItems(list(map(str, (1, 2, 4, 6, 8, 10, 12, 24, 36, 48))))
+        self.dur_box.currentTextChanged.connect(self.set_dur)
         dur_layout = QHBoxLayout()
         dur_layout.addWidget(dur_label)
         dur_layout.addWidget(self.dur_box)
@@ -126,6 +127,13 @@ class CaptureControl(QWidget):
         # Detect if we're running a Pi?
         self.logger.debug("Selected sampling frequency: %ss",self.sample_frequency)
 
+    def set_dur(self, txt):
+        '''
+        Sets the experiment duration from the drop-down menu
+        '''
+        self.duration = int(txt)
+        self.logger.debug("Selected experiment duration: %sh",self.duration)
+
 
 class ChartWidget(QWebEngineView):
     '''
@@ -133,10 +141,8 @@ class ChartWidget(QWebEngineView):
         https://doc.qt.io/qt-6/webengine-widgetexamples.html
     Probably want to sub-class from QWidget, embded the Web#view in a
     layout with some more native UI to control scaling, etc...
-
     '''
     def __init__(self):
-
 
         QWebEngineView.__init__(self)
 
