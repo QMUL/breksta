@@ -93,6 +93,9 @@ class CaptureControl(QWidget):
 
         self.setLayout(layout)
 
+        # Enabling charting
+        self.start_chart()
+
     def start(self):
         self.start_button.setEnabled(False)
         self.experiment_id = self.device.start_experiment(self.name_box.text())
@@ -104,6 +107,9 @@ class CaptureControl(QWidget):
         self.freq_box.setEnabled(False)
         self.dur_box.setEnabled(False)
         self.name_box.setEnabled(False)
+
+        # resume updating the chart
+        self.start_chart()
 
     def stop(self):
         self.stop_button.setEnabled(False)
@@ -117,6 +123,9 @@ class CaptureControl(QWidget):
         self.dur_box.setEnabled(True)
         self.name_box.setEnabled(True)
         self.table.populate_table()
+
+        # stop updating the chart
+        self.stop_chart()
 
     def set_freq(self, txt):
         '''
@@ -134,6 +143,25 @@ class CaptureControl(QWidget):
         self.duration = int(txt)
         self.logger.debug("Selected experiment duration: %sh",self.duration)
 
+    def start_chart(self):
+        '''Resumes the running of "chart.py" by writing '1' into the control file. This signifies
+        that the chart callback should run.'''
+        try:
+            with open('app/control.txt', 'w') as f:
+                f.write('1')
+            self.logger.debug("Sent resume signal to chart control file...")
+        except IOError as e:
+            self.logger.error("Failed to send resume signal to chart control file: %s", e)
+
+    def stop_chart(self):
+        '''Stops the running of "chart.py" by writing '0' into the control file. This signifies
+        that the chart callback should stop.'''
+        try:
+            with open('app/control.txt', 'w') as f:
+                f.write('0')
+            self.logger.debug("Sent stop signal to chart control file...")
+        except IOError as e:
+            self.logger.error("Failed to send stop signal to chart control file: %s", e)
 
 class ChartWidget(QWebEngineView):
     '''
