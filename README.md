@@ -26,6 +26,14 @@ Each time you open a new terminal, you should:
 - Activate the virtual environment: `source env/bin/activate`
 - Start the application: `python3 -m app.breksta`
 
+#### Usage
+
+**Exporting experiments**: To export a specific experiment record, select it from the table and click on the "Export" button. You'll be prompted to choose a location where the exported data will be saved. The output file will be named in the format: `<experiment-name>-<datetime:YYYYMMDD_HHMM>.csv`. After the export operation is complete, the "Exported" status of the experiment will change to `True`.
+
+**Deleting experiments**: You can delete a specific experiment record by selecting it and clicking on the "Delete" button. Please note, this operation is irreversible. If you attempt to delete an experiment that hasn't been exported, you'll be asked to confirm your decision twice.
+
+**Database backup**: As a safety measure, the system will create a backup of the database whenever an experiment is deleted. The first time you delete an experiment, you'll be prompted to choose a location for the backup database. This backup file will be named `backup.db` and will automatically be used to restore data if an issue is detected during the deletion of an experiment. This provides an opportunity to manually revert an erroneous deletion once.
+
 ## Contributing
 Please send a pull request with any suggested changes or improvements. (placeholder)
 
