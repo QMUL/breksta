@@ -366,19 +366,30 @@ class ExportControl(QWidget):
 
     def backup_database(self, filename=None):
         '''
-        Creates a database backup. The backup file is named with a timestamp,
-        like "backup_20230614_103030.db", to avoid overwriting previous backups.
-        If a filename is provided, it is used as the name
-        for the backup file. Otherwise, a default name "backup.db" is used.
+        Creates a database backup.
+
+        If a filename is provided, it is used as a prefix to the timestamp in the backup filename.
+        This is intended for manual backups and prevents overwriting previous backups.
+
+        If no filename is provided, an automatic backup named "backup.db" is created.
+        This backup gets updated with each deletion for automatic error handling.
+
+        Returns:
+            str: backup_path, the location where the database was stored.
         '''
-        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M")
 
         db_path = self.get_root_dir()
 
-        # assume that backup is done to the export folder
-        backup_path = os.path.join(self.folder_path, f'backup_{timestamp}.db') if filename else os.path.join(self.folder_path, 'backup.db')
+        if filename:
+            # If a filename is provided, use it as a prefix to the timestamp
+            backup_path = os.path.join(self.folder_path, f'{filename}_{timestamp}.db')
+        else:
+            # If no filename is provided, create an automatic backup named "backup.db"
+            backup_path = os.path.join(self.folder_path, 'backup.db')
+
         shutil.copy(db_path, backup_path)
-        return backup_path  # Return the backup path for potential further use
+        return backup_path
 
     def restore_database(self, filename=None):
         '''
