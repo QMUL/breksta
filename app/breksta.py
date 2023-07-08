@@ -1,22 +1,23 @@
 
-
 import sys, datetime, traceback, os, shutil
-# Programmatically set PYTHONPATH for breksta ONLY
-sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
 import plotly.graph_objects as go
 
 from PySide6.QtCore import QProcess, QTimer, QUrl, Signal, Slot, Qt, QDir
 from PySide6.QtGui import QAction, QKeySequence
-from PySide6.QtWidgets import (QApplication, QComboBox, QHBoxLayout, QLabel, QLineEdit,
-    QMainWindow, QPushButton, QTabWidget, QVBoxLayout, QWidget, QTableWidget,
-    QTableWidgetItem, QStyledItemDelegate, QFileDialog, QMessageBox
-    )
+from PySide6.QtWidgets import (
+    QApplication, QComboBox, QHBoxLayout, QLabel, QLineEdit, QMainWindow,
+    QPushButton, QTabWidget, QVBoxLayout, QWidget, QTableWidget,
+    QTableWidgetItem, QStyledItemDelegate, QFileDialog, QMessageBox)
 from PySide6.QtWebEngineWidgets import QWebEngineView
 
 from app.capture import DevCapture
 from app.capture import PmtDb
 from app.logger_config import setup_logger
+
+# Programmatically set PYTHONPATH for breksta ONLY
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
+
 
 class CaptureControl(QWidget):
     '''
@@ -42,7 +43,8 @@ class CaptureControl(QWidget):
         self.experiment_id = None
         self.sample_frequency = 2
         self.duration = 1
-        self.logger.debug("Default experiment values: Sampling frequency: %ss, Experiment duration: %sh",
+        self.logger.debug("Default experiment values: Sampling frequency: \
+                          %ss, Experiment duration: %sh",
                           self.sample_frequency, self.duration)
 
         self.device = DevCapture()
@@ -134,14 +136,16 @@ class CaptureControl(QWidget):
         self.sample_frequency = int(txt)
         # Set log-level from an Env Var?
         # Detect if we're running a Pi?
-        self.logger.debug("Selected sampling frequency: %ss",self.sample_frequency)
+        self.logger.debug("Selected sampling frequency: %ss",
+                          self.sample_frequency)
 
     def set_dur(self, txt):
         '''
         Sets the experiment duration from the drop-down menu
         '''
         self.duration = int(txt)
-        self.logger.debug("Selected experiment duration: %sh",self.duration)
+        self.logger.debug("Selected experiment duration: %sh",
+                          self.duration)
 
     def start_chart(self):
         '''Resumes the running of "chart.py" by writing '1' into the control file. This signifies
@@ -162,6 +166,7 @@ class CaptureControl(QWidget):
             self.logger.debug("Sent stop signal to chart control file...")
         except IOError as e:
             self.logger.error("Failed to send stop signal to chart control file: %s", e)
+
 
 class ChartWidget(QWebEngineView):
     '''
@@ -218,11 +223,12 @@ class CaptureWidget(QWidget):
 
 class ExportControl(QWidget):
     """
-    A QWidget subclass that provides control buttons and functionalities for exporting data from the PMT database.
+    A QWidget subclass that provides control buttons and functionalities for
+    exporting data from the PMT database.
     """
     def __init__(self, table):
         """
-        Initializes the export control panel with the 'Export' and 'Refresh' buttons. Refresh is placeholder.
+        Initializes the export control panel with the 'Export' and 'Delete' buttons.
         Args:
             table: A TableWidget instance to interact with.
         """
@@ -240,7 +246,7 @@ class ExportControl(QWidget):
         self.export_button.setEnabled(True)
         layout.addWidget(self.export_button)
 
-        # Set up Refresh button
+        # Set up Delete button
         self.delete_button = QPushButton("Delete", self)
         self.delete_button.clicked.connect(self.on_delete_button_clicked)
         self.delete_button.setEnabled(True)
@@ -315,7 +321,8 @@ class ExportControl(QWidget):
         """
         Opens a dialog for the user to choose an export folder for the experiment data.
         The default directory opened in the dialog is the user's home directory (`$HOME`).
-        Note: To open the dialog at the current working directory (`$CWD`) instead, replace `QDir.homePath()` with `QDir.currentPath()`.
+        Note: To open the dialog at the current working directory (`$CWD`) instead,
+        replace `QDir.homePath()` with `QDir.currentPath()`.
 
         Returns:
             str or None: The chosen directory path, or None if no directory was chosen.
@@ -360,7 +367,7 @@ class ExportControl(QWidget):
             # backup the database in preparation of destructive manipulation
             self.backup_database()
             # find if exported and handle deletion user prompting
-            item = self.table.item(self.table.selected_row,4)
+            item = self.table.item(self.table.selected_row, 4)
             # item.text() does not return a boolean
             is_exported = item.text() == "True" if item else None
 
@@ -395,7 +402,9 @@ class ExportControl(QWidget):
         '''
         if not is_exported:
             # Warn user that they are about to delete unexported data.
-            reply = QMessageBox.question(self, 'Delete Unexported Experiment',
+            reply = QMessageBox.question(
+                self,
+                'Delete Unexported Experiment',
                 "This experiment has not been exported. Are you sure you want to delete?",
                 QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
 
@@ -403,7 +412,9 @@ class ExportControl(QWidget):
                 return False
 
         # Final confirmation from user before deleting
-        reply = QMessageBox.question(self, 'Delete Experiment',
+        reply = QMessageBox.question(
+            self,
+            'Delete Experiment',
             "Are you sure you want to delete this experiment?",
             QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
 
@@ -444,7 +455,10 @@ class ExportControl(QWidget):
         db_path = self.get_root_dir()
 
         # Set backup_path based on whether filename is provided or not
-        backup_path = os.path.join(self.folder_path, filename) if filename else os.path.join(self.folder_path, 'backup.db')
+        if filename:
+            backup_path = os.path.join(self.folder_path, filename)
+        else:
+            backup_path = os.path.join(self.folder_path, 'backup.db')
 
         # Then check if backup file exists
         if not os.path.isfile(backup_path):
@@ -461,10 +475,12 @@ class ExportControl(QWidget):
         db_path = os.path.join(root_path, 'pmt.db')
         return db_path
 
+
 class ExportWidget(QWidget):
     """
-    A QWidget subclass that provides an interface for exporting PMT data. It includes TableWidget for displaying the
-    experiment information and ExportControl for controlling the data export and refreshing the table.
+    A QWidget subclass that provides an interface for exporting PMT data.
+    It includes TableWidget for displaying the experiment information and
+    ExportControl for controlling the data export and refreshing the table.
     """
     def __init__(self, width, table):
 
@@ -489,10 +505,12 @@ class ExportWidget(QWidget):
 
         self.setLayout(layout)
 
+
 class TableWidget(QTableWidget):
     """
-    A QTableWidget subclass that displays PMT experiment information in a table format. It includes functionalities
-    for populating the table with data from the PMT database and for handling user interaction with the table.
+    A QTableWidget subclass that displays PMT experiment information in a table format.
+    It includes functionalities for populating the table with data from the PMT database
+    and for handling user interaction with the table.
     """
 
     # create a signal that carries an integer
@@ -500,8 +518,9 @@ class TableWidget(QTableWidget):
 
     def __init__(self, width):
         """
-        Initializes the table widget with 0 rows and 5 columns. The columns are labeled with 'Id', 'Name', 'Date started',
-        'Date ended', 'Exported', and the table is populated with data from the PMT database.
+        Initializes the table widget with 0 rows and 5 columns.
+        The columns are labeled with 'Id', 'Name', 'Date started', 'Date ended', 'Exported',
+        and the table is populated with data from the PMT database.
         """
         QTableWidget.__init__(self, 0, 5)
 
@@ -536,7 +555,8 @@ class TableWidget(QTableWidget):
 
     def populate_table(self):
         """
-        Populates the table with data from the PMT database. Each row in the table corresponds to an experiment from the database.
+        Populates the table with data from the PMT database.
+        Each row in the table corresponds to an experiment from the database.
         """
         # Initialize the database connection
         db = PmtDb()
@@ -545,8 +565,8 @@ class TableWidget(QTableWidget):
         # (id, name, date start, date end, exported status)
         experiments = db.get_experiments()
 
-        # check if database has data
-        if not experiments: # list is empty
+        # check if database has data. If list empty, may be first run
+        if not experiments:
             self.logger.warning("Database has no data... table is empty")
             return
 
@@ -558,16 +578,18 @@ class TableWidget(QTableWidget):
 
         for row, experiment in enumerate(experiments):
             for col, entry in enumerate(experiment):
-                new_item = QTableWidgetItem(entry.strftime('%Y-%m-%d %H:%M') if isinstance(entry, datetime.datetime) else str(entry))
+                if isinstance(entry, datetime.datetime):
+                    new_item = QTableWidgetItem(entry.strftime('%Y-%m-%d %H:%M'))
+                else:
+                    new_item = str(entry)
                 new_item.setTextAlignment(Qt.AlignCenter)  # Sets text alignment to center
                 new_item.setFlags(new_item.flags() & ~Qt.ItemIsEditable)  # Makes item non-editable
                 self.setItem(row, col, new_item)
 
-        # self.resizeColumnsToContents()  # Resizes columns to fit content
-
     def on_cell_click(self, row):
         """
-        Handles user click on a cell in the table. The ID of the clicked experiment is stored for future use.
+        Handles user click on a cell in the table.
+        The ID of the clicked experiment is stored for future use.
         """
         # assume that the experiment ID is in the first column
         item = self.item(row, 0)
@@ -576,17 +598,20 @@ class TableWidget(QTableWidget):
             self.selected_row = row
             # emit the signal
             self.experimentSelected.emit(self.selected_experiment_id)
-            self.logger.debug(f"Cell clicked, row {row}, experiment id {self.selected_experiment_id}")
+            self.logger.debug(f"Cell clicked, row {row}, \
+                              experiment id {self.selected_experiment_id}")
 
     def mousePressEvent(self, event):
         """
-        Overrides the QTableWidget's mousePressEvent to maintain selection when a user clicks outside a valid item.
+        Overrides the QTableWidget's mousePressEvent to maintain selection
+        when a user clicks outside a valid item.
         """
         # sticky table line selection
         index = self.indexAt(event.position().toPoint())
         if not index.isValid():
             return
         super().mousePressEvent(event)
+
 
 class ExperimentGraph(QWebEngineView):
     """
@@ -632,8 +657,8 @@ class ExperimentGraph(QWebEngineView):
             xaxis=dict(showgrid=False, zeroline=False, visible=False),
             yaxis=dict(showgrid=False, zeroline=False, visible=False),
             autosize=False,
-            width=width/2,
-            height=width/4,
+            width=width / 2,
+            height=width / 4,
         )
 
         # Convert the Plotly figure to HTML and load it
@@ -664,10 +689,12 @@ class ExperimentGraph(QWebEngineView):
         else:
             self.logger.warning("No data to plot for the selected experiment.")
 
+
 class ExperimentWidget(QWidget):
     """
     A QWidget subclass that provides an interface for viewing PMT experiment data.
-    It includes a TableWidget for displaying the experiment list and an ExperimentGraph for displaying experiment data.
+    It includes a TableWidget for displaying the experiment list
+    and an ExperimentGraph for displaying experiment data.
     """
     def __init__(self, width, table, export_control):
 
@@ -692,6 +719,7 @@ class ExperimentWidget(QWidget):
         # connect the experimentSelected signal to the slots
         table.experimentSelected.connect(self.graph.refresh_graph)
         table.experimentSelected.connect(self.export_control.update_selected_experiment)
+
 
 # https://doc.qt.io/qtforpython/tutorials/datavisualize/
 class MainWindow(QMainWindow):
@@ -789,6 +817,7 @@ class MainWindow(QMainWindow):
                 self.web_process.kill()
         # Accept the close event, allowing the main window to close
         event.accept()
+
 
 if __name__ == "__main__":
     app = QApplication()

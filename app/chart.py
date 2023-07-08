@@ -1,3 +1,10 @@
+'''Dash example of a periodically updated chart:
+    https://dash.plotly.com/live-updates
+If the chart is to be accessed remotely, should cache previous data-points
+to reduce network traffic:
+    https://dash.plotly.com/persistence
+TODO: Add components only visible remotely to faciliate remote .csv download.
+'''
 
 import urllib.parse
 
@@ -16,15 +23,10 @@ app.layout = html.Div([
     dcc.Interval(id='interval-component', interval=2000, n_intervals=0)
 ])
 
-'''Dash example of a periodically updated chart:
-    https://dash.plotly.com/live-updates
-If the chart is to be accessed remotely, should cache previous data-points
-to reduce network traffic:
-    https://dash.plotly.com/persistence
-TODO: Add components only visible remotely to faciliate remote .csv download.
-'''
-@app.callback(Output('chart-content', 'figure'), [Input('url', 'pathname'),
-    Input('interval-component', 'n_intervals')])
+
+@app.callback(Output('chart-content', 'figure'),
+              [Input('url', 'pathname'),
+              Input('interval-component', 'n_intervals')])
 def draw_chart(pathname, n):
 
     logger = setup_logger()
@@ -55,9 +57,8 @@ def draw_chart(pathname, n):
         logger.error("Control file contains an invalid value")
         return px.line()
 
-    # logger.debug(f"draw_chart called with pathname={pathname}, n={n}")
-
     return px.line(df, x='ts', y='value')
+
 
 @app.callback(
     [Output(component_id='interval-component', component_property='interval')],
@@ -81,6 +82,7 @@ def update_refresh_rate(n_intervals):
         # If the control file contains an invalid value, keep the current interval
         return [default_value * 1000]
 
+
 def read_control_file():
     '''Reads in "app/control.txt".
         Returns: str'''
@@ -91,6 +93,7 @@ def read_control_file():
     except IOError as e:
         logger.error("Failed to read control file: %s", e)
         return None
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)

@@ -25,8 +25,10 @@ from sqlalchemy import create_engine, ForeignKey, String
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 from app.logger_config import setup_logger
 
+
 class Base(DeclarativeBase):
     pass
+
 
 class Experiment(Base):
     '''Metadata for each experiment run.
@@ -40,6 +42,7 @@ class Experiment(Base):
     end: Mapped[Optional[datetime]]
     exported: Mapped[bool] = mapped_column(default=False)
 
+
 class PmtReading(Base):
     '''Store the readings against each experiment here.
     Might as well have wall-clock time as the time-stamp so
@@ -51,6 +54,7 @@ class PmtReading(Base):
     experiment: Mapped[int] = mapped_column(ForeignKey("experiment.id"))
     value: Mapped[int]
     ts: Mapped[datetime] = mapped_column(primary_key=True)
+
 
 class PmtDb(object):
 
@@ -81,7 +85,7 @@ class PmtDb(object):
         return self.experiment_id
 
     def stop_experiment(self):
-        assert not self.experiment_id is None
+        assert self.experiment_id is not None
         self.start_time = None
         with self.Session() as sess:
             exp = sess.get(Experiment, self.experiment_id)
@@ -91,7 +95,8 @@ class PmtDb(object):
 
     def write_reading(self, val):
         with self.Session() as sess:
-            sess.add(PmtReading(experiment=self.experiment_id,
+            sess.add(PmtReading(
+                experiment=self.experiment_id,
                 value=val, ts=datetime.now()))
             sess.commit()
 
@@ -108,14 +113,14 @@ class PmtDb(object):
                     Experiment.id.desc()).first()
                 experiment = expt.id
             else:
-                expt = sess.query(Experiment).filter(Experiment.id==experiment).first()
+                expt = sess.query(Experiment).filter(Experiment.id == experiment).first()
 
             if since is None:
                 query = sess.query(PmtReading.ts, PmtReading.value).filter(
-                    PmtReading.experiment==experiment)
+                    PmtReading.experiment == experiment)
             else:
                 query = sess.query(PmtReading.ts, PmtReading.value).filter(
-                    PmtReading.experiment==experiment, PmtReading.ts > since)
+                    PmtReading.experiment == experiment, PmtReading.ts > since)
 
             df = pd.DataFrame(query)
             if df.empty:
@@ -151,8 +156,9 @@ class PmtDb(object):
             # create dataframe for "experiment_id"
             df = self.latest_readings(experiment_id)
             if df is None:
-                    self.logger.critical(f"Cannot export data for experiment {experiment_id} because there are no readings.")
-                    return
+                self.logger.critical(f"Cannot export data for experiment {experiment_id} \
+                                     because there are no readings.")
+                return
 
             # Attempt to retrieve the experiment's start date
             with self.Session() as sess:
@@ -184,10 +190,11 @@ class PmtDb(object):
         try:
             with self.Session() as sess:
                 # Query for the experiment to delete
-                experiment = sess.query(Experiment).filter(Experiment.id==experiment_id).first()
+                experiment = sess.query(Experiment).filter(Experiment.id == experiment_id).first()
 
                 if experiment is None:
-                    self.logger.critical(f"Cannot delete data for experiment {experiment_id} because there are no readings.")
+                    self.logger.critical(f"Cannot delete data for experiment {experiment_id} \
+                                          because there are no readings.")
                     return
 
             # Delete the experiment and commit the changes
@@ -196,7 +203,7 @@ class PmtDb(object):
             self.logger.debug(f"Experiment {experiment_id} deleted successfully.")
 
         except Exception as e:
-            self.logger.critical("Deleting experiment failed {e}")
+            self.logger.critical(f"Deleting experiment failed {e}")
 
     def query_database(self):
         '''
@@ -265,6 +272,7 @@ class PmtDb(object):
 
         # Return False if the function did not return True earlier
         return False
+
 
 class DevCapture(PmtDb):
     '''Subclass PmtDb again to read from the Pi ADC.

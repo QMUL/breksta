@@ -2,6 +2,7 @@
 
 import logging
 
+
 def setup_logger():
     my_app = 'Breksta'
     logger = logging.getLogger(my_app)
