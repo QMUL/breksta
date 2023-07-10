@@ -1,10 +1,11 @@
-'''Dash example of a periodically updated chart:
+"""
+Dash example of a periodically updated chart:
     https://dash.plotly.com/live-updates
 If the chart is to be accessed remotely, should cache previous data-points
 to reduce network traffic:
     https://dash.plotly.com/persistence
 TODO: Add components only visible remotely to faciliate remote .csv download.
-'''
+"""
 
 import urllib.parse
 
@@ -16,6 +17,11 @@ from app.capture import PmtDb
 from app.logger_config import setup_logger
 
 app = Dash(__name__)
+"""
+A Dash application instance.
+This app has a layout that consists of a location component for URL handling,
+a graph for chart content, and an interval component for periodic updates.
+"""
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
@@ -28,7 +34,21 @@ app.layout = html.Div([
               [Input('url', 'pathname'),
               Input('interval-component', 'n_intervals')])
 def draw_chart(pathname, n):
+    """
+    Callback function to draw the chart.
+    The chart content is updated based on the pathname and the number of intervals passed.
+    The experiment ID is extracted from the GET parameters of the URL,
+    and the corresponding data is fetched from the database.
+    The control file value determines whether to fetch new data or return the last figure.
+    If an invalid control file value is encountered, an empty line chart is returned.
 
+    Args:
+        pathname (str): The pathname part of the URL.
+        n (int): The number of intervals passed.
+
+    Returns:
+        plotly.graph_objs._figure.Figure: A Plotly figure representing the chart to be drawn.
+    """
     logger = setup_logger()
 
     parsed = urllib.parse.urlparse(pathname)
@@ -64,7 +84,19 @@ def draw_chart(pathname, n):
     [Output(component_id='interval-component', component_property='interval')],
     [Input('interval-component', 'n_intervals')])
 def update_refresh_rate(n_intervals):
-    # Read the control file
+    """
+    Callback function to update the refresh rate of the chart.
+    The control file value determines the new interval rate.
+    If the control file value is '0', the interval is set to a large number, effectively pausing the updates.
+    If the control file value is '1', the interval is set to the normal refresh rate.
+    If an invalid control file value is encountered, the interval is kept at the default rate.
+
+    Args:
+        n_intervals (int): The number of intervals passed.
+
+    Returns:
+        list: A list containing the new interval rate (in milliseconds).
+    """
     control = read_control_file()
 
     # Refresh values are in seconds. 2s or 10m.
@@ -84,8 +116,13 @@ def update_refresh_rate(n_intervals):
 
 
 def read_control_file():
-    '''Reads in "app/control.txt".
-        Returns: str'''
+    """
+    Reads the control file "app/control.txt".
+    If the control file is successfully read, the stripped content of the file is returned.
+
+    Returns:
+        str or None: The content of the control file, or None if an IOError occurs.
+    """
     logger = setup_logger()
     try:
         with open('app/control.txt', 'r') as f:
@@ -96,4 +133,9 @@ def read_control_file():
 
 
 if __name__ == '__main__':
+    """
+    Entry point for the script.
+    Starts the Dash server with debugging enabled if the script is run directly.
+    Autoupdate is True by default.
+    """
     app.run_server(debug=True)

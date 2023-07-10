@@ -1,4 +1,7 @@
-
+"""
+This module contains the main application for managing experiments.
+It includes the main window UI, the data capture and charting functionalities.
+"""
 import sys, datetime, traceback, os, shutil
 
 import plotly.graph_objects as go
@@ -20,12 +23,11 @@ sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
 
 class CaptureControl(QWidget):
-    '''
+    """
     Widget with all the controls for data capture.
     See the example at:
         https://doc.qt.io/qtforpython/PySide6/QtCore/Signal.html
-
-    '''
+    """
 
     # external signal for the slot in the ChartWidget
     started = Signal(int)
@@ -99,6 +101,8 @@ class CaptureControl(QWidget):
         self.start_chart()
 
     def start(self):
+        """Handles all logic adjacent to clicking on the Start button
+        """
         self.start_button.setEnabled(False)
         self.experiment_id = self.device.start_experiment(self.name_box.text())
         self.device.take_reading()
@@ -114,6 +118,8 @@ class CaptureControl(QWidget):
         self.start_chart()
 
     def stop(self):
+        """Handles all logic adjacent to clicking on the Stop button
+        """
         self.stop_button.setEnabled(False)
         self.device.stop_experiment()
         self.sample_timer.stop()
@@ -130,9 +136,9 @@ class CaptureControl(QWidget):
         self.stop_chart()
 
     def set_freq(self, txt):
-        '''
+        """
         Sets the sampling frequency from the drop-down menu
-        '''
+        """
         self.sample_frequency = int(txt)
         # Set log-level from an Env Var?
         # Detect if we're running a Pi?
@@ -140,16 +146,17 @@ class CaptureControl(QWidget):
                           self.sample_frequency)
 
     def set_dur(self, txt):
-        '''
+        """
         Sets the experiment duration from the drop-down menu
-        '''
+        """
         self.duration = int(txt)
         self.logger.debug("Selected experiment duration: %sh",
                           self.duration)
 
     def start_chart(self):
-        '''Resumes the running of "chart.py" by writing '1' into the control file. This signifies
-        that the chart callback should run.'''
+        """Resumes the running of "chart.py" by writing '1' into the control file. This signifies
+        that the chart callback should run.
+        """
         try:
             with open('app/control.txt', 'w') as f:
                 f.write('1')
@@ -158,8 +165,9 @@ class CaptureControl(QWidget):
             self.logger.error("Failed to send resume signal to chart control file: %s", e)
 
     def stop_chart(self):
-        '''Stops the running of "chart.py" by writing '0' into the control file. This signifies
-        that the chart callback should stop.'''
+        """Stops the running of "chart.py" by writing '0' into the control file. This signifies
+        that the chart callback should stop.
+        """
         try:
             with open('app/control.txt', 'w') as f:
                 f.write('0')
@@ -169,31 +177,40 @@ class CaptureControl(QWidget):
 
 
 class ChartWidget(QWebEngineView):
-    '''
+    """
     Sub-classed WebView:
         https://doc.qt.io/qt-6/webengine-widgetexamples.html
     Probably want to sub-class from QWidget, embded the Web#view in a
     layout with some more native UI to control scaling, etc...
-    '''
+    """
     def __init__(self):
 
         QWebEngineView.__init__(self)
 
-    '''
+    """
     Slot to receive the started signal from CaptureControl.
     Could pass the experiment ID as a parameter to the web app.
     https://doc.qt.io/qtforpython/PySide6/QtCore/Slot.html
-    '''
+    """
     @Slot(int)
     def plot_experiment(self, experiment):
+        """
+        Plots the experiment data in a web view by loading a local web server URL.
+
+        This method assumes that a Plotly Dash application is running on localhost at port 8050,
+        and that this application can plot the experiment when provided with an experiment ID.
+
+        Args:
+            experiment (int): The ID of the experiment to be plotted.
+        """
         url = QUrl('http://localhost:8050/')
         self.load(url)
 
 
 class CaptureWidget(QWidget):
-    '''
+    """
     Stick the capture and chart widgets in a parent layout.
-    '''
+    """
     def __init__(self, width, table):
 
         QWidget.__init__(self)
@@ -267,6 +284,14 @@ class ExportControl(QWidget):
 
     @Slot(int)
     def update_selected_experiment(self, experiment_id):
+        """
+        Updates the currently selected experiment ID.
+
+        This method is typically connected to a signal that emits an experiment ID when an experiment is selected in the UI.
+
+        Args:
+            experiment_id (int): The ID of the experiment to be selected.
+        """
         try:
             self.selected_experiment_id = experiment_id
             self.logger.debug(f"signal received {self.selected_experiment_id}. ID {id(self)}")
@@ -275,8 +300,10 @@ class ExportControl(QWidget):
 
     def on_export_button_clicked(self):
         """
-        Exports the data of the selected experiment when the export button is clicked.
-        Also refreshes the table widget after the export.
+        Handles the click event of the export button.
+        If a folder is chosen and the database connection is established successfully,
+        the data of the selected experiment is exported to the chosen directory.
+        If an error occurs during the process (such as permission issues), an error log is created.
         """
         # if `selected_experiment_id` is still default, user hasn't clicked on table
         if self.selected_experiment_id == -1:
@@ -395,11 +422,11 @@ class ExportControl(QWidget):
             self.delete_button.setEnabled(True)
 
     def confirm_delete(self, is_exported):
-        '''
-        This function prompts the user to confirm the deletion of an experiment.
+        """
+        Handles user prompts to confirm the deletion of an experiment.
         If the experiment hasn't been exported yet, it prompts for an additional confirmation.
         Returns True if deletion is confirmed, False otherwise.
-        '''
+        """
         if not is_exported:
             # Warn user that they are about to delete unexported data.
             reply = QMessageBox.question(
@@ -421,7 +448,7 @@ class ExportControl(QWidget):
         return reply == QMessageBox.Yes
 
     def backup_database(self, filename=None):
-        '''
+        """
         Creates a database backup.
 
         If a filename is provided, it is used as a prefix to the timestamp in the backup filename.
@@ -432,7 +459,7 @@ class ExportControl(QWidget):
 
         Returns:
             str: backup_path, the location where the database was stored.
-        '''
+        """
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M")
 
         db_path = self.get_root_dir()
@@ -448,10 +475,10 @@ class ExportControl(QWidget):
         return backup_path
 
     def restore_database(self, filename=None):
-        '''
+        """
         Restores the database from a backup. If a filename is provided, it is used as
         the name of the backup file. Otherwise, a default name "backup.db" is used.
-        '''
+        """
         db_path = self.get_root_dir()
 
         # Set backup_path based on whether filename is provided or not
@@ -467,9 +494,9 @@ class ExportControl(QWidget):
         shutil.copy(backup_path, db_path)
 
     def get_root_dir(self):
-        '''
+        """
         Grabs root directory - by default where we save 'pmt.db'
-        '''
+        """
         script_path = os.path.dirname(os.path.realpath(__file__))
         root_path = os.path.dirname(script_path)
         db_path = os.path.join(root_path, 'pmt.db')
@@ -631,7 +658,7 @@ class ExperimentGraph(QWebEngineView):
 
     def display_placeholder_graph(self, width):
         """
-        Display a placeholder graph before an experiment is selected.
+        Displays a placeholder text, reading "graph", before an experiment is selected.
         """
         fig = go.Figure()
 
@@ -723,7 +750,10 @@ class ExperimentWidget(QWidget):
 
 # https://doc.qt.io/qtforpython/tutorials/datavisualize/
 class MainWindow(QMainWindow):
-
+    """
+    The main window of the application which includes all the widgets and controls.
+    It also handles the lifecycle of the web process running the Dash server.
+    """
     def __init__(self):
 
         QMainWindow.__init__(self)
@@ -764,11 +794,11 @@ class MainWindow(QMainWindow):
     # https://www.pythonguis.com/tutorials/pyside-qprocess-external-programs/
     # https://doc.qt.io/qtforpython/PySide6/QtCore/QProcess.html
     def start_web(self):
-        '''
+        """
         Initializes the web process to start the Dash server running "chart.py".
         This function assumes that "chart.py" resides in the same directory as "breksta.py".
         The process is run in its own thread.
-        '''
+        """
         # Connect the readyReadStandardError signal to the handle_stderr slot
         # This allows us to read any error messages output by the web process
         self.web_process.readyReadStandardError.connect(self.handle_stderr)
@@ -787,26 +817,31 @@ class MainWindow(QMainWindow):
             self.logger.info("starting web process")
 
     def handle_error(self, error):
-        # Function to handle errors that occur in the web process
+        """Handles errors that occur in the web process
+        """
         self.logger.debug("An error occurred in the web process: %s", error)
 
     def handle_stderr(self):
-        # Function to handle standard error output from the web process
-        # Reads the standard error output, decodes it, and prints it
+        """Handles standard error output from the web process.
+        Reads the standard error output, decodes it, and prints it
+        """
         stderr = self.web_process.readAllStandardError().data().decode()
         self.logger.debug(stderr)
 
     def on_process_finished(self):
-        # Function to handle the process finishing
-        # Closes the web process when it finishes running
+        """Handles the process finishing.
+        Closes the web process when it finishes running
+        """
         self.web_process.close()
 
     def closeEvent(self, event):
-        '''
-        Override the QMainWindow close event to properly shut down the web process.
+        """
+        Overrides the QMainWindow close event to properly shut down the web process.
         If the web process is running, it is terminated, with a timeout for graceful termination.
         If the process does not terminate within the timeout, it is forcibly killed.
-        '''
+        Args:
+            event: The close event triggered when the main window is closed.
+        """
         # Check if the web process is running
         if self.web_process.state() == QProcess.Running:
             # If it is, terminate the process

@@ -1,9 +1,27 @@
-# logger_config.py
+"""
+Houses all logging-specific functionality.
+"""
 
 import logging
 
 
 def setup_logger():
+    """
+    Sets up a logger for 'Breksta'. The logger writes messages
+    to both the console and a log file ('file.log'), with different formats and severity levels.
+
+    For the console, only messages with a level of WARNING or above are logged, and the format
+    is: '%(name)s - %(levelname)s - %(message)s'.
+
+    For the log file, all messages are logged and the format is:
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s'.
+
+    If the logger already has handlers set up, it returns the logger as is. This is to prevent
+    adding multiple handlers to the logger if `setup_logger` is called multiple times.
+
+    Returns:
+        logging.Logger: The logger for the application.
+    """
     my_app = 'Breksta'
     logger = logging.getLogger(my_app)
 
