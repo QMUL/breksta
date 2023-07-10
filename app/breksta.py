@@ -45,9 +45,9 @@ class CaptureControl(QWidget):
         self.experiment_id = None
         self.sample_frequency = 2
         self.duration = 1
-        self.logger.debug("Default experiment values: Sampling frequency: \
-                          %ss, Experiment duration: %sh",
-                          self.sample_frequency, self.duration)
+        self.logger.debug(
+            "Default values: Sampling frequency: %ss, Experiment duration: %sh",
+            self.sample_frequency, self.duration)
 
         self.device = DevCapture()
         # https://doc.qt.io/qtforpython/PySide6/QtCore/QTimer.html
@@ -294,9 +294,9 @@ class ExportControl(QWidget):
         """
         try:
             self.selected_experiment_id = experiment_id
-            self.logger.debug(f"signal received {self.selected_experiment_id}. ID {id(self)}")
+            self.logger.debug("signal received %s. ID %s", self.selected_experiment_id, id(self))
         except Exception as e:
-            self.logger.debug(f"update_selected_experiment failed unexpectedly: {e}")
+            self.logger.debug("update_selected_experiment failed unexpectedly: %s", e)
 
     def on_export_button_clicked(self):
         """
@@ -332,7 +332,7 @@ class ExportControl(QWidget):
 
         except (OSError) as e:
             # if export gone wrong - OSError might catch pmt.db permissions issues
-            self.logger.critical(f"Export button failed due to: {e}")
+            self.logger.critical("Export button failed due to: %s", e)
             self.logger.critical(traceback.format_exc())
 
         else:
@@ -356,7 +356,7 @@ class ExportControl(QWidget):
         """
         self.dialog = QFileDialog()
         self.folder_path = self.dialog.getExistingDirectory(None, "Select Folder", QDir.homePath())
-        self.logger.debug("Exporting directory chosen as: " + self.folder_path)
+        self.logger.debug("Exporting directory chosen as: %s", self.folder_path)
 
         # Upon cancelling, folder_path will return an empty string, reset
         if self.folder_path == '':
@@ -398,8 +398,9 @@ class ExportControl(QWidget):
             # item.text() does not return a boolean
             is_exported = item.text() == "True" if item else None
 
-            self.logger.debug(f"selected row is: {self.table.selected_row}")
-            self.logger.debug(f"Experiment is {'exported' if is_exported else 'not exported'}")
+            self.logger.debug("selected row is: %s", self.table.selected_row)
+            export_status = 'exported' if is_exported else 'not exported'
+            self.logger.debug("Experiment is %s", export_status)
 
             reply = self.confirm_delete(is_exported)
             self.logger.debug("User wants to delete ID %s: %s", self.selected_experiment_id, reply)
@@ -408,7 +409,7 @@ class ExportControl(QWidget):
 
         except Exception as e:
             # if delete gone wrong - restore the database
-            self.logger.exception(f"Delete button failed due to: {e}")
+            self.logger.exception("Delete button failed due to: %s", e)
             self.logger.exception(traceback.format_exc())
             self.restore_database()
 
@@ -489,7 +490,7 @@ class ExportControl(QWidget):
 
         # Then check if backup file exists
         if not os.path.isfile(backup_path):
-            raise Exception(f"Backup file {backup_path} does not exist.")
+            raise Exception("Backup file %s does not exist.", backup_path)
 
         shutil.copy(backup_path, db_path)
 
@@ -625,8 +626,8 @@ class TableWidget(QTableWidget):
             self.selected_row = row
             # emit the signal
             self.experimentSelected.emit(self.selected_experiment_id)
-            self.logger.debug(f"Cell clicked, row {row}, \
-                              experiment id {self.selected_experiment_id}")
+            self.logger.debug(
+                "Cell clicked, row %s, experiment id %s", row, self.selected_experiment_id)
 
     def mousePressEvent(self, event):
         """

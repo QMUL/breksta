@@ -47,7 +47,6 @@ class PmtReading(Base):
     """Store the readings against each experiment here.
     Might as well have wall-clock time as the time-stamp so
     it can be a unique primary key.
-
     """
     __tablename__ = "reading"
 
@@ -129,7 +128,8 @@ class PmtDb(object):
             since (datetime, optional): The earliest timestamp to fetch readings from.
 
         Returns:
-            DataFrame or None: A DataFrame containing the readings and their timestamps, or None if no readings were found.
+            DataFrame or None: A DataFrame containing the readings and their timestamps,
+            or None if no readings were found.
 
         TODO: If we're continuing with the web-app for charting, cache the DB queries
         with Memcached or similar, query only the latest values.
@@ -151,7 +151,7 @@ class PmtDb(object):
 
             df = pd.DataFrame(query)
             if df.empty:
-                self.logger.warning(f"No readings found for experiment {experiment}")
+                self.logger.warning("No readings found for experiment %s", experiment)
                 return None
 
             df['ts'] = (df.ts - expt.start).dt.total_seconds()
@@ -184,8 +184,9 @@ class PmtDb(object):
             # create dataframe for "experiment_id"
             df = self.latest_readings(experiment_id)
             if df is None:
-                self.logger.critical(f"Cannot export data for experiment {experiment_id} \
-                                     because there are no readings.")
+                self.logger.critical(
+                    "Cannot export data for experiment %s because there are no readings.",
+                    experiment_id)
                 return
 
             # Attempt to retrieve the experiment's start date
@@ -200,7 +201,7 @@ class PmtDb(object):
             df.to_csv(full_path)
 
         except (ValueError, AttributeError, OSError) as e:
-            self.logger.debug(f"Export failed due to: {e}")
+            self.logger.debug("Export failed due to: %s", e)
 
         else:
             # only run if `try:` is successful. set exported status to "True"
@@ -220,17 +221,18 @@ class PmtDb(object):
                 experiment = sess.query(Experiment).filter(Experiment.id == experiment_id).first()
 
                 if experiment is None:
-                    self.logger.critical(f"Cannot delete data for experiment {experiment_id} \
-                                          because there are no readings.")
+                    self.logger.critical(
+                        "Cannot delete data for experiment %s because there are no readings.",
+                        experiment_id)
                     return
 
             # Delete the experiment and commit the changes
             sess.delete(experiment)
             sess.commit()
-            self.logger.debug(f"Experiment {experiment_id} deleted successfully.")
+            self.logger.debug("Experiment %s deleted successfully.", experiment_id)
 
         except Exception as e:
-            self.logger.critical(f"Deleting experiment failed {e}")
+            self.logger.critical("Deleting experiment failed %s", e)
 
     def query_database(self):
         """
@@ -268,7 +270,8 @@ class PmtDb(object):
         Fetches all experiments from the database.
 
         Returns:
-            list: A list of tuples, each containing the ID, name, start time, end time, and exported status of an experiment.
+            list: A list of tuples, each containing the ID, name, start time, end time,
+            and exported status of an experiment.
         """
         with self.Session() as sess:
             experiments = sess.query(Experiment).all()
@@ -296,12 +299,12 @@ class PmtDb(object):
                         sess.commit()
                         return True
                     else:
-                        self.logger.critical(f"No experiment found with ID {experiment_id}")
+                        self.logger.critical("No experiment found with ID %s", experiment_id)
                 else:
                     self.logger.debug("Experiment ID is None")
 
         except Exception as e:
-            self.logger.debug(f"Failed to mark experiment as exported due to: {e}")
+            self.logger.debug("Failed to mark experiment as exported due to: %s", e)
 
         # Return False if the function did not return True earlier
         return False
