@@ -158,22 +158,22 @@ class CaptureControl(QWidget):
         that the chart callback should run.
         """
         try:
-            with open('app/control.txt', 'w') as f:
-                f.write('1')
+            with open('app/control.txt', 'w') as file:
+                file.write('1')
             self.logger.debug("Sent resume signal to chart control file...")
-        except IOError as e:
-            self.logger.error("Failed to send resume signal to chart control file: %s", e)
+        except IOError as err:
+            self.logger.error("Failed to send resume signal to chart control file: %s", err)
 
     def stop_chart(self):
         """Stops the running of "chart.py" by writing '0' into the control file. This signifies
         that the chart callback should stop.
         """
         try:
-            with open('app/control.txt', 'w') as f:
-                f.write('0')
+            with open('app/control.txt', 'w') as file:
+                file.write('0')
             self.logger.debug("Sent stop signal to chart control file...")
-        except IOError as e:
-            self.logger.error("Failed to send stop signal to chart control file: %s", e)
+        except IOError as err:
+            self.logger.error("Failed to send stop signal to chart control file: %s", err)
 
 
 class ChartWidget(QWebEngineView):
@@ -295,8 +295,8 @@ class ExportControl(QWidget):
         try:
             self.selected_experiment_id = experiment_id
             self.logger.debug("signal received %s. ID %s", self.selected_experiment_id, id(self))
-        except Exception as e:
-            self.logger.debug("update_selected_experiment failed unexpectedly: %s", e)
+        except Exception as err:
+            self.logger.debug("update_selected_experiment failed unexpectedly: %s", err)
 
     def on_export_button_clicked(self):
         """
@@ -330,9 +330,9 @@ class ExportControl(QWidget):
             # Export the data
             db.export_data_single(self.selected_experiment_id, self.folder_path)
 
-        except (OSError) as e:
+        except (OSError) as err:
             # if export gone wrong - OSError might catch pmt.db permissions issues
-            self.logger.critical("Export button failed due to: %s", e)
+            self.logger.critical("Export button failed due to: %s", err)
             self.logger.critical(traceback.format_exc())
 
         else:
@@ -407,9 +407,9 @@ class ExportControl(QWidget):
 
             db.delete_experiment(self.selected_experiment_id)
 
-        except Exception as e:
+        except Exception as err:
             # if delete gone wrong - restore the database
-            self.logger.exception("Delete button failed due to: %s", e)
+            self.logger.exception("Delete button failed due to: %s", err)
             self.logger.exception(traceback.format_exc())
             self.restore_database()
 
@@ -812,8 +812,8 @@ class MainWindow(QMainWindow):
             # Wait for the process to start, print a failure message if it doesn't
             if not self.web_process.waitForStarted():
                 self.logger.critical("Failed to start web process.")
-        except Exception as e:
-            self.logger.debug('web process fell over:', str(e))
+        except Exception as err:
+            self.logger.debug('web process fell over:', str(err))
         else:
             self.logger.info("starting web process")
 

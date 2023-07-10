@@ -200,8 +200,8 @@ class PmtDb:
             full_path = os.path.join(folder_path, filename)
             df.to_csv(full_path)
 
-        except (ValueError, AttributeError, OSError) as e:
-            self.logger.debug("Export failed due to: %s", e)
+        except (ValueError, AttributeError, OSError) as err:
+            self.logger.debug("Export failed due to: %s", err)
 
         else:
             # only run if `try:` is successful. set exported status to "True"
@@ -231,8 +231,8 @@ class PmtDb:
             sess.commit()
             self.logger.debug("Experiment %s deleted successfully.", experiment_id)
 
-        except Exception as e:
-            self.logger.critical("Deleting experiment failed %s", e)
+        except Exception as err:
+            self.logger.critical("Deleting experiment failed %s", err)
 
     def query_database(self):
         """
@@ -303,8 +303,8 @@ class PmtDb:
                 else:
                     self.logger.debug("Experiment ID is None")
 
-        except Exception as e:
-            self.logger.debug("Failed to mark experiment as exported due to: %s", e)
+        except Exception as err:
+            self.logger.debug("Failed to mark experiment as exported due to: %s", err)
 
         # Return False if the function did not return True earlier
         return False

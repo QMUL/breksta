@@ -125,10 +125,10 @@ def read_control_file():
     """
     logger = setup_logger()
     try:
-        with open('app/control.txt', 'r') as f:
-            return f.read().strip()
-    except IOError as e:
-        logger.error("Failed to read control file: %s", e)
+        with open('app/control.txt', 'r') as file:
+            return file.read().strip()
+    except IOError as err:
+        logger.error("Failed to read control file: %s", err)
         return None
 
 
