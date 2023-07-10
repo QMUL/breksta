@@ -609,7 +609,7 @@ class TableWidget(QTableWidget):
                 if isinstance(entry, datetime.datetime):
                     new_item = QTableWidgetItem(entry.strftime('%Y-%m-%d %H:%M'))
                 else:
-                    new_item = str(entry)
+                    new_item = QTableWidgetItem(str(entry))
                 new_item.setTextAlignment(Qt.AlignCenter)  # Sets text alignment to center
                 new_item.setFlags(new_item.flags() & ~Qt.ItemIsEditable)  # Makes item non-editable
                 self.setItem(row, col, new_item)
