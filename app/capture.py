@@ -55,7 +55,7 @@ class PmtReading(Base):
     ts: Mapped[datetime] = mapped_column(primary_key=True)
 
 
-class PmtDb(object):
+class PmtDb:
     """
     Handles interactions with the database which contains experiments and PMT readings.
     The class provides functionalities to start and stop experiments, write readings to the database,
@@ -298,8 +298,8 @@ class PmtDb(object):
                         exp.exported = True
                         sess.commit()
                         return True
-                    else:
-                        self.logger.critical("No experiment found with ID %s", experiment_id)
+
+                    self.logger.critical("No experiment found with ID %s", experiment_id)
                 else:
                     self.logger.debug("Experiment ID is None")
 
