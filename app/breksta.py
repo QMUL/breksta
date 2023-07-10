@@ -667,7 +667,7 @@ class ExperimentGraph(QWebEngineView):
             x=[0, 1],
             y=[0, 1],
             mode='markers',
-            marker=dict(size=[0, 0])  # invisible points
+            marker={"size": [0, 0]}  # invisible points
         ))
 
         fig.update_layout(
@@ -677,13 +677,11 @@ class ExperimentGraph(QWebEngineView):
                     y=0.5,
                     text="GRAPH",
                     showarrow=False,
-                    font=dict(
-                        size=84
-                    )
+                    font={"size": 84}
                 )
             ],
-            xaxis=dict(showgrid=False, zeroline=False, visible=False),
-            yaxis=dict(showgrid=False, zeroline=False, visible=False),
+            xaxis={"showgrid": False, "zeroline": False, "visible": False},
+            yaxis={"showgrid": False, "zeroline": False, "visible": False},
             autosize=False,
             width=width / 2,
             height=width / 4,
