@@ -295,8 +295,8 @@ class ExportControl(QWidget):
         try:
             self.selected_experiment_id = experiment_id
             self.logger.debug("signal received %s. ID %s", self.selected_experiment_id, id(self))
-        except Exception as err:
-            self.logger.debug("update_selected_experiment failed unexpectedly: %s", err)
+        except TypeError as err:
+            self.logger.debug("update_selected_experiment failed due to TyperError: %s", err)
 
     def on_export_button_clicked(self):
         """
@@ -407,10 +407,9 @@ class ExportControl(QWidget):
 
             db.delete_experiment(self.selected_experiment_id)
 
-        except Exception as err:
+        except Exception as err:  # too general exception <- return to previous database if ANY error occurs
             # if delete gone wrong - restore the database
             self.logger.exception("Delete button failed due to: %s", err)
-            self.logger.exception(traceback.format_exc())
             self.restore_database()
 
         else:
@@ -490,7 +489,7 @@ class ExportControl(QWidget):
 
         # Then check if backup file exists
         if not os.path.isfile(backup_path):
-            raise Exception("Backup file %s does not exist.", backup_path)
+            raise FileNotFoundError(f"Backup file {backup_path} does not exist.")
 
         shutil.copy(backup_path, db_path)
 
@@ -810,8 +809,8 @@ class MainWindow(QMainWindow):
             # Wait for the process to start, print a failure message if it doesn't
             if not self.web_process.waitForStarted():
                 self.logger.critical("Failed to start web process.")
-        except Exception as err:
-            self.logger.debug('web process fell over:', str(err))
+        except (TypeError, RuntimeError) as err:
+            self.logger.debug('web process fell over: %s', err)
         else:
             self.logger.info("starting web process")
 

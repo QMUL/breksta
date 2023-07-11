@@ -21,7 +21,7 @@ from typing import Optional
 from pathvalidate import sanitize_filename
 
 import pandas as pd
-from sqlalchemy import create_engine, ForeignKey, String
+from sqlalchemy import create_engine, ForeignKey, String, exc
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 from app.logger_config import setup_logger
 
@@ -231,8 +231,12 @@ class PmtDb:
             sess.commit()
             self.logger.debug("Experiment %s deleted successfully.", experiment_id)
 
-        except Exception as err:
-            self.logger.critical("Deleting experiment failed %s", err)
+        except exc.NoResultFound:
+            self.logger.critical("No experiment found with ID %s", experiment_id)
+        except exc.IntegrityError as err:
+            self.logger.critical("IntegrityError while deleting experiment: %s", err)
+        except exc.OperationalError as err:
+            self.logger.critical("OperationalError while deleting experiment: %s", err)
 
     def query_database(self):
         """
@@ -303,7 +307,7 @@ class PmtDb:
                 else:
                     self.logger.debug("Experiment ID is None")
 
-        except Exception as err:
+        except exc.SQLAlchemyError as err:
             self.logger.debug("Failed to mark experiment as exported due to: %s", err)
 
         # Return False if the function did not return True earlier
