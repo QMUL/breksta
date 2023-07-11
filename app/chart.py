@@ -125,7 +125,7 @@ def read_control_file():
     """
     logger = setup_logger()
     try:
-        with open('app/control.txt', 'r') as file:
+        with open('app/control.txt', 'r', encoding='utf-8') as file:
             return file.read().strip()
     except IOError as err:
         logger.error("Failed to read control file: %s", err)

@@ -158,7 +158,7 @@ class CaptureControl(QWidget):
         that the chart callback should run.
         """
         try:
-            with open('app/control.txt', 'w') as file:
+            with open('app/control.txt', 'w', encoding='utf-8') as file:
                 file.write('1')
             self.logger.debug("Sent resume signal to chart control file...")
         except IOError as err:
@@ -169,7 +169,7 @@ class CaptureControl(QWidget):
         that the chart callback should stop.
         """
         try:
-            with open('app/control.txt', 'w') as file:
+            with open('app/control.txt', 'w', encoding='utf-8') as file:
                 file.write('0')
             self.logger.debug("Sent stop signal to chart control file...")
         except IOError as err:
