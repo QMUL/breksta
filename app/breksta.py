@@ -802,19 +802,31 @@ class MainWindow(QMainWindow):
         # Connect the readyReadStandardError signal to the handle_stderr slot
         # This allows us to read any error messages output by the web process
         self.web_process.readyReadStandardError.connect(self.handle_stderr)
-        try:
-            # Connect the errorOccurred signal to the handle_error slot
-            # This allows us to react to errors that occur while the process is running
-            self.web_process.errorOccurred.connect(self.handle_error)
-            # Start the web process using python3 and the module path to chart.py
-            self.web_process.start("python3", ["-m", "app.chart"])
-            # Wait for the process to start, print a failure message if it doesn't
-            if not self.web_process.waitForStarted():
-                self.logger.critical("Failed to start web process.")
-        except (TypeError, RuntimeError) as err:
-            self.logger.debug('web process fell over: %s', err)
+        retry_attempts = 3
+        for attempt in range(retry_attempts):
+            try:
+                # Connect the errorOccurred signal to the handle_error slot
+                # This allows us to react to errors that occur while the process is running
+                self.web_process.errorOccurred.connect(self.handle_error)
+                # Start the web process using python3 and the module path to chart.py
+                self.web_process.start("python3", ["-m", "app.chart"])
+
+                # Wait for the process to start, print a failure message if it doesn't
+                if self.web_process.waitForStarted():
+                    self.logger.info("Starting web process...")
+                    break
+
+                self.logger.warning("Failed to start web process. Attempt %d of %d.", attempt + 1, retry_attempts)
+
+            except (TypeError, RuntimeError, QProcess.StartFailed) as err:
+                self.logger.debug('web process fell over: %s', err)
         else:
-            self.logger.info("starting web process")
+            # Alert the user of the failure with a QMessageBox
+            QMessageBox.critical(
+                self,
+                "Web Process Error",
+                "Failed to start the web process after several attempts. The application may not work correctly.")
+            self.logger.critical("Failed to start web process after %d attempts.", retry_attempts)
 
     def handle_error(self, error):
         """Handles errors that occur in the web process
