@@ -33,7 +33,7 @@ app.layout = html.Div([
 @app.callback(Output('chart-content', 'figure'),
               [Input('url', 'pathname'),
               Input('interval-component', 'n_intervals')])
-def draw_chart(pathname, n):
+def draw_chart(pathname, n_intervals):
     """
     Callback function to draw the chart.
     The chart content is updated based on the pathname and the number of intervals passed.
@@ -66,8 +66,8 @@ def draw_chart(pathname, n):
             # This is the first run after the server was started,
             # draw_chart.last_df is not defined, so draw nothing
             return px.line()
-        else:
-            df = draw_chart.last_df
+
+        df = draw_chart.last_df
     elif control == '1':
         # If the control file contains '1', fetch the new data and update the plot
         db = PmtDb()

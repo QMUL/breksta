@@ -35,12 +35,31 @@ Each time you open a new terminal, you should:
 **Database backup**: As a safety measure, the system will create a backup of the database whenever an experiment is deleted. The first time you delete an experiment, you'll be prompted to choose a location for the backup database. This backup file will be named `backup.db` and will automatically be used to restore data if an issue is detected during the deletion of an experiment. This provides an opportunity to manually revert an erroneous deletion once.
 
 ## Contributing
-Please send a pull request with any suggested changes or improvements. (placeholder)
+
+Please send a pull request with any suggested changes or improvements.
+
+### Linting
+
+This project uses `flake8` and `pylint` to maintain code quality and ensure adherence to Python best practices.
+
+- `flake8`: It checks for style issues as well as some types of bugs, such as module level imports not at the top of the file, line length, unused imports etc. To install, `(env) :$ pip3 install flake8`.
+- `pylint`: It is a Python static code analysis tool which checks for programming errors, helps enforcing a coding standard, sniffs for code smells and offers simple refactoring suggestions. To install, `(env) :$ pip3 install pylint`.
+
+Before committing changes, it's recommended to run these tools to check for any potential issues. They can be run from the command line as follows:
+
+- To run `flake8`, navigate to the project directory and run `flake8 app/*` (or substitute `*` with a file).
+- To run `pylint`, navigate to the project directory and run `pylint app/*` (or substitute `*` with a file).
+
+Both have been customized via configuration files (`.flake8` and `.pylintrc`). These configuration files are used to enable or disable certain rules, exclude files or directories, and other. Additionally, both can be added to VS Code by installing the extension `Python` and then changing the settings to enable them.
+
+Remember that these tools are not infallible and some issues they report may be false positives or not applicable in your specific situation. They should be used as guides, not absolute authorities. Always use your best judgement when addressing the issues they report.
 
 ## License
+
 This project is licensed under the MIT License. (placeholder)
 
 ## Contact
+
 If you have any questions or suggestions, please contact us at [email] or open an issue on this project. (placeholder)
 
 ## Debugging

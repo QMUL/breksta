@@ -1,0 +1,12 @@
+[MAIN]
+
+# A comma-separated list of package or module names from where C extensions may
+# be loaded. Extensions are loading into the active Python interpreter and may
+# run arbitrary code.
+extension-pkg-allow-list=PySide6
+
+
+[FORMAT]
+
+# Maximum number of characters on a single line.
+max-line-length=125
