@@ -326,11 +326,11 @@ class ExportControl(QWidget):
                 return
 
         try:
-            # Initialize the database connection
-            db = PmtDb()
+            # Propagate the database connection
+            database = self.table.database
 
             # Export the data
-            db.export_data_single(self.selected_experiment_id, self.folder_path)
+            database.export_data_single(self.selected_experiment_id, self.folder_path)
 
         except (OSError) as err:
             # if export gone wrong - OSError might catch pmt.db permissions issues
@@ -389,8 +389,8 @@ class ExportControl(QWidget):
                 self.delete_button.setEnabled(True)
                 return
 
-        # Initialize the database connection
-        db = PmtDb()
+        # Propagate the database connection
+        database = self.table.database
 
         try:
             # backup the database in preparation of destructive manipulation
@@ -407,7 +407,7 @@ class ExportControl(QWidget):
             reply = self.confirm_delete(is_exported)
             self.logger.debug("User wants to delete ID %s: %s", self.selected_experiment_id, reply)
 
-            db.delete_experiment(self.selected_experiment_id)
+            database.delete_experiment(self.selected_experiment_id)
 
         except Exception as err:  # too general exception <- return to previous database if ANY error occurs
             # if delete gone wrong - restore the database
@@ -556,6 +556,9 @@ class TableWidget(QTableWidget):
         # Set logger
         self.logger = setup_logger()
 
+        # Initialize the database connection ONCE in breksta, inside the table widget
+        self.database = PmtDb()
+
         # initialise with invalid id, test
         self.selected_experiment_id = None
         self.selected_row = None
@@ -587,12 +590,9 @@ class TableWidget(QTableWidget):
         Populates the table with data from the PMT database.
         Each row in the table corresponds to an experiment from the database.
         """
-        # Initialize the database connection
-        db = PmtDb()
-
         # get_experiments() returns a list of tuples, each containing:
         # (id, name, date start, date end, exported status)
-        experiments = db.get_experiments()
+        experiments = self.database.get_experiments()
 
         # check if database has data. If list empty, may be first run
         if not experiments:
@@ -701,10 +701,10 @@ class ExperimentGraph(QWebEngineView):
             self.logger.debug("Cannot refresh preview graph. No experiment selected.")
             return
 
-        # Initialize the database connection
-        db = PmtDb()
+        # Propagate the database connection
+        database = self.table.database
 
-        exp_data = db.latest_readings(self.table.selected_experiment_id)
+        exp_data = database.latest_readings(self.table.selected_experiment_id)
 
         if exp_data is not None:
             # Create a scatter plot with timestamp as x and value as y
