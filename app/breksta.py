@@ -183,6 +183,8 @@ class ChartWidget(QWebEngineView):
     Probably want to sub-class from QWidget, embded the Web#view in a
     layout with some more native UI to control scaling, etc...
     """
+    DASH_APP_PORT = 8050
+
     def __init__(self):
 
         QWebEngineView.__init__(self)
@@ -203,7 +205,7 @@ class ChartWidget(QWebEngineView):
         Args:
             experiment (int): The ID of the experiment to be plotted.
         """
-        url = QUrl('http://localhost:8050/')
+        url = QUrl('http://localhost:{self.DASH_APP_PORT}/')
         self.load(url)
 
 
