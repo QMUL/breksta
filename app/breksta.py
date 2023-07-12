@@ -279,8 +279,9 @@ class ExportControl(QWidget):
         self.table = table
         self.table.experimentSelected.connect(self.update_selected_experiment)
 
-        # No folder path set
+        # Initialize attributes with default values
         self.folder_path = None
+        self.dialog = None
 
     @Slot(int)
     def update_selected_experiment(self, experiment_id):
