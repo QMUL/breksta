@@ -5,3 +5,4 @@ pyside6
 sqlalchemy
 pathvalidate
 pytest
+coverage

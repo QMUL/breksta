@@ -66,6 +66,22 @@ To run the tests, navigate to the project directory and run `pytest` from the co
 
 This will automatically discover and run all tests in the tests directory. Test files are named in the format test_*.py and test methods within those files are named in the format test_*(). This naming convention is required for pytest to automatically discover tests.
 
+When writing tests, you should aim to cover all lines of code and all branches (i.e., all paths through conditional statements). You can check the coverage of your tests by using a tool like `coverage.py`.
+
+To run the tests with coverage, use:
+
+```bash
+(env) :$ coverage run -m pytest
+```
+
+And then to report the coverage:
+
+```bash
+(env) :$ coverage report -m
+```
+
+You should aim for as high test coverage as possible, but remember that 100% coverage doesn't guarantee that your code is free of bugs. It only guarantees that all lines of code were executed during testing. You should also aim to test a variety of scenarios and edge cases to ensure your code behaves as expected in a range of situations.
+
 ## License
 
 This project is licensed under the MIT License. (placeholder)
