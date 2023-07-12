@@ -54,6 +54,18 @@ Both have been customized via configuration files (`.flake8` and `.pylintrc`). T
 
 Remember that these tools are not infallible and some issues they report may be false positives or not applicable in your specific situation. They should be used as guides, not absolute authorities. Always use your best judgement when addressing the issues they report.
 
+### Testing
+
+This project uses `pytest` for running the test suite, which contains unit tests that ensure each individual part of the code performs as expected.
+
+To run the tests, navigate to the project directory and run `pytest` from the command line:
+
+```bash
+(env) :$ pytest
+```
+
+This will automatically discover and run all tests in the tests directory. Test files are named in the format test_*.py and test methods within those files are named in the format test_*(). This naming convention is required for pytest to automatically discover tests.
+
 ## License
 
 This project is licensed under the MIT License. (placeholder)

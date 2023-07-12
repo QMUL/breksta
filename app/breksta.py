@@ -33,13 +33,19 @@ class CaptureControl(QWidget):
     started = Signal(int)
 
     def __init__(self, table):
+        super().__init__()
 
-        QWidget.__init__(self)
-
-        # Set logger
         self.logger = setup_logger()
-        # propagate table
+        # propagate table widget
         self.table = table
+
+        # Create the UI
+        self.ui = CaptureUI()
+
+        # Create a layout for this class, and add the UI elements to it
+        layout = QVBoxLayout()
+        layout.addWidget(self.ui)
+        self.setLayout(layout)
 
         # Initialize important variables
         self.experiment_id = None
@@ -55,47 +61,10 @@ class CaptureControl(QWidget):
         # Here, the repeating timer provokes the data capture:
         self.sample_timer.timeout.connect(self.device.take_reading)
 
-        # https://www.pythonguis.com/tutorials/pyside6-layouts/
-        # https://doc.qt.io/qtforpython/overviews/layout.html
-        layout = QVBoxLayout()
-
-        self.start_button = QPushButton('Start')
-        self.start_button.clicked.connect(self.start)
-        layout.addWidget(self.start_button)
-
-        self.stop_button = QPushButton('Stop')
-        self.stop_button.setEnabled(False)
-        self.stop_button.clicked.connect(self.stop)
-        layout.addWidget(self.stop_button)
-
-        # https://doc.qt.io/qtforpython/PySide6/QtWidgets/QLineEdit.html
-        name_label = QLabel('experiment name')
-        self.name_box = QLineEdit()
-        self.name_box.setText('experiment_1')
-        name_layout = QHBoxLayout()
-        name_layout.addWidget(name_label)
-        name_layout.addWidget(self.name_box)
-        layout.addLayout(name_layout)
-
-        freq_label = QLabel('sample frequency (s)')
-        self.freq_box = QComboBox()
-        self.freq_box.addItems(list(map(str, (2, 4, 8, 10, 15, 30, 60, 120))))
-        self.freq_box.currentTextChanged.connect(self.set_freq)
-        freq_layout = QHBoxLayout()
-        freq_layout.addWidget(freq_label)
-        freq_layout.addWidget(self.freq_box)
-        layout.addLayout(freq_layout)
-
-        dur_label = QLabel('experiment duration (hr)')
-        self.dur_box = QComboBox()
-        self.dur_box.addItems(list(map(str, (1, 2, 4, 6, 8, 10, 12, 24, 36, 48))))
-        self.dur_box.currentTextChanged.connect(self.set_dur)
-        dur_layout = QHBoxLayout()
-        dur_layout.addWidget(dur_label)
-        dur_layout.addWidget(self.dur_box)
-        layout.addLayout(dur_layout)
-
-        self.setLayout(layout)
+        self.ui.start_button.clicked.connect(self.start)
+        self.ui.stop_button.clicked.connect(self.stop)
+        self.ui.freq_box.currentTextChanged.connect(self.set_freq)
+        self.ui.dur_box.currentTextChanged.connect(self.set_dur)
 
         # Enabling charting
         self.start_chart()
@@ -103,16 +72,16 @@ class CaptureControl(QWidget):
     def start(self):
         """Handles all logic adjacent to clicking on the Start button
         """
-        self.start_button.setEnabled(False)
-        self.experiment_id = self.device.start_experiment(self.name_box.text())
+        self.ui.start_button.setEnabled(False)
+        self.experiment_id = self.device.start_experiment(self.ui.name_box.text())
         self.device.take_reading()
         self.sample_timer.start(1000 * self.sample_frequency)
         # signal to the ChartWidget is sent here:
         self.started.emit(self.experiment_id)
-        self.stop_button.setEnabled(True)
-        self.freq_box.setEnabled(False)
-        self.dur_box.setEnabled(False)
-        self.name_box.setEnabled(False)
+        self.ui.stop_button.setEnabled(True)
+        self.ui.freq_box.setEnabled(False)
+        self.ui.dur_box.setEnabled(False)
+        self.ui.name_box.setEnabled(False)
 
         # resume updating the chart
         self.start_chart()
@@ -120,16 +89,16 @@ class CaptureControl(QWidget):
     def stop(self):
         """Handles all logic adjacent to clicking on the Stop button
         """
-        self.stop_button.setEnabled(False)
+        self.ui.stop_button.setEnabled(False)
         self.device.stop_experiment()
         self.sample_timer.stop()
         # What should the ChartWidget display when capture stops?
         # TODO: Send another signal here:
         self.experiment_id = None
-        self.start_button.setEnabled(True)
-        self.freq_box.setEnabled(True)
-        self.dur_box.setEnabled(True)
-        self.name_box.setEnabled(True)
+        self.ui.start_button.setEnabled(True)
+        self.ui.freq_box.setEnabled(True)
+        self.ui.dur_box.setEnabled(True)
+        self.ui.name_box.setEnabled(True)
         self.table.populate_table()
 
         # stop updating the chart
@@ -174,6 +143,59 @@ class CaptureControl(QWidget):
             self.logger.debug("Sent stop signal to chart control file...")
         except IOError as err:
             self.logger.error("Failed to send stop signal to chart control file: %s", err)
+
+
+class CaptureUI(QWidget):
+    """
+    Widget that houses all UI control elements for data capture
+    """
+    def __init__(self):
+        super().__init__()
+
+        self.logger = setup_logger()
+        self.setup_ui()
+
+    def setup_ui(self):
+        """
+        Set up all UI elements.
+        """
+        # https://www.pythonguis.com/tutorials/pyside6-layouts/
+        # https://doc.qt.io/qtforpython/overviews/layout.html
+        layout = QVBoxLayout()
+
+        self.start_button = QPushButton('Start')
+        layout.addWidget(self.start_button)
+
+        self.stop_button = QPushButton('Stop')
+        self.stop_button.setEnabled(False)
+        layout.addWidget(self.stop_button)
+
+        # https://doc.qt.io/qtforpython/PySide6/QtWidgets/QLineEdit.html
+        name_label = QLabel('experiment name')
+        self.name_box = QLineEdit()
+        self.name_box.setText('experiment_1')
+        name_layout = QHBoxLayout()
+        name_layout.addWidget(name_label)
+        name_layout.addWidget(self.name_box)
+        layout.addLayout(name_layout)
+
+        freq_label = QLabel('sample frequency (s)')
+        self.freq_box = QComboBox()
+        self.freq_box.addItems(list(map(str, (2, 4, 8, 10, 15, 30, 60, 120))))
+        freq_layout = QHBoxLayout()
+        freq_layout.addWidget(freq_label)
+        freq_layout.addWidget(self.freq_box)
+        layout.addLayout(freq_layout)
+
+        dur_label = QLabel('experiment duration (hr)')
+        self.dur_box = QComboBox()
+        self.dur_box.addItems(list(map(str, (1, 2, 4, 6, 8, 10, 12, 24, 36, 48))))
+        dur_layout = QHBoxLayout()
+        dur_layout.addWidget(dur_label)
+        dur_layout.addWidget(self.dur_box)
+        layout.addLayout(dur_layout)
+
+        self.setLayout(layout)
 
 
 class ChartWidget(QWebEngineView):
