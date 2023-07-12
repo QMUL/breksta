@@ -273,7 +273,7 @@ class ExportControl(QWidget):
         self.setLayout(layout)
 
         # Initialize the experiment_id to receive signal
-        self.selected_experiment_id = -1
+        self.selected_experiment_id = None
 
         # Link to TableWidget instance
         self.table = table
@@ -307,7 +307,7 @@ class ExportControl(QWidget):
         If an error occurs during the process (such as permission issues), an error log is created.
         """
         # if `selected_experiment_id` is still default, user hasn't clicked on table
-        if self.selected_experiment_id == -1:
+        if self.selected_experiment_id is None:
             self.logger.warning("To export, please choose an experiment from the list")
             return
 
@@ -371,7 +371,7 @@ class ExportControl(QWidget):
         Also refreshes the table widget after the deletion.
         """
         # if `selected_experiment_id` is still default, user hasn't clicked on table
-        if self.selected_experiment_id == -1:
+        if self.selected_experiment_id is None:
             self.logger.info("To delete, please choose an experiment from the list")
             return
 
@@ -556,8 +556,8 @@ class TableWidget(QTableWidget):
         self.logger = setup_logger()
 
         # initialise with invalid id, test
-        self.selected_experiment_id = -1
-        self.selected_row = -1
+        self.selected_experiment_id = None
+        self.selected_row = None
 
         # set the column labels
         self.setHorizontalHeaderLabels(['Id', 'Name', 'Date started', 'Date ended', 'Exported'])
@@ -696,7 +696,7 @@ class ExperimentGraph(QWebEngineView):
         Refresh the graph to reflect the data for the currently selected experiment.
         """
 
-        if self.table.selected_experiment_id == -1:
+        if self.table.selected_experiment_id is None:
             self.logger.debug("Cannot refresh preview graph. No experiment selected.")
             return
 
