@@ -133,9 +133,7 @@ def read_control_file():
 
 
 if __name__ == '__main__':
-    """
-    Entry point for the script.
-    Starts the Dash server with debugging enabled if the script is run directly.
-    Autoupdate is True by default.
-    """
+    # Entry point for the script.
+    # Starts the Dash server with debugging enabled if the script is run directly.
+    # Autoupdate is True by default.
     app.run_server(debug=True)

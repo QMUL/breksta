@@ -27,6 +27,13 @@ from app.logger_config import setup_logger
 
 
 class Base(DeclarativeBase):
+    """Creates a new base class for SQLAlchemy declarative models. In SQLAlchemy, the
+    declarative base class serves as the foundation for all declarative model definitions.
+    `Base` is just an instance of `DeclarativeBase`, and it will be used as the base class for
+    all models in the application.
+    The pass keyword is used when you need to create a block of code syntactically, but you
+    want that block to do nothing
+    """
     pass
 
 
@@ -111,6 +118,19 @@ class PmtDb:
         self.experiment_id = None
 
     def write_reading(self, val):
+        """
+        Writes a new reading to the database.
+
+        This function creates a new `PmtReading` object with the given value and the current timestamp,
+        associates it with the current experiment, and writes it to the database.
+
+        Args:
+            val (float): The reading to be written to the database.
+
+        Raises:
+            sqlalchemy.exc.SQLAlchemyError: If any error occurs while adding the reading to the session
+            or committing the session.
+        """
         with self.Session() as sess:
             sess.add(PmtReading(
                 experiment=self.experiment_id,
@@ -222,8 +242,7 @@ class PmtDb:
 
                 if experiment is None:
                     self.logger.critical(
-                        "Cannot delete data for experiment %s because there are no readings.",
-                        experiment_id)
+                        "Cannot delete data for experiment %s because there are no readings.", experiment_id)
                     return
 
             # Delete the experiment and commit the changes

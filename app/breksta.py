@@ -189,11 +189,6 @@ class ChartWidget(QWebEngineView):
 
         QWebEngineView.__init__(self)
 
-    """
-    Slot to receive the started signal from CaptureControl.
-    Could pass the experiment ID as a parameter to the web app.
-    https://doc.qt.io/qtforpython/PySide6/QtCore/Slot.html
-    """
     @Slot(int)
     def plot_experiment(self, experiment):
         """
@@ -204,8 +199,12 @@ class ChartWidget(QWebEngineView):
 
         Args:
             experiment (int): The ID of the experiment to be plotted.
+
+        Slot to receive the started signal from CaptureControl.
+        Could pass the experiment ID as a parameter to the web app.
+        https://doc.qt.io/qtforpython/PySide6/QtCore/Slot.html
         """
-        url = QUrl('http://localhost:{self.DASH_APP_PORT}/')
+        url = QUrl(f'http://localhost:{self.DASH_APP_PORT}/')
         self.load(url)
 
 
@@ -359,12 +358,12 @@ class ExportControl(QWidget):
         """
         self.dialog = QFileDialog()
         self.folder_path = self.dialog.getExistingDirectory(None, "Select Folder", QDir.homePath())
-        self.logger.debug("Exporting directory chosen as: %s", self.folder_path)
 
         # Upon cancelling, folder_path will return an empty string, reset
         if self.folder_path == '':
             self.folder_path = None
 
+        self.logger.debug("Exporting directory chosen as: %s", self.folder_path)
         return self.folder_path
 
     def on_delete_button_clicked(self):
