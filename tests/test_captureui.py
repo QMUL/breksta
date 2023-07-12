@@ -48,3 +48,39 @@ class TestCaptureUI(unittest.TestCase):
         self.assertEqual(self.capture_ui.name_box.text(), 'experiment_1')
         self.assertEqual(self.capture_ui.freq_box.currentText(), '2')
         self.assertEqual(self.capture_ui.dur_box.currentText(), '1')
+
+    def test_on_start_button_click(self):
+        """Test that the on_start_button_click method updates the UI elements correctly."""
+        # Call the on_start_button_click method
+        self.capture_ui.on_start_button_click()
+
+        # Check that the start button is now disabled
+        self.assertFalse(self.capture_ui.start_button.isEnabled())
+
+        # Check that the stop button is now enabled
+        self.assertTrue(self.capture_ui.stop_button.isEnabled())
+
+        # Check that the frequency and duration dropdown menus are now disabled
+        self.assertFalse(self.capture_ui.freq_box.isEnabled())
+        self.assertFalse(self.capture_ui.dur_box.isEnabled())
+
+        # Check that the name box is now disabled
+        self.assertFalse(self.capture_ui.name_box.isEnabled())
+
+    def test_on_stop_button_click(self):
+        """Test that the on_stop_button_click method updates the UI elements correctly."""
+        # Call the on_stop_button_click method
+        self.capture_ui.on_stop_button_click()
+
+        # Check that the start button is now enabled
+        self.assertTrue(self.capture_ui.start_button.isEnabled())
+
+        # Check that the stop button is now disabled
+        self.assertFalse(self.capture_ui.stop_button.isEnabled())
+
+        # Check that the frequency and duration dropdown menus are enabled
+        self.assertTrue(self.capture_ui.freq_box.isEnabled())
+        self.assertTrue(self.capture_ui.dur_box.isEnabled())
+
+        # Check that the name box is now enabled
+        self.assertTrue(self.capture_ui.name_box.isEnabled())

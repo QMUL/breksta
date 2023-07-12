@@ -39,21 +39,24 @@ class CaptureControl(QWidget):
         # propagate table widget
         self.table = table
 
-        # Create the UI
+        # Initialize important variables
+        self.experiment_id = None
+
+        # Create the UI elements, initialize UI element values and experiment parameters
         self.ui = CaptureUI()
+        self.sample_frequency = self.ui.sample_frequency
+        self.duration = self.ui.duration
+
+        # Connect UI events to the corresponding methods
+        self.ui.start_button.clicked.connect(self.start)
+        self.ui.stop_button.clicked.connect(self.stop)
+        self.ui.freq_box.currentTextChanged.connect(self.set_freq)
+        self.ui.dur_box.currentTextChanged.connect(self.set_dur)
 
         # Create a layout for this class, and add the UI elements to it
         layout = QVBoxLayout()
         layout.addWidget(self.ui)
         self.setLayout(layout)
-
-        # Initialize important variables
-        self.experiment_id = None
-        self.sample_frequency = 2
-        self.duration = 1
-        self.logger.debug(
-            "Default values: Sampling frequency: %ss, Experiment duration: %sh",
-            self.sample_frequency, self.duration)
 
         self.device = DevCapture()
         # https://doc.qt.io/qtforpython/PySide6/QtCore/QTimer.html
@@ -61,27 +64,20 @@ class CaptureControl(QWidget):
         # Here, the repeating timer provokes the data capture:
         self.sample_timer.timeout.connect(self.device.take_reading)
 
-        self.ui.start_button.clicked.connect(self.start)
-        self.ui.stop_button.clicked.connect(self.stop)
-        self.ui.freq_box.currentTextChanged.connect(self.set_freq)
-        self.ui.dur_box.currentTextChanged.connect(self.set_dur)
-
         # Enabling charting
         self.start_chart()
 
     def start(self):
         """Handles all logic adjacent to clicking on the Start button
         """
-        self.ui.start_button.setEnabled(False)
         self.experiment_id = self.device.start_experiment(self.ui.name_box.text())
         self.device.take_reading()
         self.sample_timer.start(1000 * self.sample_frequency)
         # signal to the ChartWidget is sent here:
         self.started.emit(self.experiment_id)
-        self.ui.stop_button.setEnabled(True)
-        self.ui.freq_box.setEnabled(False)
-        self.ui.dur_box.setEnabled(False)
-        self.ui.name_box.setEnabled(False)
+
+        # Call the UI method to update the UI elements
+        self.ui.on_start_button_click()
 
         # resume updating the chart
         self.start_chart()
@@ -89,16 +85,15 @@ class CaptureControl(QWidget):
     def stop(self):
         """Handles all logic adjacent to clicking on the Stop button
         """
-        self.ui.stop_button.setEnabled(False)
         self.device.stop_experiment()
         self.sample_timer.stop()
         # What should the ChartWidget display when capture stops?
         # TODO: Send another signal here:
         self.experiment_id = None
-        self.ui.start_button.setEnabled(True)
-        self.ui.freq_box.setEnabled(True)
-        self.ui.dur_box.setEnabled(True)
-        self.ui.name_box.setEnabled(True)
+
+        # Call the UI method to update the UI elements
+        self.ui.on_stop_button_click()
+
         self.table.populate_table()
 
         # stop updating the chart
@@ -147,17 +142,49 @@ class CaptureControl(QWidget):
 
 class CaptureUI(QWidget):
     """
-    Widget that houses all UI control elements for data capture
+    This class is a QWidget subclass that houses all UI control elements for data capture.
+    It is responsible for setting up the UI layout and elements, handling UI interactions
+    (button clicks, dropdown selections), and updating UI element states.
     """
     def __init__(self):
         super().__init__()
 
         self.logger = setup_logger()
         self.setup_ui()
+        self.initialize_ui_values()
+
+    def on_start_button_click(self):
+        """Handle user interaction with the "Start" button.
+
+        This method is called when the user clicks the "Start" button. It disables certain
+        UI components to prevent user interaction during the data capture process,
+        including the "Start" button itself, the frequency selection box, the duration
+        selection box, and the name input box. It also enables the "Stop" button to
+        allow the user to end the data capture process.
+        """
+        self.start_button.setEnabled(False)
+        self.stop_button.setEnabled(True)
+        self.freq_box.setEnabled(False)
+        self.dur_box.setEnabled(False)
+        self.name_box.setEnabled(False)
+
+    def on_stop_button_click(self):
+        """Handle user interaction with the "Stop" button.
+
+        This method is called when the user clicks the "Stop" button. Enables the
+        "Start" button, the frequency selection box, the duration selection box,
+        and the name input box, and disables the "Stop" button.
+        """
+        self.stop_button.setEnabled(False)
+        self.start_button.setEnabled(True)
+        self.freq_box.setEnabled(True)
+        self.dur_box.setEnabled(True)
+        self.name_box.setEnabled(True)
 
     def setup_ui(self):
         """
-        Set up all UI elements.
+        This method sets up all UI elements, including buttons, labels, text fields, and
+        dropdown menus. It also configures the layout of these elements within the widget.
         """
         # https://www.pythonguis.com/tutorials/pyside6-layouts/
         # https://doc.qt.io/qtforpython/overviews/layout.html
@@ -196,6 +223,16 @@ class CaptureUI(QWidget):
         layout.addLayout(dur_layout)
 
         self.setLayout(layout)
+
+    def initialize_ui_values(self):
+        """Responsible for initializing the values in UI elements.
+        Initial values are the first items on each list.
+        """
+        self.sample_frequency = int(self.freq_box.itemText(0))
+        self.duration = int(self.dur_box.itemText(0))
+        self.logger.debug(
+            "Default values: Sampling frequency: %ss, Experiment duration: %sh",
+            self.sample_frequency, self.duration)
 
 
 class ChartWidget(QWebEngineView):
