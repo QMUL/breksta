@@ -24,9 +24,10 @@ sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
 class CaptureControl(QWidget):
     """
-    Widget with all the controls for data capture.
-    See the example at:
-        https://doc.qt.io/qtforpython/PySide6/QtCore/Signal.html
+    Class responsible for initiating and terminating data capture, managing the
+    experiment parameters, and handling of the chart update signals.
+    It communicates with the CaptureUI class for user interface interactions and
+    the DevCapture class for device operations.
     """
 
     # external signal for the slot in the ChartWidget
@@ -36,10 +37,9 @@ class CaptureControl(QWidget):
         super().__init__()
 
         self.logger = setup_logger()
-        # propagate table widget
+        # Access 'populate_table' method of the table widget for table refresh
         self.table = table
 
-        # Initialize important variables
         self.experiment_id = None
 
         # Create the UI elements, initialize UI element values and experiment parameters
@@ -49,7 +49,7 @@ class CaptureControl(QWidget):
 
         # Connect UI events to the corresponding methods
         self.ui.start_button.clicked.connect(self.initiate_data_capture)
-        self.ui.stop_button.clicked.connect(self.stop)
+        self.ui.stop_button.clicked.connect(self.terminate_data_capture)
         self.ui.freq_box.currentTextChanged.connect(self.set_freq)
         self.ui.dur_box.currentTextChanged.connect(self.set_dur)
 
@@ -58,13 +58,17 @@ class CaptureControl(QWidget):
         layout.addWidget(self.ui)
         self.setLayout(layout)
 
+        # Set up the device for data capture and create a QTimer object
         self.device = DevCapture()
         # https://doc.qt.io/qtforpython/PySide6/QtCore/QTimer.html
         self.sample_timer = QTimer()
-        # Here, the repeating timer provokes the data capture:
+
+        # Connect the timer timeout signal to the device's take_reading method
+        # This means that a reading will be taken every time the timer times out
+        # (i.e., at the sample frequency)
         self.sample_timer.timeout.connect(self.device.take_reading)
 
-        # Enabling charting
+        # Initialize charting signal to "start/resume"
         self.start_chart()
 
     def initiate_data_capture(self):
@@ -88,22 +92,26 @@ class CaptureControl(QWidget):
             "New experiment started named: %s, with ID: %d, frequency %ds",
             self.ui.name_box.text(), self.experiment_id, self.sample_frequency)
 
-    def stop(self):
-        """Handles all logic adjacent to clicking on the Stop button
+    def terminate_data_capture(self):
+        """Terminates data capture upon clicking the Stop button.
+
+        This involves the following steps:
+        - Terminating the ongoing experiment.
+        - Stopping the timer that triggers regular readings.
+        - Clearing the experiment_id to indicate that no experiment is currently ongoing.
+        - Updating the UI elements to reflect the current state.
+        - Populating the table with the captured data.
+        - Stopping the updating of the chart.
         """
+        self.logger.debug(
+            "Experiment stopping named: %s, with ID: %d",
+            self.ui.name_box.text(), self.experiment_id)
         self.device.stop_experiment()
         self.sample_timer.stop()
-        # What should the ChartWidget display when capture stops?
-        # TODO: Send another signal here:
         self.experiment_id = None
-
-        # Call the UI method to update the UI elements
-        self.ui.on_stop_button_click()
-
-        self.table.populate_table()
-
-        # stop updating the chart
-        self.stop_chart()
+        self.ui.on_stop_button_click()  # Reflect current state in the UI
+        self.table.populate_table()  # Populate table with the captured data
+        self.stop_chart()  # Stop chart updates
 
     def set_freq(self, txt):
         """
