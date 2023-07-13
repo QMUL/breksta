@@ -12,7 +12,10 @@ from app.breksta import CaptureUI
 # In Qt, every GUI application must have exactly one instance of QApplication or one of its subclasses.
 # It's a requirement for managing a lot of application-wide resources, for initializing various Qt
 # subsystems and for handling events.
-app = QApplication([])
+# If it already exists, don't create another one
+app = QApplication.instance()
+if not app:
+    app = QApplication([])
 
 
 class TestCaptureUI(unittest.TestCase):

@@ -48,7 +48,7 @@ class CaptureControl(QWidget):
         self.duration = self.ui.duration
 
         # Connect UI events to the corresponding methods
-        self.ui.start_button.clicked.connect(self.start)
+        self.ui.start_button.clicked.connect(self.initiate_data_capture)
         self.ui.stop_button.clicked.connect(self.stop)
         self.ui.freq_box.currentTextChanged.connect(self.set_freq)
         self.ui.dur_box.currentTextChanged.connect(self.set_dur)
@@ -67,20 +67,26 @@ class CaptureControl(QWidget):
         # Enabling charting
         self.start_chart()
 
-    def start(self):
-        """Handles all logic adjacent to clicking on the Start button
+    def initiate_data_capture(self):
+        """Begins data capture upon clicking the Start button.
+
+        This involves the following steps:
+        - Initiating a new experiment with the current text in the name box.
+        - Taking an initial reading from the device.
+        - Starting a timer that triggers regular readings based on the sample frequency.
+        - Emitting a signal to indicate the start of data capture, which can be used by other components.
+        - Updating the UI elements to reflect the current state.
+        - Resuming the updating of the chart.
         """
         self.experiment_id = self.device.start_experiment(self.ui.name_box.text())
         self.device.take_reading()
         self.sample_timer.start(1000 * self.sample_frequency)
-        # signal to the ChartWidget is sent here:
-        self.started.emit(self.experiment_id)
-
-        # Call the UI method to update the UI elements
-        self.ui.on_start_button_click()
-
-        # resume updating the chart
-        self.start_chart()
+        self.started.emit(self.experiment_id)  # Signal the start of data capture
+        self.ui.on_start_button_click()  # Reflect current state in the UI
+        self.start_chart()  # Resume chart updates
+        self.logger.debug(
+            "New experiment started named: %s, with ID: %d, frequency %ds",
+            self.ui.name_box.text(), self.experiment_id, self.sample_frequency)
 
     def stop(self):
         """Handles all logic adjacent to clicking on the Stop button
