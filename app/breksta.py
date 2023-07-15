@@ -33,7 +33,7 @@ class CaptureControl(QWidget):
     # external signal for the slot in the ChartWidget
     started = Signal(int)
 
-    def __init__(self, table):
+    def __init__(self, table) -> None:
         super().__init__()
 
         self.logger = setup_logger()
@@ -71,7 +71,7 @@ class CaptureControl(QWidget):
         # Initialize charting signal to "start/resume"
         self.start_chart()
 
-    def initiate_data_capture(self):
+    def initiate_data_capture(self) -> None:
         """Begins data capture upon clicking the Start button.
 
         This involves the following steps:
@@ -92,7 +92,7 @@ class CaptureControl(QWidget):
             "New experiment started named: %s, with ID: %d, frequency %ds",
             self.ui.name_box.text(), self.experiment_id, self.sample_frequency)
 
-    def terminate_data_capture(self):
+    def terminate_data_capture(self) -> None:
         """Terminates data capture upon clicking the Stop button.
 
         This involves the following steps:
@@ -113,7 +113,7 @@ class CaptureControl(QWidget):
         self.table.populate_table()  # Populate table with the captured data
         self.stop_chart()  # Stop chart updates
 
-    def set_freq(self, txt):
+    def set_freq(self, txt) -> None:
         """
         Sets the sampling frequency from the drop-down menu
         """
@@ -123,7 +123,7 @@ class CaptureControl(QWidget):
         self.logger.debug("Selected sampling frequency: %ss",
                           self.sample_frequency)
 
-    def set_dur(self, txt):
+    def set_dur(self, txt) -> None:
         """
         Sets the experiment duration from the drop-down menu
         """
@@ -131,7 +131,7 @@ class CaptureControl(QWidget):
         self.logger.debug("Selected experiment duration: %sh",
                           self.duration)
 
-    def start_chart(self):
+    def start_chart(self) -> None:
         """Resumes the running of "chart.py" by writing '1' into the control file. This signifies
         that the chart callback should run.
         """
@@ -142,7 +142,7 @@ class CaptureControl(QWidget):
         except IOError as err:
             self.logger.error("Failed to send resume signal to chart control file: %s", err)
 
-    def stop_chart(self):
+    def stop_chart(self) -> None:
         """Stops the running of "chart.py" by writing '0' into the control file. This signifies
         that the chart callback should stop.
         """
@@ -160,14 +160,14 @@ class CaptureUI(QWidget):
     It is responsible for setting up the UI layout and elements, handling UI interactions
     (button clicks, dropdown selections), and updating UI element states.
     """
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         self.logger = setup_logger()
         self.setup_ui()
         self.initialize_ui_values()
 
-    def on_start_button_click(self):
+    def on_start_button_click(self) -> None:
         """Handle user interaction with the "Start" button.
 
         This method is called when the user clicks the "Start" button. It disables certain
@@ -182,7 +182,7 @@ class CaptureUI(QWidget):
         self.dur_box.setEnabled(False)
         self.name_box.setEnabled(False)
 
-    def on_stop_button_click(self):
+    def on_stop_button_click(self) -> None:
         """Handle user interaction with the "Stop" button.
 
         This method is called when the user clicks the "Stop" button. Enables the
@@ -195,7 +195,7 @@ class CaptureUI(QWidget):
         self.dur_box.setEnabled(True)
         self.name_box.setEnabled(True)
 
-    def setup_ui(self):
+    def setup_ui(self) -> None:
         """
         This method sets up all UI elements, including buttons, labels, text fields, and
         dropdown menus. It also configures the layout of these elements within the widget.
@@ -238,7 +238,7 @@ class CaptureUI(QWidget):
 
         self.setLayout(layout)
 
-    def initialize_ui_values(self):
+    def initialize_ui_values(self) -> None:
         """Responsible for initializing the values in UI elements.
         Initial values are the first items on each list.
         """
@@ -258,12 +258,12 @@ class ChartWidget(QWebEngineView):
     """
     DASH_APP_PORT = 8050
 
-    def __init__(self):
+    def __init__(self) -> None:
 
         QWebEngineView.__init__(self)
 
     @Slot(int)
-    def plot_experiment(self, experiment):
+    def plot_experiment(self, experiment) -> None:
         """
         Plots the experiment data in a web view by loading a local web server URL.
 
@@ -285,7 +285,7 @@ class CaptureWidget(QWidget):
     """
     Stick the capture and chart widgets in a parent layout.
     """
-    def __init__(self, width, table):
+    def __init__(self, width, table) -> None:
 
         QWidget.__init__(self)
 
@@ -317,7 +317,7 @@ class ExportControl(QWidget):
     A QWidget subclass that provides control buttons and functionalities for
     exporting data from the PMT database.
     """
-    def __init__(self, table):
+    def __init__(self, table) -> None:
         """
         Initializes the export control panel with the 'Export' and 'Delete' buttons.
         Args:
@@ -358,7 +358,7 @@ class ExportControl(QWidget):
         self.dialog = None
 
     @Slot(int)
-    def update_selected_experiment(self, experiment_id):
+    def update_selected_experiment(self, experiment_id) -> None:
         """
         Updates the currently selected experiment ID.
 
@@ -373,7 +373,7 @@ class ExportControl(QWidget):
         except TypeError as err:
             self.logger.debug("update_selected_experiment failed due to TyperError: %s", err)
 
-    def on_export_button_clicked(self):
+    def on_export_button_clicked(self) -> None:
         """
         Handles the click event of the export button.
         If a folder is chosen and the database connection is established successfully,
@@ -439,7 +439,7 @@ class ExportControl(QWidget):
         self.logger.debug("Exporting directory chosen as: %s", self.folder_path)
         return self.folder_path
 
-    def on_delete_button_clicked(self):
+    def on_delete_button_clicked(self) -> None:
         """
         Deletes the selected experiment when the delete button is clicked.
         Also refreshes the table widget after the deletion.
@@ -549,7 +549,7 @@ class ExportControl(QWidget):
         shutil.copy(db_path, backup_path)
         return backup_path
 
-    def restore_database(self, filename=None):
+    def restore_database(self, filename=None) -> None:
         """
         Restores the database from a backup. If a filename is provided, it is used as
         the name of the backup file. Otherwise, a default name "backup.db" is used.
@@ -584,7 +584,7 @@ class ExportWidget(QWidget):
     It includes TableWidget for displaying the experiment information and
     ExportControl for controlling the data export and refreshing the table.
     """
-    def __init__(self, width, table):
+    def __init__(self, width, table) -> None:
 
         QWidget.__init__(self)
 
@@ -618,7 +618,7 @@ class TableWidget(QTableWidget):
     # create a signal that carries an integer
     experimentSelected = Signal(int)
 
-    def __init__(self, width):
+    def __init__(self, width) -> None:
         """
         Initializes the table widget with 0 rows and 5 columns.
         The columns are labeled with 'Id', 'Name', 'Date started', 'Date ended', 'Exported',
@@ -658,7 +658,7 @@ class TableWidget(QTableWidget):
         # connect cell clicked event to the appropriate method
         self.cellClicked.connect(self.on_cell_click)
 
-    def populate_table(self):
+    def populate_table(self) -> None:
         """
         Populates the table with data from the PMT database.
         Each row in the table corresponds to an experiment from the database.
@@ -688,7 +688,7 @@ class TableWidget(QTableWidget):
                 new_item.setFlags(new_item.flags() & ~Qt.ItemIsEditable)  # Makes item non-editable
                 self.setItem(row, col, new_item)
 
-    def on_cell_click(self, row):
+    def on_cell_click(self, row) -> None:
         """
         Handles user click on a cell in the table.
         The ID of the clicked experiment is stored for future use.
@@ -703,7 +703,7 @@ class TableWidget(QTableWidget):
             self.logger.debug(
                 "Cell clicked, row %s, experiment id %s", row, self.selected_experiment_id)
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event) -> None:
         """
         Overrides the QTableWidget's mousePressEvent to maintain selection
         when a user clicks outside a valid item.
@@ -719,7 +719,7 @@ class ExperimentGraph(QWebEngineView):
     """
     A QWebEngineView subclass that displays a Plotly graph for the selected experiment.
     """
-    def __init__(self, width, table):
+    def __init__(self, width, table) -> None:
         QWebEngineView.__init__(self)
 
         # Set up logger
@@ -731,7 +731,7 @@ class ExperimentGraph(QWebEngineView):
         # Display a placeholder graph initially
         self.display_placeholder_graph(width)
 
-    def display_placeholder_graph(self, width):
+    def display_placeholder_graph(self, width) -> None:
         """
         Displays a placeholder text, reading "graph", before an experiment is selected.
         """
@@ -765,7 +765,7 @@ class ExperimentGraph(QWebEngineView):
         raw_html = fig.to_html(full_html=False, include_plotlyjs='cdn')
         self.setHtml(raw_html)
 
-    def refresh_graph(self):
+    def refresh_graph(self) -> None:
         """
         Refresh the graph to reflect the data for the currently selected experiment.
         """
@@ -796,7 +796,7 @@ class ExperimentWidget(QWidget):
     It includes a TableWidget for displaying the experiment list
     and an ExperimentGraph for displaying experiment data.
     """
-    def __init__(self, width, table, export_control):
+    def __init__(self, width, table, export_control) -> None:
 
         QWidget.__init__(self)
 
@@ -827,7 +827,7 @@ class MainWindow(QMainWindow):
     The main window of the application which includes all the widgets and controls.
     It also handles the lifecycle of the web process running the Dash server.
     """
-    def __init__(self):
+    def __init__(self) -> None:
 
         QMainWindow.__init__(self)
 
@@ -866,7 +866,7 @@ class MainWindow(QMainWindow):
 
     # https://www.pythonguis.com/tutorials/pyside-qprocess-external-programs/
     # https://doc.qt.io/qtforpython/PySide6/QtCore/QProcess.html
-    def start_web(self):
+    def start_web(self) -> None:
         """
         Initializes the web process to start the Dash server running "chart.py".
         This function assumes that "chart.py" resides in the same directory as "breksta.py".
@@ -901,25 +901,25 @@ class MainWindow(QMainWindow):
                 "Failed to start the web process after several attempts. The application may not work correctly.")
             self.logger.critical("Failed to start web process after %d attempts.", retry_attempts)
 
-    def handle_error(self, error):
+    def handle_error(self, error) -> None:
         """Handles errors that occur in the web process
         """
         self.logger.debug("An error occurred in the web process: %s", error)
 
-    def handle_stderr(self):
+    def handle_stderr(self) -> None:
         """Handles standard error output from the web process.
         Reads the standard error output, decodes it, and prints it
         """
         stderr = self.web_process.readAllStandardError().data().decode()
         self.logger.debug(stderr)
 
-    def on_process_finished(self):
+    def on_process_finished(self) -> None:
         """Handles the process finishing.
         Closes the web process when it finishes running
         """
         self.web_process.close()
 
-    def closeEvent(self, event):
+    def closeEvent(self, event) -> None:
         """
         Overrides the QMainWindow close event to properly shut down the web process.
         If the web process is running, it is terminated, with a timeout for graceful termination.

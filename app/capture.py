@@ -68,7 +68,7 @@ class PmtDb:
     The class provides functionalities to start and stop experiments, write readings to the database,
     fetch the latest readings, export data, delete experiments, and mark experiments as exported.
     """
-    def __init__(self):
+    def __init__(self) -> None:
 
         # set up logger
         self.logger = setup_logger()
@@ -104,7 +104,7 @@ class PmtDb:
 
         return self.experiment_id
 
-    def stop_experiment(self):
+    def stop_experiment(self) -> None:
         """
         Stops the current experiment.
         The end time is recorded as the current time and the experiment ID is reset.
@@ -117,7 +117,7 @@ class PmtDb:
             sess.commit()
         self.experiment_id = None
 
-    def write_reading(self, val):
+    def write_reading(self, val) -> None:
         """
         Writes a new reading to the database.
 
@@ -178,7 +178,7 @@ class PmtDb:
 
         return df
 
-    def export_data(self):
+    def export_data(self) -> None:
         """
         Exports the data of all experiments to a CSV file.
         """
@@ -191,7 +191,7 @@ class PmtDb:
         # Save DataFrame as a CSV file
         df.to_csv('export.csv')
 
-    def export_data_single(self, experiment_id, folder_path):
+    def export_data_single(self, experiment_id, folder_path) -> None:
         """
         Exports the data of a single experiment to a CSV file in the specified directory.
         The CSV file is named with the experiment's name and start time.
@@ -228,7 +228,7 @@ class PmtDb:
             self.mark_exported(experiment_id)
             self.logger.debug("`export_data_single` complete")
 
-    def delete_experiment(self, experiment_id):
+    def delete_experiment(self, experiment_id) -> None:
         """
         Deletes an experiment and its readings from the database.
 
@@ -340,7 +340,7 @@ class DevCapture(PmtDb):
 
     TODO: How can we tell if we're running on a real Pi?
     """
-    def __init__(self):
+    def __init__(self) -> None:
         PmtDb.__init__(self)
 
         self.logger = setup_logger()
