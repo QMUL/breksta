@@ -556,11 +556,15 @@ class ExportControl(QWidget):
         """
         db_path = self.get_root_dir()
 
-        # Set backup_path based on whether filename is provided or not
-        if filename:
-            backup_path = os.path.join(self.folder_path, filename)
+        # folder_path has to be str for the join()
+        if self.folder_path is not None:
+            # Set backup_path based on whether filename is provided or not
+            if filename:
+                backup_path = os.path.join(self.folder_path, filename)
+            else:
+                backup_path = os.path.join(self.folder_path, 'backup.db')
         else:
-            backup_path = os.path.join(self.folder_path, 'backup.db')
+            raise ValueError("self.folder_path is None")
 
         # Then check if backup file exists
         if not os.path.isfile(backup_path):

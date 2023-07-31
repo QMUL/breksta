@@ -5,7 +5,7 @@ Houses all logging-specific functionality.
 import logging
 
 
-def setup_logger():
+def setup_logger() -> logging.Logger:
     """
     Sets up a logger for 'Breksta'. The logger writes messages
     to both the console and a log file ('file.log'), with different formats and severity levels.
