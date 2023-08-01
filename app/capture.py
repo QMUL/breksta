@@ -13,10 +13,10 @@ Otherwise, SQLAlchemy speaks Postgres, so it should be able to talk to
 QuestDB, a column-store for IOT time-series:
     https://questdb.io/
 """
-
-from datetime import datetime
 import math
-import random, os
+import random
+import os
+from datetime import datetime
 from typing import Optional
 from pathvalidate import sanitize_filename
 
@@ -76,8 +76,8 @@ class PmtDb:
         engine = create_engine('sqlite:///pmt.db')
         Base.metadata.create_all(engine)
         self.Session = sessionmaker(engine)
-        self.experiment_id = None
-        self.start_time = None
+        self.experiment_id: Optional[int] = None
+        self.start_time: Optional[datetime] = None
 
     def start_experiment(self, name):
         """

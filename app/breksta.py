@@ -2,7 +2,12 @@
 This module contains the main application for managing experiments.
 It includes the main window UI, the data capture and charting functionalities.
 """
-import sys, datetime, traceback, os, shutil
+import sys
+import datetime
+import os
+import shutil
+import traceback
+from typing import Optional
 
 import plotly.graph_objects as go
 
@@ -40,7 +45,7 @@ class CaptureControl(QWidget):
         # Access 'populate_table' method of the table widget for table refresh
         self.table = table
 
-        self.experiment_id = None
+        self.experiment_id: Optional[int] = None
 
         # Create the UI elements, initialize UI element values and experiment parameters
         self.ui = CaptureUI()
@@ -347,14 +352,14 @@ class ExportControl(QWidget):
         self.setLayout(layout)
 
         # Initialize the experiment_id to receive signal
-        self.selected_experiment_id = None
+        self.selected_experiment_id: Optional[int] = None
 
         # Link to TableWidget instance
         self.table = table
         self.table.experimentSelected.connect(self.update_selected_experiment)
 
         # Initialize attributes with default values
-        self.folder_path = None
+        self.folder_path: Optional[str] = None
         self.dialog = None
 
     @Slot(int)
@@ -637,8 +642,8 @@ class TableWidget(QTableWidget):
         self.database = PmtDb()
 
         # initialise with invalid id, test
-        self.selected_experiment_id = None
-        self.selected_row = None
+        self.selected_experiment_id: Optional[int] = None
+        self.selected_row: Optional[int] = None
 
         # set the column labels
         self.setHorizontalHeaderLabels(['Id', 'Name', 'Date started', 'Date ended', 'Exported'])
