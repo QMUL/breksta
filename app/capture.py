@@ -212,8 +212,12 @@ class PmtDb:
             # Attempt to retrieve the experiment's start date
             with self.Session() as sess:
                 exp = sess.get(Experiment, experiment_id)
-                stamp = exp.start.strftime("%Y%m%d-%H%M")
-                name = exp.name
+                if exp is not None:
+                    stamp = exp.start.strftime("%Y%m%d-%H%M")
+                    name = exp.name
+                else:
+                    self.logger.error("No experiment found with id %s", experiment_id)
+                    return
 
             # create filename string and save to file
             filename = sanitize_filename(f"{name}-{stamp}.csv")

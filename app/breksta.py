@@ -360,7 +360,6 @@ class ExportControl(QWidget):
 
         # Initialize attributes with default values
         self.folder_path: Optional[str] = None
-        self.dialog = None
 
     @Slot(int)
     def update_selected_experiment(self, experiment_id) -> None:
@@ -434,8 +433,8 @@ class ExportControl(QWidget):
         Returns:
             str or None: The chosen directory path, or None if no directory was chosen.
         """
-        self.dialog = QFileDialog()
-        self.folder_path = self.dialog.getExistingDirectory(None, "Select Folder", QDir.homePath())
+        dialog = QFileDialog()
+        self.folder_path = dialog.getExistingDirectory(None, "Select Folder", QDir.homePath())
 
         # Upon cancelling, folder_path will return an empty string, reset
         if self.folder_path == '':
@@ -685,7 +684,7 @@ class TableWidget(QTableWidget):
         self.setRowCount(len(experiments))
 
         # Set num of columns to length of tuple
-        col = self.setColumnCount(len(experiments[0]))
+        self.setColumnCount(len(experiments[0]))
 
         for row, experiment in enumerate(experiments):
             for col, entry in enumerate(experiment):
