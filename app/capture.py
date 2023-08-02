@@ -226,7 +226,7 @@ class PmtDb:
             # create filename string and save to file
             filename = sanitize_filename(f"{name}-{stamp}.csv")
             full_path = os.path.join(folder_path, filename)
-            df.to_csv(full_path)
+            df.to_csv(full_path, index=False)
 
         except (ValueError, AttributeError, OSError) as err:
             self.logger.debug("Export failed due to: %s", err)
