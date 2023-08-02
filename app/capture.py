@@ -68,14 +68,18 @@ class PmtDb:
     The class provides functionalities to start and stop experiments, write readings to the database,
     fetch the latest readings, export data, delete experiments, and mark experiments as exported.
     """
-    def __init__(self) -> None:
+    def __init__(self, Session=None) -> None:
 
         # set up logger
         self.logger = setup_logger()
 
-        engine = create_engine('sqlite:///pmt.db')
-        Base.metadata.create_all(engine)
-        self.Session = sessionmaker(engine)
+        if Session is None:
+            engine = create_engine('sqlite:///pmt.db')
+            Base.metadata.create_all(engine)
+            self.Session = sessionmaker(bind=engine)
+        else:
+            self.Session = Session
+
         self.experiment_id: Optional[int] = None
         self.start_time: Optional[datetime] = None
 
