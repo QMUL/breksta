@@ -10,6 +10,7 @@ from PySide6.QtWidgets import QApplication, QVBoxLayout
 from PySide6.QtCore import QTimer
 from app.breksta import CaptureControl, TableWidget
 from app.capture import DevCapture
+from app.logger_config import setup_logger
 
 # In Qt, every GUI application must have exactly one instance of QApplication or one of its subclasses.
 # It's a requirement for managing a lot of application-wide resources, for initializing various Qt
@@ -29,12 +30,19 @@ class TestCaptureControl(unittest.TestCase):
     """
 
     def setUp(self):
+        self.logger = setup_logger()
+        self.logger.info('=' * 50)
+        self.logger.info('TESTS STARTED')
+
         width = 1
         self.table = TableWidget(width)
         self.capture_control = CaptureControl(self.table)
 
     def tearDown(self):
         self.capture_control = CaptureControl(self.table)
+        self.logger.info('TESTS FINISHED')
+        self.logger.info('=' * 50)
+        return super().tearDown()
 
     def test_start_button_disabled_after_click(self):
         """Test that the start button is disabled after clicking it."""

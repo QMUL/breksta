@@ -841,6 +841,8 @@ class MainWindow(QMainWindow):
 
         # Initialize logging
         self.logger = setup_logger()
+        self.logger.info('=' * 50)
+        self.logger.info('APP SPOOLING UP!')
 
         # Launch the plotly/dash web-app in here:
         self.web_process = QProcess(self)
@@ -944,6 +946,10 @@ class MainWindow(QMainWindow):
             if not self.web_process.waitForFinished(1000):
                 self.web_process.kill()
         # Accept the close event, allowing the main window to close
+
+        self.logger.info('APP WINDING DOWN!')
+        self.logger.info('=' * 50)
+
         event.accept()
 
 

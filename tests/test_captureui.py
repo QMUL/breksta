@@ -8,6 +8,7 @@ import unittest
 
 from PySide6.QtWidgets import QApplication, QPushButton, QLineEdit, QComboBox
 from app.breksta import CaptureUI
+from app.logger_config import setup_logger
 
 # In Qt, every GUI application must have exactly one instance of QApplication or one of its subclasses.
 # It's a requirement for managing a lot of application-wide resources, for initializing various Qt
@@ -26,8 +27,19 @@ class TestCaptureUI(unittest.TestCase):
     that are utilized by the test methods. In this case, a CaptureUI object is set up before each test.
     """
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.capture_ui = CaptureUI()
+
+        self.logger = setup_logger()
+        self.logger.info('=' * 50)
+        self.logger.info('TESTS STARTED')
+        # self.logger.info('=' * 50)
+
+    def tearDown(self) -> None:
+        # self.logger.info('=' * 50)
+        self.logger.info('TESTS FINISHED')
+        self.logger.info('=' * 50)
+        return super().tearDown()
 
     def test_ui_elements_initialization(self):
         """
