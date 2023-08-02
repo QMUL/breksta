@@ -34,8 +34,12 @@ class TestCaptureControl(unittest.TestCase):
         self.logger.info('=' * 50)
         self.logger.info('TESTS STARTED')
 
+        # Create instances of classes with the mock database session
+        self.mock_db = PmtDb(Session)
+        self.mock_device = DevCapture(self.mock_db)
+
         width = 1
-        self.table = TableWidget(width)
+        self.table = TableWidget(width, self.mock_db)
         self.capture_control = CaptureControl(self.table)
 
     def tearDown(self):
