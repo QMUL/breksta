@@ -64,6 +64,7 @@ class CaptureControl(QWidget):
         self.setLayout(layout)
 
         # Set up the device for data capture and create a QTimer object
+        self.db = self.table.database
         self.device = DevCapture()
         # https://doc.qt.io/qtforpython/PySide6/QtCore/QTimer.html
         self.sample_timer = QTimer()
@@ -626,7 +627,7 @@ class TableWidget(QTableWidget):
     # create a signal that carries an integer
     experimentSelected = Signal(int)
 
-    def __init__(self, width) -> None:
+    def __init__(self, width, db: Optional[PmtDb] = None):
         """
         Initializes the table widget with 0 rows and 5 columns.
         The columns are labeled with 'Id', 'Name', 'Date started', 'Date ended', 'Exported',
@@ -638,7 +639,7 @@ class TableWidget(QTableWidget):
         self.logger = setup_logger()
 
         # Initialize the database connection ONCE in breksta, inside the table widget
-        self.database = PmtDb()
+        self.database = PmtDb() if db is None else db
 
         # initialise with invalid id, test
         self.selected_experiment_id: Optional[int] = None
