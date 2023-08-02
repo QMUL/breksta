@@ -476,7 +476,7 @@ class ExportControl(QWidget):
             # find if exported and handle deletion user prompting
             item = self.table.item(self.table.selected_row, 4)
             # item.text() does not return a boolean
-            is_exported = item.text() == "True" if item else None
+            is_exported = item.text() == "True"
 
             self.logger.debug("selected row is: %s", self.table.selected_row)
             export_status = 'exported' if is_exported else 'not exported'
@@ -485,7 +485,8 @@ class ExportControl(QWidget):
             reply = self.confirm_delete(is_exported)
             self.logger.debug("User wants to delete ID %s: %s", self.selected_experiment_id, reply)
 
-            database.delete_experiment(self.selected_experiment_id)
+            if reply:  # only attempt deletion if the user confirmed
+                database.delete_experiment(self.selected_experiment_id)
 
         except Exception as err:  # too general exception <- return to previous database if ANY error occurs
             # if delete gone wrong - restore the database
@@ -494,8 +495,9 @@ class ExportControl(QWidget):
 
         else:
             # only runs if try is successful
-            self.logger.info("Deletion complete! Refresh experiment list...")
-            self.table.populate_table()
+            if reply:  # only if the user confirmed
+                self.logger.info("Deletion complete! Refresh experiment list...")
+                self.table.populate_table()
 
         finally:
             # always runs - return control to button
@@ -507,25 +509,22 @@ class ExportControl(QWidget):
         If the experiment hasn't been exported yet, it prompts for an additional confirmation.
         Returns True if deletion is confirmed, False otherwise.
         """
-        if not is_exported:
-            # Warn user that they are about to delete unexported data.
+        def confirm_dialog(title, text):
             reply = QMessageBox.question(
                 self,
-                'Delete Unexported Experiment',
-                "This experiment has not been exported. Are you sure you want to delete?",
+                title,
+                text,
                 QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+            return reply == QMessageBox.Yes
 
-            if reply == QMessageBox.No:
-                return False
+        if not is_exported and not confirm_dialog(
+                'Delete Unexported Experiment',
+                "This experiment has not been exported. Are you sure you want to delete?"):
+            return False
 
-        # Final confirmation from user before deleting
-        reply = QMessageBox.question(
-            self,
+        return confirm_dialog(
             'Delete Experiment',
-            "Are you sure you want to delete this experiment?",
-            QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-
-        return reply == QMessageBox.Yes
+            "Are you sure you want to delete this experiment?")
 
     def backup_database(self, filename=None):
         """
