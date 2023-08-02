@@ -33,10 +33,8 @@ class TestCaptureUI(unittest.TestCase):
         self.logger = setup_logger()
         self.logger.info('=' * 50)
         self.logger.info('TESTS STARTED')
-        # self.logger.info('=' * 50)
 
     def tearDown(self) -> None:
-        # self.logger.info('=' * 50)
         self.logger.info('TESTS FINISHED')
         self.logger.info('=' * 50)
         return super().tearDown()

@@ -5,11 +5,15 @@ Each public method of CaptureControl is tested to ensure that changes in the cod
 break the application.
 """
 import unittest
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 from PySide6.QtWidgets import QApplication, QVBoxLayout
 from PySide6.QtCore import QTimer
 from app.breksta import CaptureControl, TableWidget
 from app.capture import DevCapture
+from app.capture import PmtDb
+from app.capture import Base
 from app.logger_config import setup_logger
 
 # In Qt, every GUI application must have exactly one instance of QApplication or one of its subclasses.
@@ -22,14 +26,24 @@ if not app:
 
 
 class TestCaptureControl(unittest.TestCase):
-    """
-    Defines the test cases for the CaptureControl class.
+    """Defines the test cases for the CaptureControl class.
 
     The setUp method is called before executing each test method.
-    In this case, a CaptureControl and a TableWidget object are set up before each test.
+    Here, it sets up a mock database in memory and creates instances of the CaptureControl,
+    TableWidget, PmtDb, and DevCapture classes. The PmtDb and DevCapture instances are
+    initialized with the mock database session.
+
+    The tearDown method is called after each test method. It closes the database session and
+    drops the mock database to ensure isolation between tests.
     """
 
     def setUp(self):
+        # Create an SQLite database in memory
+        self.engine = create_engine('sqlite:///:memory:', echo=False)
+        Session = sessionmaker(bind=self.engine)
+        self.session = Session()  # save the session instance
+        Base.metadata.create_all(self.engine)  # Creates the database structure
+
         self.logger = setup_logger()
         self.logger.info('=' * 50)
         self.logger.info('TESTS STARTED')
@@ -44,6 +58,10 @@ class TestCaptureControl(unittest.TestCase):
 
     def tearDown(self):
         self.capture_control = CaptureControl(self.table)
+        # Close session and drop database after each test
+        self.session.close()
+        Base.metadata.drop_all(self.engine)
+
         self.logger.info('TESTS FINISHED')
         self.logger.info('=' * 50)
         return super().tearDown()
@@ -171,9 +189,8 @@ class TestCaptureControl(unittest.TestCase):
 
     def test_init_table(self):
         """Test that the table attribute is initialized with the provided argument."""
-        dummy_table = object()  # Just a placeholder object
-        capture_control = CaptureControl(dummy_table)
-        self.assertIs(capture_control.table, dummy_table)
+        capture_control = CaptureControl(self.table)
+        self.assertIs(capture_control.table, self.table)
 
     def test_init_experiment_id(self):
         """Test that the experiment_id attribute is initialized to None."""
