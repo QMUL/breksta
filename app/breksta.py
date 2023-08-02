@@ -65,7 +65,7 @@ class CaptureControl(QWidget):
 
         # Set up the device for data capture and create a QTimer object
         self.db = self.table.database
-        self.device = DevCapture()
+        self.device = DevCapture(self.db)
         # https://doc.qt.io/qtforpython/PySide6/QtCore/QTimer.html
         self.sample_timer = QTimer()
 
@@ -88,7 +88,7 @@ class CaptureControl(QWidget):
         - Updating the UI elements to reflect the current state.
         - Resuming the updating of the chart.
         """
-        self.experiment_id = self.device.start_experiment(self.ui.name_box.text())
+        self.experiment_id = self.db.start_experiment(self.ui.name_box.text())
         self.device.take_reading()
         self.sample_timer.start(1000 * self.sample_frequency)
         self.started.emit(self.experiment_id)  # Signal the start of data capture
@@ -112,7 +112,7 @@ class CaptureControl(QWidget):
         self.logger.debug(
             "Experiment stopping named: %s, with ID: %d",
             self.ui.name_box.text(), self.experiment_id)
-        self.device.stop_experiment()
+        self.db.stop_experiment()
         self.sample_timer.stop()
         self.experiment_id = None
         self.ui.on_stop_button_click()  # Reflect current state in the UI
