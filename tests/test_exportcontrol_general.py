@@ -92,3 +92,14 @@ class TestExportControl(unittest.TestCase):
         mock_choose_directory.assert_called_once()
         self.assertEqual(self.export_control.folder_path, mock_path)
 
+    def test_update_selected_experiment(self) -> None:
+        """Test that the selected_experiment_id attribute is updated correctly."""
+
+        # Setup
+        experiment_id = 1234  # Sample ID
+
+        # Act
+        self.export_control.update_selected_experiment(experiment_id)
+
+        # Assert
+        self.assertEqual(self.export_control.selected_experiment_id, experiment_id)

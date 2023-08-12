@@ -364,19 +364,15 @@ class ExportControl(QWidget):
 
     @Slot(int)
     def update_selected_experiment(self, experiment_id) -> None:
-        """
-        Updates the currently selected experiment ID.
+        """Updates the currently selected experiment ID.
 
         This method is typically connected to a signal that emits an experiment ID when an experiment is selected in the UI.
 
         Args:
             experiment_id (int): The ID of the experiment to be selected.
         """
-        try:
-            self.selected_experiment_id = experiment_id
-            self.logger.debug("signal received %s. ID %s", self.selected_experiment_id, id(self))
-        except TypeError as err:
-            self.logger.debug("update_selected_experiment failed due to TyperError: %s", err)
+        self.selected_experiment_id = experiment_id
+        self.logger.debug("signal received %s. ID %s", self.selected_experiment_id, id(self))
 
     def on_export_button_clicked(self) -> None:
         """Handles the click event of the export button.
