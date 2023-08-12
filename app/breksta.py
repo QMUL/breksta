@@ -379,13 +379,12 @@ class ExportControl(QWidget):
             self.logger.debug("update_selected_experiment failed due to TyperError: %s", err)
 
     def on_export_button_clicked(self) -> None:
-        """
-        Handles the click event of the export button.
+        """Handles the click event of the export button.
         If a folder is chosen and the database connection is established successfully,
         the data of the selected experiment is exported to the chosen directory.
         If an error occurs during the process (such as permission issues), an error log is created.
         """
-        # if `selected_experiment_id` is still default, user hasn't clicked on table
+        # if selected_experiment_id is still default, user hasn't clicked on table
         if self.selected_experiment_id is None:
             self.logger.warning("To export, please choose an experiment from the list")
             return
@@ -396,12 +395,13 @@ class ExportControl(QWidget):
 
         # first time export is invoked, choose export folder
         # if cancelled, return control to parent
-        if self.folder_path is None:
-            self.choose_directory()
-            if self.folder_path is None:
+        if not self.folder_path:
+            chosen_dir = self.choose_directory()
+            if not chosen_dir:
                 self.logger.warning("No folder chosen.. Please, try again")
                 self.export_button.setEnabled(True)
                 return
+            self.folder_path = chosen_dir
 
         try:
             # Propagate the database connection
@@ -424,7 +424,7 @@ class ExportControl(QWidget):
             # always runs - return control to button
             self.export_button.setEnabled(True)
 
-    def choose_directory(self):
+    def choose_directory(self) -> str | None:
         """
         Opens a dialog for the user to choose an export folder for the experiment data.
         The default directory opened in the dialog is the user's home directory (`$HOME`).
@@ -435,14 +435,14 @@ class ExportControl(QWidget):
             str or None: The chosen directory path, or None if no directory was chosen.
         """
         dialog = QFileDialog()
-        self.folder_path = dialog.getExistingDirectory(None, "Select Folder", QDir.homePath())
+        chosen_path = dialog.getExistingDirectory(None, "Select Folder", QDir.homePath())
 
-        # Upon cancelling, folder_path will return an empty string, reset
-        if self.folder_path == '':
-            self.folder_path = None
+        # Upon cancelling, chosen_path will return an empty string, reset
+        if not chosen_path:
+            return None
 
-        self.logger.debug("Exporting directory chosen as: %s", self.folder_path)
-        return self.folder_path
+        self.logger.debug("Exporting directory chosen as: %s", chosen_path)
+        return chosen_path
 
     def on_delete_button_clicked(self) -> None:
         """
@@ -460,12 +460,13 @@ class ExportControl(QWidget):
 
         # first time delete is invoked, choose database folder
         # if cancelled, return control to parent
-        if self.folder_path is None:
-            self.choose_directory()
-            if self.folder_path is None:
+        if not self.folder_path:
+            chosen_dir = self.choose_directory()
+            if not chosen_dir:
                 self.logger.warning("No folder chosen.. Please, try again")
                 self.delete_button.setEnabled(True)
                 return
+            self.folder_path = chosen_dir
 
         # Propagate the database connection
         database = self.table.database
