@@ -28,10 +28,12 @@ class TestExportControl(unittest.TestCase):
     The tearDown method is called after each test method.
     """
 
-    def setUp(self):
-        self.logger = setup_logger()
-        self.logger.info('=' * 50)
-        self.logger.info('TESTS STARTED')
+
+        # Create a mock logger
+        self.mock_logger = MagicMock()
+        # Mock the logger within ExportControl module
+        self.logger_patch = patch("app.breksta.setup_logger", return_value=self.mock_logger)
+        self.logger_patch.start()
 
         # Create instances of classes with the mock database
         self.mock_db = MagicMock()
@@ -40,8 +42,11 @@ class TestExportControl(unittest.TestCase):
         self.table = TableWidget(width, self.mock_db)
         self.export_control = ExportControl(self.table)
 
-    def tearDown(self):
+    def tearDown(self) -> None:
+        width = 1
+        self.table = TableWidget(width, self.mock_db)
         self.export_control = ExportControl(self.table)
+        self.logger_patch.stop()
 
         self.logger.info('TESTS FINISHED')
         self.logger.info('=' * 50)
@@ -103,3 +108,46 @@ class TestExportControl(unittest.TestCase):
 
         # Assert
         self.assertEqual(self.export_control.selected_experiment_id, experiment_id)
+
+    def test_on_export_experiment_not_selected(self) -> None:
+        """Test that clicking the export button when an experiment has not been selected
+        asserts that a warning is logged about choosing an experiment, and ensures no further
+        methods are called/control returns."""
+        self.export_control.selected_experiment_id = None
+
+        self.export_control.on_export_button_clicked()
+
+        self.mock_logger.warning.assert_called_once_with("To export, please choose an experiment from the list")
+
+    @patch.object(ExportControl, "choose_directory", return_value="/mock/directory")
+    def test_successful_export_on_export_button_clicked(self, mock_choose_directory) -> None:
+        """Test that clicking the export button successfully exports the data."""
+        self.export_control.selected_experiment_id = 123  # mock ID
+        self.export_control.folder_path = "/mock/directory"
+
+        # Mock the instance's method
+        self.export_control.table.database.export_data_single = MagicMock()
+
+        self.export_control.on_export_button_clicked()
+
+        self.export_control.table.database.export_data_single.assert_called_once_with(123, "/mock/directory")
+
+    @patch.object(ExportControl, "choose_directory", return_value="/mock/directory")
+    def test_failed_export_on_export_button_clicked(self, mock_choose_directory) -> None:
+        """Test that clicking the export button raises an OSError and is logged as a critical error."""
+        self.export_control.selected_experiment_id = 123  # mock ID
+        self.export_control.folder_path = "/mock/directory"
+
+        mock_export_data_single = MagicMock(side_effect=OSError("mock error"))
+        self.export_control.table.database.export_data_single = mock_export_data_single
+
+        self.export_control.on_export_button_clicked()
+        mock_export_data_single.assert_called_once()
+
+        # look for our expected message in all calls to the logger
+        calls_to_critical = self.mock_logger.critical.call_args_list
+        formatted_errors = [call_args[0][0] % call_args[0][1] for call_args in calls_to_critical if len(call_args[0]) == 2]
+
+        # Now, we just check if our expected message appears in any of the formatted messages
+        expected_message = "Export button failed due to: %s" % "mock error"
+        self.assertIn(expected_message, formatted_errors)
