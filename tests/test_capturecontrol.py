@@ -5,6 +5,8 @@ Each public method of CaptureControl is tested to ensure that changes in the cod
 break the application.
 """
 import unittest
+from unittest.mock import MagicMock, patch
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -14,7 +16,6 @@ from app.breksta import CaptureControl, TableWidget
 from app.capture import DevCapture
 from app.capture import PmtDb
 from app.capture import Base
-from app.logger_config import setup_logger
 
 # In Qt, every GUI application must have exactly one instance of QApplication or one of its subclasses.
 # It's a requirement for managing a lot of application-wide resources, for initializing various Qt
@@ -44,9 +45,14 @@ class TestCaptureControl(unittest.TestCase):
         self.session = Session()  # save the session instance
         Base.metadata.create_all(self.engine)  # Creates the database structure
 
-        self.logger = setup_logger()
-        self.logger.info('=' * 50)
-        self.logger.info('TESTS STARTED')
+        # Create a mock logger
+        self.mock_logger = MagicMock()
+        # Mock the logger within CaptureControl module
+        self.logger_patch = patch("app.breksta.setup_logger", return_value=self.mock_logger)
+        self.logger_patch.start()
+        # Mock the logger within DevCapture module
+        self.logger_patch_dev = patch("app.capture.setup_logger", return_value=self.mock_logger)
+        self.logger_patch_dev.start()
 
         # Create instances of classes with the mock database session
         self.mock_db = PmtDb(Session)
@@ -62,8 +68,8 @@ class TestCaptureControl(unittest.TestCase):
         self.session.close()
         Base.metadata.drop_all(self.engine)
 
-        self.logger.info('TESTS FINISHED')
-        self.logger.info('=' * 50)
+        self.logger_patch.stop()
+        self.logger_patch_dev.stop()
         return super().tearDown()
 
     def test_start_button_disabled_after_click(self):

@@ -7,11 +7,10 @@ break the application.
 import unittest
 import tempfile
 from unittest import mock
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from PySide6.QtWidgets import QApplication, QMessageBox
 from app.breksta import ExportControl, TableWidget
-from app.logger_config import setup_logger
 
 # In Qt, every GUI application must have exactly one instance of QApplication or one of its subclasses.
 # It's a requirement for managing a lot of application-wide resources, for initializing various Qt
@@ -31,9 +30,11 @@ class TestExportControl(unittest.TestCase):
     """
 
     def setUp(self):
-        self.logger = setup_logger()
-        self.logger.info('=' * 50)
-        self.logger.info('TESTS STARTED')
+        # Create a mock logger
+        self.mock_logger = MagicMock()
+        # Mock the logger within ExportControl module
+        self.logger_patch = patch("app.breksta.setup_logger", return_value=self.mock_logger)
+        self.logger_patch.start()
 
         # Create instances of classes with the mock database
         self.mock_db = MagicMock()
@@ -45,8 +46,7 @@ class TestExportControl(unittest.TestCase):
     def tearDown(self):
         self.export_control = ExportControl(self.table)
 
-        self.logger.info('TESTS FINISHED')
-        self.logger.info('=' * 50)
+        self.logger_patch.stop()
         return super().tearDown()
 
     def test_delete_button_no_experiment_selected(self) -> None:

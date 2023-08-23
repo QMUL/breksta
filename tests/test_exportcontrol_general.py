@@ -9,7 +9,6 @@ from unittest.mock import MagicMock, patch
 
 from PySide6.QtWidgets import QApplication
 from app.breksta import ExportControl, TableWidget
-from app.logger_config import setup_logger
 
 # In Qt, every GUI application must have exactly one instance of QApplication or one of its subclasses.
 # It's a requirement for managing a lot of application-wide resources, for initializing various Qt
@@ -47,9 +46,6 @@ class TestExportControl(unittest.TestCase):
         self.table = TableWidget(width, self.mock_db)
         self.export_control = ExportControl(self.table)
         self.logger_patch.stop()
-
-        self.logger.info('TESTS FINISHED')
-        self.logger.info('=' * 50)
         return super().tearDown()
 
     @patch.object(ExportControl, "choose_directory", return_value=None)

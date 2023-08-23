@@ -5,10 +5,10 @@ Each public method of CaptureUI is tested to ensure that changes in the code do 
 break the application.
 """
 import unittest
+from unittest.mock import MagicMock, patch
 
 from PySide6.QtWidgets import QApplication, QPushButton, QLineEdit, QComboBox
 from app.breksta import CaptureUI
-from app.logger_config import setup_logger
 
 # In Qt, every GUI application must have exactly one instance of QApplication or one of its subclasses.
 # It's a requirement for managing a lot of application-wide resources, for initializing various Qt
@@ -28,15 +28,16 @@ class TestCaptureUI(unittest.TestCase):
     """
 
     def setUp(self) -> None:
+        # Create a mock logger
+        self.mock_logger = MagicMock()
+        # Mock the logger within CaptureUI module
+        self.logger_patch = patch("app.breksta.setup_logger", return_value=self.mock_logger)
+        self.logger_patch.start()
+
         self.capture_ui = CaptureUI()
 
-        self.logger = setup_logger()
-        self.logger.info('=' * 50)
-        self.logger.info('TESTS STARTED')
-
     def tearDown(self) -> None:
-        self.logger.info('TESTS FINISHED')
-        self.logger.info('=' * 50)
+        self.logger_patch.stop()
         return super().tearDown()
 
     def test_ui_elements_initialization(self):
