@@ -1,6 +1,5 @@
 
-"""
-While data is being captured it could be simultaenously being read by the local chart plotter,
+"""While data is being captured it could be simultaenously being read by the local chart plotter,
 remotely (if we want to do that) and by the export functionality. Negotiating locks on flat
 .csv files will Not Be Fun. We could keep everything in shared memory, but we'd probably
 rather data was sent to disk as soon as it's captured. SQLAlchemys Object Relational
@@ -63,14 +62,12 @@ class PmtReading(Base):
 
 
 class PmtDb:
-    """
-    Handles interactions with the database which contains experiments and PMT readings.
+    """Handles interactions with the database which contains experiments and PMT readings.
     The class provides functionalities to start and stop experiments, write readings to the database,
     fetch the latest readings, export data, delete experiments, and mark experiments as exported.
     """
     def __init__(self, Session=None) -> None:
 
-        # set up logger
         self.logger = setup_logger()
 
         if Session is None:
@@ -84,8 +81,7 @@ class PmtDb:
         self.start_time: Optional[datetime] = None
 
     def start_experiment(self, name):
-        """
-        Starts a new experiment and writes it to the database.
+        """Starts a new experiment and writes it to the database.
         The start time is recorded as the current time.
 
         Args:
@@ -109,8 +105,7 @@ class PmtDb:
         return self.experiment_id
 
     def stop_experiment(self) -> None:
-        """
-        Stops the current experiment.
+        """Stops the current experiment.
         The end time is recorded as the current time and the experiment ID is reset.
         """
         assert self.experiment_id is not None
@@ -122,10 +117,9 @@ class PmtDb:
         self.experiment_id = None
 
     def write_reading(self, val) -> None:
-        """
-        Writes a new reading to the database.
+        """Writes a new reading to the database.
 
-        This function creates a new `PmtReading` object with the given value and the current timestamp,
+        Creates a new `PmtReading` object with the given value and the current timestamp,
         associates it with the current experiment, and writes it to the database.
 
         Args:
@@ -142,10 +136,10 @@ class PmtDb:
             sess.commit()
 
     def latest_readings(self, experiment=None, since=None):
-        """
-        Fetches the latest PMT readings from the database. If an experiment ID is provided, fetches
-        readings for that experiment. Otherwise, fetches readings for the latest experiment. The
-        timestamps are returned as integer seconds relative to the start time of the experiment.
+        """Fetches the latest readings from the database.
+        If an experiment ID is provided, fetches readings for that experiment.
+        Otherwise, fetches readings for the latest experiment. The timestamps are
+        returned as integer seconds relative to the start time of the experiment.
 
         Args:
             experiment (int, optional): The ID of the experiment to fetch readings for.
@@ -183,8 +177,7 @@ class PmtDb:
         return df
 
     def export_data(self) -> None:
-        """
-        Exports the data of all experiments to a CSV file.
+        """Exports the data of all experiments to a CSV file.
         """
         # Query the database and get data
         data = self.query_database()
@@ -196,8 +189,7 @@ class PmtDb:
         df.to_csv('export.csv')
 
     def export_data_single(self, experiment_id, folder_path) -> None:
-        """
-        Exports the data of a single experiment to a CSV file in the specified directory.
+        """Exports the data of a single experiment to a CSV file in the specified directory.
         The CSV file is named with the experiment's name and start time.
 
         Args:
@@ -234,11 +226,10 @@ class PmtDb:
         else:
             # only run if `try:` is successful. set exported status to "True"
             self.mark_exported(experiment_id)
-            self.logger.debug("`export_data_single` complete")
+            self.logger.debug("export_data_single complete")
 
     def delete_experiment(self, experiment_id) -> None:
-        """
-        Deletes an experiment and its readings from the database.
+        """Deletes an experiment and its readings from the database.
 
         Args:
             experiment_id (int): The ID of the experiment to delete.
@@ -266,8 +257,7 @@ class PmtDb:
             self.logger.critical("OperationalError while deleting experiment: %s", err)
 
     def query_database(self):
-        """
-        Queries the database and returns a DataFrame of all readings,
+        """Queries the database and returns a DataFrame of all readings,
         with the timestamps as integer seconds relative to the start time of each experiment.
 
         Returns:
@@ -297,8 +287,7 @@ class PmtDb:
         return all_data
 
     def get_experiments(self):
-        """
-        Fetches all experiments from the database.
+        """Fetches all experiments from the database.
 
         Returns:
             list: A list of tuples, each containing the ID, name, start time, end time,
@@ -310,8 +299,7 @@ class PmtDb:
             return [(expt.id, expt.name, expt.start, expt.end, expt.exported) for expt in experiments]
 
     def mark_exported(self, experiment_id):
-        """
-        Marks an experiment as exported in the database.
+        """Marks an experiment as exported in the database.
 
         Args:
             experiment_id (int): The ID of the experiment to mark as exported.
@@ -354,8 +342,7 @@ class DevCapture:
         self.omega = 2.0 * math.pi / 60
 
     def take_reading(self):
-        """
-        Simulates taking a PMT reading.
+        """Simulates taking a PMT reading.
         The reading is a sine wave with some noise, and it is written to the database.
 
         Returns:
