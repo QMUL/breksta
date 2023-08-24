@@ -1,5 +1,4 @@
-"""
-This module contains unit tests for the CaptureUI class from the breksta module.
+"""This module contains unit tests for the CaptureUI class from the breksta module.
 
 Each public method of CaptureUI is tested to ensure that changes in the code do not unintentionally
 break the application.
@@ -20,8 +19,7 @@ if not app:
 
 
 class TestCaptureUI(unittest.TestCase):
-    """
-    Defines the test cases for the CaptureUI class.
+    """Defines the test cases for the CaptureUI class.
 
     The setUp method is called before executing each test method, and it's used to set up any objects
     that are utilized by the test methods. In this case, a CaptureUI object is set up before each test.
@@ -34,15 +32,16 @@ class TestCaptureUI(unittest.TestCase):
         self.logger_patch = patch("app.breksta.setup_logger", return_value=self.mock_logger)
         self.logger_patch.start()
 
+        # Instantiate tested class _after_ mocking the logger
         self.capture_ui = CaptureUI()
 
     def tearDown(self) -> None:
         self.logger_patch.stop()
+        self.capture_ui = CaptureUI()
         return super().tearDown()
 
-    def test_ui_elements_initialization(self):
-        """
-        Tests the initialization of UI elements in CaptureUI.
+    def test_ui_elements_initialization(self) -> None:
+        """Tests the initialization of UI elements in CaptureUI.
 
         This test ensures that all UI elements are of the correct type and are initialized as expected.
         """
@@ -52,9 +51,8 @@ class TestCaptureUI(unittest.TestCase):
         self.assertIsInstance(self.capture_ui.freq_box, QComboBox)
         self.assertIsInstance(self.capture_ui.dur_box, QComboBox)
 
-    def test_default_values(self):
-        """
-        Tests the default values of UI elements in CaptureUI.
+    def test_default_values(self) -> None:
+        """Tests the default values of UI elements in CaptureUI.
 
         This test checks that the experiment name, sample frequency, and experiment duration are set to
         their expected default values.
@@ -63,7 +61,7 @@ class TestCaptureUI(unittest.TestCase):
         self.assertEqual(self.capture_ui.freq_box.currentText(), '2')
         self.assertEqual(self.capture_ui.dur_box.currentText(), '1')
 
-    def test_on_start_button_click(self):
+    def test_on_start_button_click(self) -> None:
         """Test that the on_start_button_click method updates the UI elements correctly."""
         # Call the on_start_button_click method
         self.capture_ui.on_start_button_click()
@@ -81,7 +79,7 @@ class TestCaptureUI(unittest.TestCase):
         # Check that the name box is now disabled
         self.assertFalse(self.capture_ui.name_box.isEnabled())
 
-    def test_on_stop_button_click(self):
+    def test_on_stop_button_click(self) -> None:
         """Test that the on_stop_button_click method updates the UI elements correctly."""
         # Call the on_stop_button_click method
         self.capture_ui.on_stop_button_click()

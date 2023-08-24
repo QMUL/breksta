@@ -1,8 +1,9 @@
-"""
-This module contains unit tests for the ExportControl class from the breksta module. Specifically, general methods
+"""This module contains unit tests for the ExportControl class from the breksta module.
+Specifically, general methods related to choosing directories and setting paths, updating
+the experimend id and exporting data.
 
-Each public method of ExportControl is tested to ensure that changes in the code do not unintentionally
-break the application.
+Each public method of ExportControl is tested to ensure that changes in the code do not
+unintentionally break the application.
 """
 import unittest
 from unittest.mock import MagicMock, patch
@@ -27,7 +28,7 @@ class TestExportControl(unittest.TestCase):
     The tearDown method is called after each test method.
     """
 
-
+    def setUp(self) -> None:
         # Create a mock logger
         self.mock_logger = MagicMock()
         # Mock the logger within ExportControl module
@@ -61,20 +62,17 @@ class TestExportControl(unittest.TestCase):
         self.assertTrue(self.export_control.export_button.isEnabled())
 
     @patch("PySide6.QtWidgets.QFileDialog.getExistingDirectory")
-    def test_choose_directory_folder_chosen(self, mock_getExistingDirectory) -> None:
+    def test_choose_directory_folder_chosen(self, mock_get_existing_directory) -> None:
         """Test that choosing an export folder returns a valid filepath."""
 
         # Mock the QFileDialog's getExistingDirectory method to return a fake directory path.
         mock_path = "/fake/directory/path"
-        mock_getExistingDirectory.return_value = mock_path
+        mock_get_existing_directory.return_value = mock_path
 
-        # Act
         result = self.export_control.choose_directory()
 
-        # Assert
-        mock_getExistingDirectory.assert_called_once()
+        mock_get_existing_directory.assert_called_once()
         self.assertEqual(result, mock_path)
-
 
     @patch.object(ExportControl, "choose_directory")
     def test_filepath_set_on_export_button_click(self, mock_choose_directory) -> None:
@@ -95,14 +93,10 @@ class TestExportControl(unittest.TestCase):
 
     def test_update_selected_experiment(self) -> None:
         """Test that the selected_experiment_id attribute is updated correctly."""
+        experiment_id = 123  # mock ID
 
-        # Setup
-        experiment_id = 1234  # Sample ID
-
-        # Act
         self.export_control.update_selected_experiment(experiment_id)
 
-        # Assert
         self.assertEqual(self.export_control.selected_experiment_id, experiment_id)
 
     def test_on_export_experiment_not_selected(self) -> None:
@@ -118,7 +112,8 @@ class TestExportControl(unittest.TestCase):
     @patch.object(ExportControl, "choose_directory", return_value="/mock/directory")
     def test_successful_export_on_export_button_clicked(self, mock_choose_directory) -> None:
         """Test that clicking the export button successfully exports the data."""
-        self.export_control.selected_experiment_id = 123  # mock ID
+        TEST_EXPERIMENT_ID = 123  # mock ID
+        self.export_control.selected_experiment_id = TEST_EXPERIMENT_ID
         self.export_control.folder_path = "/mock/directory"
 
         # Mock the instance's method
@@ -126,7 +121,8 @@ class TestExportControl(unittest.TestCase):
 
         self.export_control.on_export_button_clicked()
 
-        self.export_control.table.database.export_data_single.assert_called_once_with(123, "/mock/directory")
+        self.export_control.table.database.export_data_single.assert_called_once_with(
+            TEST_EXPERIMENT_ID, "/mock/directory")
 
     @patch.object(ExportControl, "choose_directory", return_value="/mock/directory")
     def test_failed_export_on_export_button_clicked(self, mock_choose_directory) -> None:

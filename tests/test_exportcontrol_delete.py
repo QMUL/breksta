@@ -1,5 +1,4 @@
-"""
-This module contains unit tests for the ExportControl class from the breksta module.
+"""This module contains unit tests for the ExportControl class from the breksta module.
 
 Each public method of ExportControl is tested to ensure that changes in the code do not unintentionally
 break the application.
@@ -29,21 +28,22 @@ class TestExportControl(unittest.TestCase):
     The tearDown method is called after each test method.
     """
 
-    def setUp(self):
+    def setUp(self) -> None:
         # Create a mock logger
         self.mock_logger = MagicMock()
-        # Mock the logger within ExportControl module
+        # Mock the logger within ExportControl and TableWidget modules
         self.logger_patch = patch("app.breksta.setup_logger", return_value=self.mock_logger)
         self.logger_patch.start()
 
-        # Create instances of classes with the mock database
+        # Mock the database to separate testing from actual database; also avoids side-effects.
         self.mock_db = MagicMock()
 
+        # Create instances of classes with the mock database
         width = 1
         self.table = TableWidget(width, self.mock_db)
         self.export_control = ExportControl(self.table)
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         self.export_control = ExportControl(self.table)
 
         self.logger_patch.stop()

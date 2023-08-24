@@ -6,7 +6,7 @@ import sys
 import datetime
 import os
 import shutil
-import traceback
+
 from typing import Optional
 
 import plotly.graph_objects as go
@@ -409,7 +409,6 @@ class ExportControl(QWidget):
         except (OSError) as err:
             # if export gone wrong - OSError might catch pmt.db permissions issues
             self.logger.critical("Export button failed due to: %s", err)
-            self.logger.critical(traceback.format_exc())
 
         else:
             # only runs if try is successful

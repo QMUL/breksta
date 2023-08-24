@@ -1,5 +1,4 @@
-"""
-This module contains unit tests for the CaptureControl class from the breksta module.
+"""This module contains unit tests for the CaptureControl class from the breksta module.
 
 Each public method of CaptureControl is tested to ensure that changes in the code do not unintentionally
 break the application.
@@ -38,7 +37,7 @@ class TestCaptureControl(unittest.TestCase):
     drops the mock database to ensure isolation between tests.
     """
 
-    def setUp(self):
+    def setUp(self) -> None:
         # Create an SQLite database in memory
         self.engine = create_engine('sqlite:///:memory:', echo=False)
         Session = sessionmaker(bind=self.engine)
@@ -55,6 +54,7 @@ class TestCaptureControl(unittest.TestCase):
         self.logger_patch_dev.start()
 
         # Create instances of classes with the mock database session
+        # always _after_ mocking the logger
         self.mock_db = PmtDb(Session)
         self.mock_device = DevCapture(self.mock_db)
 
@@ -62,7 +62,7 @@ class TestCaptureControl(unittest.TestCase):
         self.table = TableWidget(width, self.mock_db)
         self.capture_control = CaptureControl(self.table)
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         self.capture_control = CaptureControl(self.table)
         # Close session and drop database after each test
         self.session.close()
@@ -72,7 +72,7 @@ class TestCaptureControl(unittest.TestCase):
         self.logger_patch_dev.stop()
         return super().tearDown()
 
-    def test_start_button_disabled_after_click(self):
+    def test_start_button_disabled_after_click(self) -> None:
         """Test that the start button is disabled after clicking it."""
         # Check the initial state: the button should be enabled
         self.assertTrue(self.capture_control.ui.start_button.isEnabled())
@@ -83,7 +83,7 @@ class TestCaptureControl(unittest.TestCase):
         # Check the final state: the button should now be disabled
         self.assertFalse(self.capture_control.ui.start_button.isEnabled())
 
-    def test_initiate_data_capture_starts_experiment(self):
+    def test_initiate_data_capture_starts_experiment(self) -> None:
         """Test that initiate_data_capture starts a new experiment."""
         # Setup: experiment_id is None
         self.assertIsNone(self.capture_control.experiment_id)
@@ -94,7 +94,7 @@ class TestCaptureControl(unittest.TestCase):
         # Check that a new experiment was started
         self.assertGreater(self.capture_control.experiment_id, 0)
 
-    def test_initiate_data_capture_takes_reading(self):
+    def test_initiate_data_capture_takes_reading(self) -> None:
         """Test that initiate_data_capture takes a reading."""
         # Simulate a click on the start button
         self.capture_control.ui.start_button.click()
@@ -102,7 +102,7 @@ class TestCaptureControl(unittest.TestCase):
         # Check that a reading was taken
         self.assertIsNotNone(self.capture_control.device.take_reading())
 
-    def test_qtimer_has_started(self):
+    def test_qtimer_has_started(self) -> None:
         """Test that the QTimer object has initialized and is running."""
         # Check the QTimer has not started yet
         self.assertFalse(self.capture_control.sample_timer.isActive())
@@ -113,7 +113,7 @@ class TestCaptureControl(unittest.TestCase):
         # Check the QTimer has started
         self.assertTrue(self.capture_control.sample_timer.isActive())
 
-    def test_start_signal_emitted(self):
+    def test_start_signal_emitted(self) -> None:
         """Test that the signal is correctly emitted on Start button click."""
         self.signal_emitted = False
 
@@ -128,7 +128,7 @@ class TestCaptureControl(unittest.TestCase):
 
         self.assertTrue(self.signal_emitted)
 
-    def test_stop_button_disabled_after_click(self):
+    def test_stop_button_disabled_after_click(self) -> None:
         """Test that the stop button is disabled after clicking it."""
         # Check the initial state: the button should be enabled
         self.capture_control.ui.start_button.click()
@@ -140,7 +140,7 @@ class TestCaptureControl(unittest.TestCase):
         # Check the final state: the button should now be disabled
         self.assertFalse(self.capture_control.ui.stop_button.isEnabled())
 
-    def test_terminate_data_capture_resets_experiment_id(self):
+    def test_terminate_data_capture_resets_experiment_id(self) -> None:
         """Test that terminate_data_capture resets experiment_id."""
         # Setup: experiment_id is Int>0
         self.capture_control.ui.start_button.click()
@@ -151,7 +151,7 @@ class TestCaptureControl(unittest.TestCase):
         # Check that a new experiment was started
         self.assertIsNone(self.capture_control.experiment_id)
 
-    def test_qtimer_has_stopped(self):
+    def test_qtimer_has_stopped(self) -> None:
         """Test that the QTimer object has stopped running."""
         # Check the QTimer has started
         self.capture_control.ui.start_button.click()
@@ -163,7 +163,7 @@ class TestCaptureControl(unittest.TestCase):
         # Check the QTimer has stopped
         self.assertFalse(self.capture_control.sample_timer.isActive())
 
-    def test_set_freq(self):
+    def test_set_freq(self) -> None:
         """Test set_freq correctly updates sample_frequency from the drop-down menu.
         Limitation: Choosing Index 0 when 0 is default, will not trigger the update."""
         # Set the current index of the frequency combo box to 1
@@ -178,7 +178,7 @@ class TestCaptureControl(unittest.TestCase):
         expected_frequency = int(self.capture_control.ui.freq_box.itemText(0))
         self.assertEqual(self.capture_control.sample_frequency, expected_frequency)
 
-    def test_set_dur(self):
+    def test_set_dur(self) -> None:
         """Test set_dur correctly updates experiment's duration from the drop-down menu.
         Limitation: Choosing Index 0 when 0 is default, will not trigger the update."""
         # Set the current index of the duration combo box to 2
@@ -193,35 +193,35 @@ class TestCaptureControl(unittest.TestCase):
         expected_duration = int(self.capture_control.ui.dur_box.itemText(0))
         self.assertEqual(self.capture_control.duration, expected_duration)
 
-    def test_init_table(self):
+    def test_init_table(self) -> None:
         """Test that the table attribute is initialized with the provided argument."""
         capture_control = CaptureControl(self.table)
         self.assertIs(capture_control.table, self.table)
 
-    def test_init_experiment_id(self):
+    def test_init_experiment_id(self) -> None:
         """Test that the experiment_id attribute is initialized to None."""
         self.assertIsNone(self.capture_control.experiment_id)
 
-    def test_init_sample_frequency(self):
+    def test_init_sample_frequency(self) -> None:
         """Test that the sample_frequency attribute is set based on the initial UI value."""
         expected_frequency = int(self.capture_control.ui.freq_box.itemText(0))
         self.assertEqual(self.capture_control.sample_frequency, expected_frequency)
 
-    def test_init_duration(self):
+    def test_init_duration(self) -> None:
         """Test that the duration attribute is set based on the initial UI value."""
         expected_duration = int(self.capture_control.ui.dur_box.itemText(0))
         self.assertEqual(self.capture_control.duration, expected_duration)
 
-    def test_init_layout(self):
+    def test_init_layout(self) -> None:
         """Test that the layout is a QVBoxLayout and contains the CaptureUI widget."""
         self.assertIsInstance(self.capture_control.layout(), QVBoxLayout)
         self.assertEqual(self.capture_control.layout().count(), 1)
         self.assertIs(self.capture_control.layout().itemAt(0).widget(), self.capture_control.ui)
 
-    def test_init_device(self):
+    def test_init_device(self) -> None:
         """Test that a DevCapture instance is created for the device attribute."""
         self.assertIsInstance(self.capture_control.device, DevCapture)
 
-    def test_init_sample_timer(self):
+    def test_init_sample_timer(self) -> None:
         """Test that a QTimer instance is created for the sample_timer attribute."""
         self.assertIsInstance(self.capture_control.sample_timer, QTimer)
