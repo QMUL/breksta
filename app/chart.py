@@ -77,6 +77,27 @@ def draw_chart(pathname, n_intervals):
     return px.line(df, x='ts', y='value')
 
 
+# Callback to store the graph's layout
+@app.callback(
+    Output('stored-layout', 'data'),
+    [Input('dynamic-graph', 'relayoutData')]
+)
+def store_layout(relayoutData):
+    """Store the layout configuration of the Dash graph.
+
+    This function is a callback that gets triggered when the user interacts
+    with the graph (e.g., zooming, panning). It stores the new layout configuration
+    in a Dash dcc.Store component for future use.
+
+    Args:
+        relayoutData (dict): A dictionary containing the graph's layout configuration.
+
+    Returns:
+        dict: The same layout configuration dictionary is returned to be stored in dcc.Store.
+    """
+    return relayoutData
+
+
 @app.callback(
     [Output(component_id='interval-component', component_property='interval')],
     [Input('interval-component', 'n_intervals')])
