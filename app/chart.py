@@ -14,11 +14,12 @@ from typing import Optional
 import plotly.graph_objects as go
 from dash import Dash, html, dcc, State
 from dash.dependencies import Input, Output
-import plotly.express as px
 import pandas as pd  # For creating an empty DataFrame
 
 from app.capture import PmtDb
 from app.logger_config import setup_logger
+
+logger = setup_logger()
 
 app = Dash(__name__)
 """A Dash application instance.
@@ -28,15 +29,16 @@ a graph for chart content, and an interval component for periodic updates.
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
-    dcc.Graph(id='chart-content'),
-    dcc.Interval(id='interval-component', interval=2000, n_intervals=0)
-])
+    dcc.Graph(id='dynamic-graph'),
+    dcc.Interval(id='interval-component', interval=2000, n_intervals=0),
+    dcc.Store(id='stored-layout')])  # Store component to hold the graph's layout state
 
 
-@app.callback(Output('chart-content', 'figure'),
+@app.callback(Output('dynamic-graph', 'figure'),
               [Input('url', 'pathname'),
-              Input('interval-component', 'n_intervals')])
-def draw_chart(pathname, n_intervals):
+              Input('interval-component', 'n_intervals')],
+              [State('stored-layout', 'data')])
+def draw_chart(pathname: str, n_intervals: int, stored_layout: dict) -> go.Figure:
     """Callback function to draw the chart.
     The chart content is updated based on the pathname and the number of intervals passed.
     The experiment ID is extracted from the GET parameters of the URL,
@@ -46,40 +48,26 @@ def draw_chart(pathname, n_intervals):
 
     Args:
         pathname (str): The pathname part of the URL.
-        n (int): The number of intervals passed.
+        n_intervals (int): The number of intervals passed.
+        stored_layout (dict, optional): contains the layout details for the chart. Expected keys include
+        'xaxis.range[0]' and 'yaxis.range[0]' for the axis ranges, their values numeric.
 
     Returns:
-        plotly.graph_objs._figure.Figure: A Plotly figure representing the chart to be drawn.
+        fig (plotly.go.Figure): A Plotly figure representing the chart to be drawn.
     """
-    logger = setup_logger()
-
-    parsed = urllib.parse.urlparse(pathname)
-
-    # We can pass in the ID of the experiment as a GET parameter
-    parsed_dict = urllib.parse.parse_qs(parsed.query)
-    experiment = parsed_dict.get('experiment')
+    # Extract the experiment ID from the URL
+    experiment_id = extract_experiment_id_from_url(pathname)
 
     # Read the control file
-    control = read_control_file()
+    control: str = read_control_file()
 
-    # If the control file contains '0', return the last figure without updating the data
-    if control == '0':
-        if not hasattr(draw_chart, "last_df"):
-            # This is the first run after the server was started,
-            # draw_chart.last_df is not defined, so draw nothing
-            return px.line()
+    # Fetch dataframe from database
+    df: pd.DataFrame = fetch_data(experiment_id, control)
 
-        df = draw_chart.last_df
-    elif control == '1':
-        # If the control file contains '1', fetch the new data and update the plot
-        db = PmtDb()
-        df = db.latest_readings(experiment=experiment)
-        draw_chart.last_df = df  # store the current dataframe as the last dataframe
-    else:
-        logger.error("Control file contains an invalid value")
-        return px.line()
+    # Generate the figure
+    fig: go.Figure = plot_data(figure, df, stored_layout)
 
-    return px.line(df, x='ts', y='value')
+    return fig
 
 
 def plot_data(fig: go.Figure, df: pd.DataFrame, stored_layout: Optional[dict] = None) -> go.Figure:
@@ -268,11 +256,18 @@ def read_control_file():
             return file.read().strip()
     except IOError as err:
         logger.error("Failed to read control file: %s", err)
-        return None
+
+
+def get_script_level_logs() -> None:
+    """Wraps script-level logs to avoid side-effects during testing."""
+    logger.debug("Child process ID: %s", os.getpid())
+    logger.debug("Parent process ID: %s", os.getppid())
 
 
 if __name__ == '__main__':
     # Entry point for the script.
     # Starts the Dash server with debugging enabled if the script is run directly.
-    # Autoupdate is True by default.
-    app.run_server(debug=True)
+    # Autoupdate is True by default. Debug=True creates two chart.py processes
+    get_script_level_logs()
+    figure = initialize_figure()
+    app.run(debug=True, dev_tools_hot_reload=False)
