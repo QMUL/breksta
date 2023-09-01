@@ -7,10 +7,15 @@ TODO: Add components only visible remotely to faciliate remote .csv download.
 """
 
 import urllib.parse
+import os
 
-from dash import Dash, html, dcc
+from typing import Optional
+# Import plotly before dash due to dependency issues
+import plotly.graph_objects as go
+from dash import Dash, html, dcc, State
 from dash.dependencies import Input, Output
 import plotly.express as px
+import pandas as pd  # For creating an empty DataFrame
 
 from app.capture import PmtDb
 from app.logger_config import setup_logger
@@ -75,6 +80,124 @@ def draw_chart(pathname, n_intervals):
         return px.line()
 
     return px.line(df, x='ts', y='value')
+
+
+def plot_data(fig: go.Figure, df: pd.DataFrame, stored_layout: Optional[dict] = None) -> go.Figure:
+    """Create and update a Plotly graph object figure,
+    based on the provided DataFrame and layout.
+
+    Parameters:
+        df (pd.DataFrame): The data to plot.
+        stored_layout (dict, optional): The layout to apply to the figure.
+
+    Returns:
+        fig (go.Figure): The updated figure.
+    """
+
+    if df.empty or 'ts' not in df.columns or 'value' not in df.columns:
+        logger.debug("DataFrame empty, or keys missing from columns. Returning empty...")
+        return fig
+
+    # Update existing trace with new data
+    fig.data[0].x = df['ts']
+    fig.data[0].y = df['value']
+
+    # Use the stored layout if available
+    if stored_layout:
+        # Log the stored_layout for debugging
+        logger.debug("Stored layout: %s", stored_layout)
+
+        try:
+            if all(key in stored_layout for key in ['xaxis.range[0]', 'xaxis.range[1]']):
+                fig.update_xaxes(range=[stored_layout['xaxis.range[0]'], stored_layout['xaxis.range[1]']])
+
+            if all(key in stored_layout for key in ['yaxis.range[0]', 'yaxis.range[1]']):
+                fig.update_yaxes(range=[stored_layout['yaxis.range[0]'], stored_layout['yaxis.range[1]']])
+        except KeyError as error:
+            logger.error("KeyError in layout: %s", error)
+        except TypeError as error:
+            logger.error("TypeError in layout: %s", error)
+
+    return fig
+
+
+def initialize_figure() -> go.Figure:
+    """Create and initialize a Plotly graph object figure
+    Returns
+        fig (go.Figure): The default settings of the figure.
+    """
+    fig = go.Figure()
+    # Initialize with an empty line trace
+    fig.add_trace(go.Scatter(x=[], y=[], mode='lines'))
+    # Titles
+    fig.update_xaxes(title_text='Time (s)')
+    fig.update_yaxes(title_text='Value (u)')
+    logger.debug("Plotly figure created and initialized.")
+    return fig
+
+
+def extract_experiment_id_from_url(url):
+    """Extract experiment_id from a given URL.
+    The default selection is "experiment_id is None", which forces the database
+    to fetch the running experiment.
+    TODO: When "experiment_id is not None" we will be attempting to fetch
+    a previous experiment.
+
+    Parameters:
+        url (str): The URL from which to extract the experiment ID.
+        Default value: "/"
+
+    Returns:
+        experiment_id (str or None):
+        The extracted experiment ID, or None for the latest update.
+    """
+
+    parsed = urllib.parse.urlparse(url)
+    parsed_dict = urllib.parse.parse_qs(parsed.query)
+
+    experiment_id = parsed_dict.get('experiment')
+
+    if experiment_id is not None:
+        logger.debug("experiment_id found in URL %s.", url)
+
+    return experiment_id
+
+
+def fetch_data(experiment_id, control_value) -> pd.DataFrame:
+    """Fetch data from the PmtDb database based on experiment_id and control_value.
+
+    Parameters:
+        experiment_id (str):
+        The ID of the experiment for which to fetch data.
+        control_value (str):
+        The control value indicating whether to fetch new data ('1') or use existing data ('0').
+
+    Returns:
+        df (pd.DataFrame):
+        The data fetched from the database, or an empty DataFrame if no data is to be fetched.
+    """
+
+    if control_value == '0':
+        if not hasattr(fetch_data, "last_df"):
+            # This is the first run after the server was started,
+            # fetch_data.last_df is not defined, so draw nothing
+            df = pd.DataFrame()
+            return df
+
+        df = fetch_data.last_df
+
+    elif control_value == '1':
+        # fetch the new data and update the plot
+        database = PmtDb()
+        # Default value is "experiment_id is None" which fetches running experiment
+        df: pd.DataFrame = database.latest_readings(experiment=experiment_id)
+        fetch_data.last_df = df  # store the current dataframe as the last dataframe
+
+    else:
+        logger.error("Control file contains an invalid value")
+        df = pd.DataFrame()
+
+    return df
 
 
 # Callback to store the graph's layout
