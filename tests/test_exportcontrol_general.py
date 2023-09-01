@@ -43,9 +43,8 @@ class TestExportControl(unittest.TestCase):
         self.export_control = ExportControl(self.table)
 
     def tearDown(self) -> None:
-        width = 1
-        self.table = TableWidget(width, self.mock_db)
-        self.export_control = ExportControl(self.table)
+        self.table = None
+        self.export_control = None
         self.logger_patch.stop()
         return super().tearDown()
 

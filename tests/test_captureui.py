@@ -28,6 +28,7 @@ class TestCaptureUI(unittest.TestCase):
     def setUp(self) -> None:
         # Create a mock logger
         self.mock_logger = MagicMock()
+
         # Mock the logger within CaptureUI module
         self.logger_patch = patch("app.breksta.setup_logger", return_value=self.mock_logger)
         self.logger_patch.start()
@@ -37,7 +38,7 @@ class TestCaptureUI(unittest.TestCase):
 
     def tearDown(self) -> None:
         self.logger_patch.stop()
-        self.capture_ui = CaptureUI()
+        self.capture_ui = None
         return super().tearDown()
 
     def test_ui_elements_initialization(self) -> None:

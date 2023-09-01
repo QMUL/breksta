@@ -63,7 +63,7 @@ class TestCaptureControl(unittest.TestCase):
         self.capture_control = CaptureControl(self.table)
 
     def tearDown(self) -> None:
-        self.capture_control = CaptureControl(self.table)
+        self.capture_control = None
         # Close session and drop database after each test
         self.session.close()
         Base.metadata.drop_all(self.engine)
