@@ -225,7 +225,7 @@ def update_refresh_rate(n_intervals):
     Returns:
         list: A list containing the new interval rate (in milliseconds).
     """
-    control = read_control_file()
+    control: str = read_control_file()
 
     # Refresh values are in seconds. 2s or 10m.
     default_value = 2
@@ -243,19 +243,21 @@ def update_refresh_rate(n_intervals):
         return [default_value * 1000]
 
 
-def read_control_file():
+def read_control_file(file_path: str = 'app/control.txt', default_value: str = "1") -> str:
     """Reads the control file "app/control.txt".
     If the control file is successfully read, the stripped content of the file is returned.
 
     Returns:
-        str or None: The content of the control file, or None if an IOError occurs.
+        control (str): The binary control parameter, or default if an error occurs.
     """
-    logger = setup_logger()
     try:
-        with open('app/control.txt', 'r', encoding='utf-8') as file:
-            return file.read().strip()
-    except IOError as err:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            control = file.read().strip()
+    except (IOError, PermissionError) as err:
         logger.error("Failed to read control file: %s", err)
+        control = default_value
+
+    return control
 
 
 def get_script_level_logs() -> None:
