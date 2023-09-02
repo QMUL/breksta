@@ -39,7 +39,7 @@ class TestPlotData(unittest.TestCase):
         fig = app.chart.plot_data(self.init_fig, empty_df)
 
         # Verify that the logger was called with the expected debug message
-        self.mock_logger.debug.assert_called_with(
+        self.mock_logger.error.assert_called_with(
             "DataFrame empty, or keys missing from columns. Returning empty...")
 
         # Verify that an empty figure is returned
@@ -53,7 +53,7 @@ class TestPlotData(unittest.TestCase):
         fig = app.chart.plot_data(self.init_fig, df)
 
         # Verify that the logger was called with the expected debug message
-        self.mock_logger.debug.assert_called_with(
+        self.mock_logger.error.assert_called_with(
             "DataFrame empty, or keys missing from columns. Returning empty...")
 
         # Verify that an empty figure is returned
@@ -69,6 +69,43 @@ class TestPlotData(unittest.TestCase):
 
         self.assertListEqual(list(fig.data[0]['x']), [1, 2, 3])
         self.assertListEqual(list(fig.data[0]['y']), [10, 20, 30])
+
+    def test_plot_data_when_int_string_df(self) -> None:
+        """Test with an invalid DataFrame that contains integer strings."""
+        df = pd.DataFrame({
+            'ts': ['1', '2', '3'],
+            'value': ['10', '20', '30']})
+
+        fig = app.chart.plot_data(self.init_fig, df)
+
+        self.assertListEqual(list(fig.data[0]['x']), [1, 2, 3])
+        self.assertListEqual(list(fig.data[0]['y']), [10, 20, 30])
+
+    def test_plot_data_when_float_string_df(self) -> None:
+        """Test with an invalid DataFrame that contains float strings."""
+        df = pd.DataFrame({
+            'ts': ['1.0', '2.0', '3.0'],
+            'value': ['10.0', '20.0', '30.0']})
+
+        fig = app.chart.plot_data(self.init_fig, df)
+
+        self.assertListEqual(list(fig.data[0]['x']), [1.0, 2.0, 3.0])
+        self.assertListEqual(list(fig.data[0]['y']), [10.0, 20.0, 30.0])
+
+    def test_plot_data_when_string_df(self) -> None:
+        """Test with an invalid DataFrame that contains non-numerical strings."""
+        df = pd.DataFrame({
+            'ts': ['a', 'b', '4124'],
+            'value': ['gg', 'lol', 'wat']})
+
+        fig = app.chart.plot_data(self.init_fig, df)
+
+        # Verify that an empty figure is returned
+        self.assertEqual(fig.data, self.init_fig.data)
+
+        # Verify that the logger was called with the expected debug message
+        self.mock_logger.error.assert_called_with(
+            "Columns have non-numeric data and can't change them. Returning empty...")
 
 
 class TestInitializeFigure(unittest.TestCase):

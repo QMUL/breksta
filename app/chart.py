@@ -21,6 +21,12 @@ from app.logger_config import setup_logger
 
 logger = setup_logger()
 
+# Set refresh rate literals. Normal operations is 2s, freeze is 10 minutes
+NORMAL_REFRESH = 2
+FREEZE_REFRESH = 600
+GO_SIGNAL = '1'
+STOP_SIGNAL = '0'
+
 app = Dash(__name__)
 """A Dash application instance.
 This app has a layout that consists of a location component for URL handling,
@@ -53,7 +59,7 @@ def draw_chart(pathname: str, n_intervals: int, stored_layout: dict) -> go.Figur
         'xaxis.range[0]' and 'yaxis.range[0]' for the axis ranges, their values numeric.
 
     Returns:
-        fig (plotly.go.Figure): A Plotly figure representing the chart to be drawn.
+        fig (go.Figure): A Plotly figure representing the chart to be drawn.
     """
     # Extract the experiment ID from the URL
     experiment_id = extract_experiment_id_from_url(pathname)
@@ -83,12 +89,20 @@ def plot_data(fig: go.Figure, df: pd.DataFrame, stored_layout: Optional[dict] = 
     """
 
     if df.empty or 'ts' not in df.columns or 'value' not in df.columns:
-        logger.debug("DataFrame empty, or keys missing from columns. Returning empty...")
+        logger.error("DataFrame empty, or keys missing from columns. Returning empty...")
         return fig
 
-    # Update existing trace with new data
-    fig.data[0].x = df['ts']
-    fig.data[0].y = df['value']
+    try:
+        # Attempt to convert columns to numeric
+        x_data = pd.to_numeric(df['ts'])
+        y_data = pd.to_numeric(df['value'])
+    except ValueError:
+        logger.error("Columns have non-numeric data and can't change them. Returning empty...")
+        return fig
+    else:
+        # Update existing trace with new data (runs only if the above try block succeeds)
+        fig.data[0].x = x_data
+        fig.data[0].y = y_data
 
     # Use the stored layout if available
     if stored_layout:
@@ -120,6 +134,13 @@ def initialize_figure() -> go.Figure:
     # Titles
     fig.update_xaxes(title_text='Time (s)')
     fig.update_yaxes(title_text='Value (u)')
+
+    # Add a margin and a legend, also dark <3
+    fig.update_layout(
+        margin={'l': 30, 'r': 10, 'b': 30, 't': 10},
+        legend={'x': 0, 'y': 1, 'xanchor': 'left'},
+        template='plotly_dark')
+
     logger.debug("Plotly figure created and initialized.")
     return fig
 
@@ -151,21 +172,21 @@ def extract_experiment_id_from_url(url):
     return experiment_id
 
 
-def fetch_data(experiment_id, control_value) -> pd.DataFrame:
-    """Fetch data from the PmtDb database based on experiment_id and control_value.
+def fetch_data(experiment_id, control) -> pd.DataFrame:
+    """Fetch data from the PmtDb database based on experiment_id and control.
 
     Parameters:
         experiment_id (str):
         The ID of the experiment for which to fetch data.
-        control_value (str):
-        The control value indicating whether to fetch new data ('1') or use existing data ('0').
+        control (str):
+        The control value indicating whether to fetch new data or use existing data.
 
     Returns:
         df (pd.DataFrame):
         The data fetched from the database, or an empty DataFrame if no data is to be fetched.
     """
 
-    if control_value == '0':
+    if control == STOP_SIGNAL:
         if not hasattr(fetch_data, "last_df"):
             # This is the first run after the server was started,
             # fetch_data.last_df is not defined, so draw nothing
@@ -174,7 +195,7 @@ def fetch_data(experiment_id, control_value) -> pd.DataFrame:
 
         df = fetch_data.last_df
 
-    elif control_value == '1':
+    elif control == GO_SIGNAL:
         # fetch the new data and update the plot
         database = PmtDb()
         # Default value is "experiment_id is None" which fetches running experiment
@@ -215,8 +236,8 @@ def store_layout(relayoutData):
 def update_refresh_rate(n_intervals):
     """Callback function to update the refresh rate of the chart.
     The control file value determines the new interval rate.
-    If the control file value is '0', the interval is set to a large number, effectively pausing the updates.
-    If the control file value is '1', the interval is set to the normal refresh rate.
+    If the control file value is STOP_SIGNAL, the interval is set to a large number, effectively pausing the updates.
+    If the control is GO_SIGNAL, the interval is set to the normal refresh rate.
     If an invalid control file value is encountered, the interval is kept at the default rate.
 
     Args:
@@ -228,18 +249,19 @@ def update_refresh_rate(n_intervals):
     control: str = read_control_file()
 
     # Refresh values are in seconds. 2s or 10m.
-    default_value = 2
-    large_value = 600
+    default_value = NORMAL_REFRESH
+    large_value = FREEZE_REFRESH
 
     # Check the control file for the new interval. Return values are in milliseconds
-    if control == '0':
-        # the control file says to stop, set the interval to a very large number
+    if control == STOP_SIGNAL:
+        # Freeze refresh: set the interval to a very large number
         return [large_value * 1000]
-    elif control == '1':
-        # the control file says to resume, set the interval to the normal refresh rate
+    elif control == GO_SIGNAL:
+        # Normal refresh: set the interval to the normal refresh rate
         return [default_value * 1000]
     else:
         # If the control file contains an invalid value, keep the current interval
+        logger.error("Control file contains invalid value.. Refresh rate set to 2s.")
         return [default_value * 1000]
 
 
