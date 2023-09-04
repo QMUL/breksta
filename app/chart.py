@@ -52,7 +52,7 @@ app.figure = initialize_figure()
 
 
 @app.callback(Output('dynamic-graph', 'figure'),
-              [Input('url', 'pathname'),
+              [Input('url', 'href'),
               Input('interval-component', 'n_intervals')],
               [State('stored-layout', 'data')])
 def draw_chart(pathname: str, n_intervals: int, stored_layout: dict) -> go.Figure:
@@ -78,6 +78,8 @@ def draw_chart(pathname: str, n_intervals: int, stored_layout: dict) -> go.Figur
         return dash.no_update
 
     # The experiment ID is crucial for fetching the relevant data
+    logger.debug("pathname is %s", pathname)
+    # Extract the experiment ID from the URL
     experiment_id = extract_experiment_id_from_url(pathname)
 
     # Update the layout to preserve user customizations between sessions
@@ -104,17 +106,21 @@ def extract_experiment_id_from_url(url):
         Default value: "/"
 
     Returns:
-        experiment_id (str or None):
+        experiment_id (int or None):
         The extracted experiment ID, or None for the latest update.
     """
 
     parsed = urllib.parse.urlparse(url)
     parsed_dict = urllib.parse.parse_qs(parsed.query)
 
-    experiment_id = parsed_dict.get('experiment')
+    parsed_list = parsed_dict.get('experiment')
 
-    if experiment_id is not None:
+    if parsed_list:
+        # Get the first element if it's a list
+        experiment_id = int(parsed_list[0])
         logger.debug("experiment_id found in URL %s.", url)
+    else:
+        experiment_id = None
 
     return experiment_id
 
