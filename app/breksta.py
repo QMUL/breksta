@@ -262,7 +262,7 @@ class ChartWidget(QWebEngineView):
         QWebEngineView.__init__(self)
 
     @Slot(int)
-    def plot_experiment(self, experiment) -> None:
+    def plot_experiment(self, experiment: Optional[int] = None):
         """Plots the experiment data in a web view by loading a local web server URL.
 
         This method assumes that a Plotly Dash application is running on localhost at port 8050,
@@ -275,7 +275,15 @@ class ChartWidget(QWebEngineView):
         Could pass the experiment ID as a parameter to the web app.
         https://doc.qt.io/qtforpython/PySide6/QtCore/Slot.html
         """
-        url = QUrl(f'http://localhost:{self.DASH_APP_PORT}/')
+        base_url = f'http://localhost:{self.DASH_APP_PORT}/'
+        if experiment is not None:
+            print(experiment)
+            url = QUrl(f'{base_url}?experiment={experiment}')
+            print(f"Emitting URL: {url.toString()}")
+            self.load(url)
+            return url.toString()
+
+        url = QUrl(base_url)
         self.load(url)
 
 
