@@ -135,14 +135,13 @@ class PmtDb:
                 value=val, ts=datetime.now()))
             sess.commit()
 
-    def latest_readings(self, experiment=None, since=None):
+    def latest_readings(self, experiment_id, since=None):
         """Fetches the latest readings from the database.
-        If an experiment ID is provided, fetches readings for that experiment.
-        Otherwise, fetches readings for the latest experiment. The timestamps are
-        returned as integer seconds relative to the start time of the experiment.
+        On experiment ID provided, fetches readings for that experiment.
+        The timestamps are returned as integer seconds relative to the start time of the experiment.
 
         Args:
-            experiment (int, optional): The ID of the experiment to fetch readings for.
+            experiment (int): The ID of the experiment to fetch readings for.
             since (datetime, optional): The earliest timestamp to fetch readings from.
 
         Returns:
@@ -153,23 +152,18 @@ class PmtDb:
         with Memcached or similar, query only the latest values.
         """
         with self.Session() as sess:
-            if experiment is None:
-                expt = sess.query(Experiment).order_by(
-                    Experiment.id.desc()).first()
-                experiment = expt.id
-            else:
-                expt = sess.query(Experiment).filter(Experiment.id == experiment).first()
+            expt = sess.query(Experiment).filter(Experiment.id == experiment_id).first()
 
             if since is None:
                 query = sess.query(PmtReading.ts, PmtReading.value).filter(
-                    PmtReading.experiment == experiment)
+                    PmtReading.experiment == experiment_id)
             else:
                 query = sess.query(PmtReading.ts, PmtReading.value).filter(
-                    PmtReading.experiment == experiment, PmtReading.ts > since)
+                    PmtReading.experiment == experiment_id, PmtReading.ts > since)
 
             df = pd.DataFrame(query)
             if df.empty:
-                self.logger.warning("No readings found for experiment %s", experiment)
+                self.logger.warning("No readings found for experiment %s", experiment_id)
                 return None
 
             df['ts'] = (df.ts - expt.start).dt.total_seconds()
