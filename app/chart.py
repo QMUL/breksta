@@ -96,18 +96,12 @@ def draw_chart(pathname: str, n_intervals: int, stored_layout: dict) -> go.Figur
 
 def extract_experiment_id_from_url(url):
     """Extract experiment_id from a given URL.
-    The default selection is "experiment_id is None", which forces the database
-    to fetch the running experiment.
-    TODO: When "experiment_id is not None" we will be attempting to fetch
-    a previous experiment.
 
     Args:
         url (str): The URL from which to extract the experiment ID.
-        Default value: "/"
 
     Returns:
-        experiment_id (int or None):
-        The extracted experiment ID, or None for the latest update.
+        experiment_id (int or None): The extracted experiment ID, None if URL is wrong
     """
 
     parsed = urllib.parse.urlparse(url)
@@ -116,11 +110,12 @@ def extract_experiment_id_from_url(url):
     parsed_list = parsed_dict.get('experiment')
 
     if parsed_list:
-        # Get the first element if it's a list
+        # Get the first element since it's a list
         experiment_id = int(parsed_list[0])
         logger.debug("experiment_id found in URL %s.", url)
     else:
         experiment_id = None
+        logger.critical("URL %s did not return correct experiment_id", url)
 
     return experiment_id
 

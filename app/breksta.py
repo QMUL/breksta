@@ -261,30 +261,34 @@ class ChartWidget(QWebEngineView):
 
         QWebEngineView.__init__(self)
 
+        self.logger = setup_logger()
+
     @Slot(int)
-    def plot_experiment(self, experiment: Optional[int] = None):
+    def plot_experiment(self, experiment_id: int) -> str:
         """Plots the experiment data in a web view by loading a local web server URL.
 
         This method assumes that a Plotly Dash application is running on localhost at port 8050,
         and that this application can plot the experiment when provided with an experiment ID.
 
         Args:
-            experiment (int): The ID of the experiment to be plotted.
+            experiment_id (int): The ID of the experiment to be plotted.
 
         Slot to receive the started signal from CaptureControl.
         Could pass the experiment ID as a parameter to the web app.
         https://doc.qt.io/qtforpython/PySide6/QtCore/Slot.html
         """
-        base_url = f'http://localhost:{self.DASH_APP_PORT}/'
-        if experiment is not None:
-            print(experiment)
-            url = QUrl(f'{base_url}?experiment={experiment}')
-            print(f"Emitting URL: {url.toString()}")
-            self.load(url)
-            return url.toString()
+        if experiment_id is None:
+            self.logger.error("experiment_id is None. Invalid value.")
 
-        url = QUrl(base_url)
+        # Constuct URL
+        base_url = f'http://localhost:{self.DASH_APP_PORT}/'
+        url = QUrl(f'{base_url}?experiment={experiment_id}')
+        self.logger.debug("Emitting URL: %s", url.toString())
+
+        # Serve QUrl object on the server
         self.load(url)
+
+        return url.toString()
 
 
 class CaptureWidget(QWidget):

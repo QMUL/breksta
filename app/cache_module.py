@@ -68,7 +68,7 @@ class CacheWebProcess:
         Returns:
             pd.DataFrame: The latest data fetched from the database, or None if no new data.
         """
-        return self.database.latest_readings(experiment=experiment_id, since=last_timestamp)
+        return self.database.latest_readings(experiment_id=experiment_id, since=last_timestamp)
 
     def update_cache(self, experiment_id, last_timestamp=None) -> pd.DataFrame:
         """Updates the cache with new data based on the last timestamp and experiment ID.
