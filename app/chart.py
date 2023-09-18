@@ -14,6 +14,7 @@ from typing import Optional
 import plotly.graph_objects as go
 from dash import Dash, html, dcc, State
 from dash.dependencies import Input, Output
+from dash.exceptions import PreventUpdate
 import pandas as pd  # For creating an empty DataFrame
 
 from app.capture import PmtDb
@@ -92,6 +93,9 @@ def plot_data(fig: go.Figure, df: pd.DataFrame, stored_layout: Optional[dict] = 
         logger.error("DataFrame empty, or keys missing from columns. Returning empty...")
         return fig
 
+    # Check for new layout and apply if changed
+    update_axes_layout(fig, stored_layout)
+
     try:
         # Attempt to convert columns to numeric
         x_data = pd.to_numeric(df['ts'])
@@ -104,17 +108,29 @@ def plot_data(fig: go.Figure, df: pd.DataFrame, stored_layout: Optional[dict] = 
         fig.data[0].x = x_data
         fig.data[0].y = y_data
 
-    # Use the stored layout if available
-    if stored_layout:
-        # Log the stored_layout for debugging
-        logger.debug("Stored layout: %s", stored_layout)
+    return fig
 
+
+def update_axes_layout(fig: go.Figure, stored_layout: Optional[dict]) -> go.Figure:
+    """Track and apply changes to the figure layout."""
+    if not stored_layout:
+        logger.debug("Stored layout is empty. Returning early.")
+        return fig
+
+    logger.debug("Stored layout: %s", stored_layout)
+
+    # If the layout has an autosize key, turn on autorange
+    if stored_layout.get('autosize', False):
+        fig.update_xaxes(autorange=True)
+        fig.update_yaxes(autorange=True)
+    else:
         try:
             if all(key in stored_layout for key in ['xaxis.range[0]', 'xaxis.range[1]']):
-                fig.update_xaxes(range=[stored_layout['xaxis.range[0]'], stored_layout['xaxis.range[1]']])
+                fig.update_xaxes(range=[stored_layout['xaxis.range[0]'], stored_layout['xaxis.range[1]']], autorange=False)
 
             if all(key in stored_layout for key in ['yaxis.range[0]', 'yaxis.range[1]']):
-                fig.update_yaxes(range=[stored_layout['yaxis.range[0]'], stored_layout['yaxis.range[1]']])
+                fig.update_yaxes(range=[stored_layout['yaxis.range[0]'], stored_layout['yaxis.range[1]']], autorange=False)
+
         except KeyError as error:
             logger.error("KeyError in layout: %s", error)
         except TypeError as error:
@@ -212,9 +228,9 @@ def fetch_data(experiment_id, control) -> pd.DataFrame:
 # Callback to store the graph's layout
 @app.callback(
     Output('stored-layout', 'data'),
-    [Input('dynamic-graph', 'relayoutData')]
-)
-def store_layout(relayoutData):
+    [Input('dynamic-graph', 'relayoutData')],
+    [State('stored-layout', 'data')])
+def store_layout(relayout_data, stored_layout):
     """Store the layout configuration of the Dash graph.
 
     This function is a callback that gets triggered when the user interacts
@@ -227,7 +243,22 @@ def store_layout(relayoutData):
     Returns:
         dict: The same layout configuration dictionary is returned to be stored in dcc.Store.
     """
-    return relayoutData
+    if relayout_data is None:
+        raise PreventUpdate
+
+    if stored_layout is None:
+        stored_layout = {}
+
+    if relayout_data.get('xaxis.autorange', False) and relayout_data.get('yaxis.autorange', False):
+        stored_layout = {'autosize': True}
+    else:
+        stored_layout.update(relayout_data)
+        if 'autosize' in stored_layout:
+            del stored_layout['autosize']  # Remove autosize if specific ranges are applied
+
+    logger.debug("relayoutdata: %s", stored_layout)
+
+    return stored_layout
 
 
 @app.callback(
