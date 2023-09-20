@@ -2,6 +2,7 @@
 
 import unittest
 from unittest.mock import MagicMock, patch
+from unittest import mock
 
 import pandas as pd
 import plotly.graph_objects as go
@@ -154,3 +155,86 @@ class TestInitializeFigure(unittest.TestCase):
         # Verify that the logger was called with the expected debug message
         self.mock_logger.debug.assert_called_with(
             "Plotly figure created and initialized.")
+
+
+class TestFigureLayout(unittest.TestCase):
+    """Test layout changing through manual manipulation of the graph"""
+
+    def setUp(self) -> None:
+        # Create a mock logger
+        self.mock_logger = MagicMock()
+
+        # Mock the logger within chart module
+        self.logger_patch = patch(
+            "app.chart.logger", return_value=self.mock_logger)
+
+        self.logger_patch.start()
+
+        self.original_logger = app.chart.logger
+        app.chart.logger = self.mock_logger
+
+        self.figure = app.chart.initialize_figure()
+
+    def tearDown(self) -> None:
+        app.chart.logger = self.original_logger
+        self.logger_patch.stop()
+        self.figure = None
+        return super().tearDown()
+
+    def test_initial_layout_state(self) -> None:
+        """Tests the initial layout state is that of an empty dictionary"""
+        fig_mock = mock.MagicMock()  # Mock the go.Figure object
+        stored_layout = {}  # Initial empty state
+
+        app.chart.update_axes_layout(fig_mock, stored_layout)
+
+        # Assertions
+        fig_mock.update_xaxes.assert_not_called()  # The x-axes should not be updated
+        fig_mock.update_yaxes.assert_not_called()  # The y-axes should not be updated
+
+    def test_manual_change_layout_state(self) -> None:
+        """Tests the resulting layout state when the layout is changed manually"""
+        # Manually set axis ranges
+        stored_layout = {
+            'xaxis.range[0]': 0, 'xaxis.range[1]': 10, 'yaxis.range[0]': -5, 'yaxis.range[1]': 5}
+
+        app.chart.update_axes_layout(self.figure, stored_layout)
+
+        # Assertions based on final state of figure layout
+        self.assertEqual(self.figure['layout']['xaxis']['range'], (0, 10))
+        self.assertEqual(self.figure['layout']['xaxis']['autorange'], False)
+        self.assertEqual(self.figure['layout']['yaxis']['range'], (-5, 5))
+        self.assertEqual(self.figure['layout']['yaxis']['autorange'], False)
+
+    def test_manual_reset_layout_state(self) -> None:
+        """Tests the layout state after a manual reset (double-click on Dash graph) resets the layout to autoscale"""
+        fig_mock = mock.MagicMock()  # Mock the go.Figure object
+        fig_mock.update_xaxes.autorange = False  # Simulate that autorange is initially set to False
+        fig_mock.update_yaxes.autorange = False  # Simulate that autorange is initially set to False
+
+        stored_layout = {'autosize': True}  # Simulate a manual reset
+
+        app.chart.update_axes_layout(fig_mock, stored_layout)
+
+        # Assertions
+        fig_mock.update_xaxes.assert_called_once_with(autorange=True)  # The x-axis should be set to autorange
+        fig_mock.update_yaxes.assert_called_once_with(autorange=True)  # The y-axis should be set to autorange
+
+    def test_manual_change_repeated_layout_state(self) -> None:
+        """Integration-like test for sequence of manual changes and reset"""
+        # Step 1: Initial manual set
+        stored_layout_initial = {'xaxis.range[0]': -10, 'xaxis.range[1]': 10}
+        app.chart.update_axes_layout(self.figure, stored_layout_initial)
+        self.assertEqual(self.figure['layout']['xaxis']['range'], (-10, 10))
+        self.assertEqual(self.figure['layout']['xaxis']['autorange'], False)
+
+        # Step 2: Reset layout
+        stored_layout_reset = {'autosize': True}
+        app.chart.update_axes_layout(self.figure, stored_layout_reset)
+        self.assertEqual(self.figure['layout']['xaxis']['autorange'], True)
+
+        # Step 3: Manual set again
+        stored_layout_new = {'xaxis.range[0]': 0, 'xaxis.range[1]': 20}
+        app.chart.update_axes_layout(self.figure, stored_layout_new)
+        self.assertEqual(self.figure['layout']['xaxis']['range'], (0, 20))
+        self.assertEqual(self.figure['layout']['xaxis']['autorange'], False)
