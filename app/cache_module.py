@@ -1,4 +1,5 @@
-"""Cache sub-system for the web process and Dash app"""
+"""Cache subsystem for the web process and Dash application."""
+
 from datetime import datetime
 
 import pandas as pd
@@ -8,46 +9,76 @@ from app.logger_config import setup_logger
 
 
 class CacheWebProcess:
-    """Handles the in-memory cache and the database connection.
-    Initializes the state and provides the methods."""
-    def __init__(self) -> None:
-        # Establish connection to the database
-        self.database = PmtDb()
+    """Manages in-memory data cache and database interactions.
+
+    Attributes:
+        database: An object for database interactions, defaults to PmtDb if not provided.
+        cached_data: Dictionary holding cached DataFrames, keyed by experiment_id.
+        last_datetime: Timestamp of the last cache update.
+        current_datetime: Timestamp of the current cache state.
+    """
+    def __init__(self, database=None) -> None:
+        """Initializes CacheWebProcess with optional database object.
+
+        Args:
+            database: Optional database object for custom database interactions.
+        """
+        # If a database object is provided, use it; otherwise, create a PmtDb instance
+        self.database = database if database is not None else PmtDb()
+
         self.logger = setup_logger()
 
         # Create empty Dictionary to hold DataFrames keyed by experiment_id
         self.cached_data = {}
-        self.logger.debug("Database connected to chart process. Starting caching.")
+        self.logger.debug("Database connected to cache object. Starting caching.")
 
         # Initialize datetimes for precise fetching
         self.last_datetime = None
         self.current_datetime = None
 
     def get_cached_data(self, experiment_id) -> pd.DataFrame:
-        """Getter function. Use this to access the updated DataFrame"""
+        """Retrieves cached data for a given experiment ID.
+
+        Args:
+            experiment_id: Identifier for the experiment.
+
+        Returns:
+            pd.DataFrame: The cached data, or None if no data is cached for the given ID.
+        """
         return self.cached_data.get(experiment_id, None)
 
     def initialize_empty_cache(self) -> pd.DataFrame:
-        """Initializes the cache to match expected requirements.
-        TODO: Change to accommodate multiple keys like experiment_id values.
-        # Args:
-        #     cached_data (None)
+        """Initializes an empty cache DataFrame with predefined columns.
+
+        The cache DataFrame is structured to match the expected database schema.
+
         Returns:
-            cache_initial (pd.DataFrame): The fully specced cache dataframe."""
+            pd.DataFrame: An empty DataFrame with columns 'ts' and 'value'.
+        """
         cache_empty = pd.DataFrame(columns=['ts', 'value'])
         return cache_empty
 
     def fetch_latest_data(self, experiment_id, last_timestamp=None) -> pd.DataFrame:
-        """Fetches new data since last update, in a Dataframe"""
+        """Fetches new data since the last update for a given experiment.
+
+        Args:
+            experiment_id: The ID of the experiment for which to fetch data.
+            last_timestamp: Optional timestamp to fetch data from this point forward.
+
+        Returns:
+            pd.DataFrame: The latest data fetched from the database, or None if no new data.
+        """
         return self.database.latest_readings(experiment=experiment_id, since=last_timestamp)
 
     def update_cache(self, experiment_id, last_timestamp=None) -> pd.DataFrame:
-        """Fetches the new data based on last_timestamp and updates the cache accordingly.
+        """Updates the cache with new data based on the last timestamp and experiment ID.
+
         Args:
-            cached_data (pd.DataFrame): The cached Dataframe until the current timestamp
-            last_timestamp (datetime): The timestamp of the last update, used by the database fetch
+            experiment_id: The ID of the experiment for which to update the cache.
+            last_timestamp: Optional timestamp used as a starting point for fetching new data.
+
         Returns:
-            updated_cache (pd.DataFrame): The updated DataFrame
+            pd.DataFrame: The updated cached data for the given experiment ID, or None if no update.
         """
         new_data = self.fetch_latest_data(experiment_id, last_timestamp)
 
@@ -64,23 +95,30 @@ class CacheWebProcess:
         return self.cached_data[experiment_id]
 
     def handle_data_update(self, experiment_id) -> None:
-        """Facade method to encapsulate cache update logic.
+        """Facade method to update the cache for a specific experiment.
 
-        This is an action method that triggers side effects to update the cache's internal state.
-        It does not return any value; use the getter method `get_cached_data` to retrieve cached data.
+        This method should be called to trigger side effects that update the cache.
+        It does not return a value; use `get_cached_data` to retrieve the updated cache.
 
         Args:
-            experiment_id (int): Identifier for the experiment whose data needs to be cached.
+            experiment_id (int): The ID of the experiment to update.
 
         Side Effects:
-            - Updates `self.last_datetime` to store the latest datetime.
-            - Calls `update_cache` to modify the cache's internal state.
+            - Updates `self.last_datetime` to the current datetime.
+            - Calls `update_cache` to update the cache for the specified experiment.
         """
         self.save_datetime()
         _ = self.update_cache(experiment_id, self.last_datetime)
 
     def save_datetime(self) -> None:
-        """Rollover last interval's datetime, and then take note of current datetime."""
+        """Updates the timestamp tracking mechanism.
+
+        Rolls over the last recorded datetime to make room for a new current datetime.
+
+        Side Effects:
+            - Updates `self.last_datetime` to the value of `self.current_datetime`.
+            - Updates `self.current_datetime` to the current system datetime.
+        """
         self.last_datetime = self.current_datetime  # Move current to last
         self.current_datetime = datetime.now()  # Update current
 

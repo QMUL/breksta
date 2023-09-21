@@ -207,46 +207,41 @@ def extract_experiment_id_from_url(url):
 
 
 def fetch_data(experiment_id, control) -> pd.DataFrame:
-    """Fetch data from the PmtDb database based on experiment_id and control.
+    """Fetch data based on experiment_id and control signal.
 
     Args:
-        experiment_id (str):
-        The ID of the experiment for which to fetch data.
-        control (str):
-        The control value indicating whether to fetch new data or use existing data.
+        experiment_id (str): ID of the experiment to fetch data for.
+        control (str): Control signal to determine the action.
 
     Returns:
-        df (pd.DataFrame):
-        The data fetched from the database, or an empty DataFrame if no data is to be fetched.
+        dataframe (pd.DataFrame): Data fetched or retrieved from cache.
     """
-
     if control == STOP_SIGNAL:
-        if not hasattr(fetch_data, "last_df"):
-            # This is the first run after the server was started,
-            # fetch_data.last_df is not defined, so draw nothing
-            df = pd.DataFrame()
-            return df
+        # Retrieve the last update from the cache
+        dataframe = app.cache.get_cached_data(experiment_id)
 
-        df = fetch_data.last_df
+        if dataframe is None:
+            logger.warning("No data in cache for this experiment.")
+            return pd.DataFrame()
 
-    elif control == GO_SIGNAL:
-        # Fetch the new data and update the plot
-        df = app.cache.database.latest_readings(experiment=experiment_id)
+        return dataframe
 
-        # Fetch data and append it to the cache
-        dataframe = app.cache.handle_data_update(experiment_id)
+    if control == GO_SIGNAL:
+        # Update the cache
+        app.cache.handle_data_update(experiment_id)
+
+        # Retrieve updated data from the cache
+        dataframe = app.cache.get_cached_data(experiment_id)
         logger.debug("Updating cache: \n%s", dataframe)
 
-        if df is not None:
-            fetch_data.last_df = df  # Store the current DataFrame as the last DataFrame
-
-        else:
+        if dataframe is None:
             logger.warning("No new data found.")
-    else:
-        logger.error("Control file contains an invalid value")
-        df = pd.DataFrame()
+            return pd.DataFrame()
 
-    return df
+        return dataframe
+
+    logger.error("Control file contains an invalid value.")
+    raise ValueError("Invalid control signal.")
 
 
 # Callback to persist the graph's layout for user-defined settings
