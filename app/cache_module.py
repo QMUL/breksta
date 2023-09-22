@@ -122,7 +122,21 @@ class CacheWebProcess:
         self.last_datetime = self.current_datetime  # Move current to last
         self.current_datetime = datetime.now()  # Update current
 
-    def cache_size(self):
+    def handle_completed_experiment(self, experiment_id) -> None:
+        """Facade method to update the cache for a completed experiment.
+
+        This method should be called to trigger side effects that finalize the cache for a completed experiment.
+        It does not return a value; use `get_cached_data` to retrieve the updated cache.
+
+        Args:
+            experiment_id (int): The ID of the completed experiment to update.
+
+        Side Effects:
+            - Finalizes the cache for the specified completed experiment.
+        """
+        _ = self.update_cache(experiment_id)
+
+    def cache_size(self) -> None:
         """TODO: The function should return the size of the cache.
         size/number of rows?
         actual size in MBs?
