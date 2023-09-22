@@ -228,11 +228,13 @@ def fetch_data(experiment_id, control) -> pd.DataFrame:
 
     if control == GO_SIGNAL:
         # Update the cache
+        logger.debug("Fetch data from cache for experiment ID: %s", experiment_id)
         app.cache.handle_data_update(experiment_id)
 
         # Retrieve updated data from the cache
         dataframe = app.cache.get_cached_data(experiment_id)
-        logger.debug("Updating cache: \n%s", dataframe)
+        # Logger print causes dataframe gore in the file. Enable with caution
+        # logger.debug("Updating cache: \n%s", dataframe)
 
         if dataframe is None:
             logger.warning("No new data found.")

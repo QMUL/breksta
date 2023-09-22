@@ -30,7 +30,6 @@ class CacheWebProcess:
 
         # Create empty Dictionary to hold DataFrames keyed by experiment_id
         self.cached_data = {}
-        self.logger.debug("Database connected to cache object. Starting caching.")
 
         # Initialize datetimes for precise fetching
         self.last_datetime = None
@@ -89,6 +88,7 @@ class CacheWebProcess:
         # Search for existing cache based on the experiment id, if not found create one
         if experiment_id not in self.cached_data:
             self.cached_data[experiment_id] = self.initialize_empty_cache()
+            self.logger.debug("Initializing cache for ID: %s", experiment_id)
 
         # Append new data to the existing cached dataframe
         self.cached_data[experiment_id] = pd.concat([self.cached_data[experiment_id], new_data])
