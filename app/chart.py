@@ -19,6 +19,7 @@ import pandas as pd  # For creating an empty DataFrame
 
 from app.logger_config import setup_logger
 from app.cache_module import CacheWebProcess
+from app.components.layout import create_layout
 
 logger = setup_logger()
 
@@ -37,11 +38,7 @@ a graph for chart content, and an interval component for periodic updates.
 # Attach the cache object to the app
 app.cache = CacheWebProcess()
 
-app.layout = html.Div([
-    dcc.Location(id='url', refresh=False),
-    dcc.Graph(id='dynamic-graph'),
-    dcc.Interval(id='interval-component', interval=2000, n_intervals=0),
-    dcc.Store(id='stored-layout')])  # Store component to hold the graph's layout state
+app.layout = create_layout(app)
 
 
 @app.callback(Output('dynamic-graph', 'figure'),
