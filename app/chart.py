@@ -23,8 +23,7 @@ from app.components.layout import create_layout
 
 logger = setup_logger()
 
-# Set refresh rate literals. Normal operations is 2s, freeze is 10 minutes
-NORMAL_REFRESH = 2
+# Control signals
 GO_SIGNAL = '1'
 STOP_SIGNAL = '0'
 
@@ -293,35 +292,31 @@ def store_layout(relayout_data, stored_layout):
         Output(component_id='interval-component', component_property='interval'),
         Output(component_id='interval-component', component_property='disabled')
     ],
-    [Input('interval-component', 'n_intervals')])
-def update_refresh_rate(n_intervals):
-    """Callback function to update the refresh rate of the chart.
-    The control file value determines the new interval rate.
-    If the control file value is STOP_SIGNAL, the interval is set to a large number, effectively pausing the updates.
-    If the control is GO_SIGNAL, the interval is set to the normal refresh rate.
-    If an invalid control file value is encountered, the interval is kept at the default rate.
+    [Input('interval-refresh', 'value')])
+def update_refresh_rate(value):
+    """Callback function to update the refresh rate of the chart based on user input and control signal.
+
+    This function updates two properties of the 'interval-component':
+    1. The 'interval' property, which specifies the refresh rate in milliseconds.
+    2. The 'disabled' property, which determines whether the interval is active.
+
+    If the control file value is STOP_SIGNAL, the interval is disabled.
+    Otherwise, the interval is set based on the user's input from 'interval-refresh' slider.
 
     Args:
-        n_intervals (int): The number of intervals passed.
+        value (float): The user-selected refresh rate in seconds.
 
     Returns:
-        list: A list containing the new interval rate (in milliseconds).
+        tuple: A tuple containing:
+            - New interval rate in milliseconds (int)
+            - Whether the interval should be disabled (bool)
     """
     control: str = read_control_file()
 
-    # Refresh values are in seconds. 2s or 10m.
-    default_value = NORMAL_REFRESH
-
-    # Check the control file for the new interval. Return values are in milliseconds
     if control == STOP_SIGNAL:
         return dash.no_update, True  # Disable the interval
-    elif control == GO_SIGNAL:
-        # Normal refresh: set the interval to the normal refresh rate
-        return value * 1000, False
-    else:
-        # If the control file contains an invalid value, keep the current interval
-        logger.error("Control file contains invalid value.. Refresh rate set to 2s.")
-        return default_value * 1000, False
+
+    return value * 1000, False
 
 
 def read_control_file(file_path: str = 'app/control.txt', default_value: str = "1") -> str:
