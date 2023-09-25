@@ -25,7 +25,6 @@ logger = setup_logger()
 
 # Set refresh rate literals. Normal operations is 2s, freeze is 10 minutes
 NORMAL_REFRESH = 2
-FREEZE_REFRESH = 600
 GO_SIGNAL = '1'
 STOP_SIGNAL = '0'
 
@@ -290,7 +289,10 @@ def store_layout(relayout_data, stored_layout):
 
 
 @app.callback(
-    [Output(component_id='interval-component', component_property='interval')],
+    [
+        Output(component_id='interval-component', component_property='interval'),
+        Output(component_id='interval-component', component_property='disabled')
+    ],
     [Input('interval-component', 'n_intervals')])
 def update_refresh_rate(n_intervals):
     """Callback function to update the refresh rate of the chart.
@@ -309,19 +311,17 @@ def update_refresh_rate(n_intervals):
 
     # Refresh values are in seconds. 2s or 10m.
     default_value = NORMAL_REFRESH
-    large_value = FREEZE_REFRESH
 
     # Check the control file for the new interval. Return values are in milliseconds
     if control == STOP_SIGNAL:
-        # Freeze refresh: set the interval to a very large number
-        return [large_value * 1000]
+        return dash.no_update, True  # Disable the interval
     elif control == GO_SIGNAL:
         # Normal refresh: set the interval to the normal refresh rate
-        return [default_value * 1000]
+        return value * 1000, False
     else:
         # If the control file contains an invalid value, keep the current interval
         logger.error("Control file contains invalid value.. Refresh rate set to 2s.")
-        return [default_value * 1000]
+        return default_value * 1000, False
 
 
 def read_control_file(file_path: str = 'app/control.txt', default_value: str = "1") -> str:
