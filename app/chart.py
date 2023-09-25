@@ -1,4 +1,8 @@
-"""Dash example of a periodically updated chart:
+"""A Dash application instance.
+This app has a layout that consists of a location component for URL handling,
+a graph for chart content, and an interval component for periodic updates.
+
+Dash example of a periodically updated chart:
     https://dash.plotly.com/live-updates
 If the chart is to be accessed remotely, should cache previous data-points
 to reduce network traffic:
@@ -12,9 +16,11 @@ import os
 from typing import Optional
 # Import plotly before dash due to dependency issues
 import plotly.graph_objects as go
-from dash import Dash, html, dcc, State
+import dash
+from dash import Dash, State
 from dash.dependencies import Input, Output
 from dash.exceptions import PreventUpdate
+import dash_bootstrap_components as dbc  # BOOTSTRAP, CYBORG,SUPERHERO
 import pandas as pd  # For creating an empty DataFrame
 
 from app.logger_config import setup_logger
@@ -27,11 +33,16 @@ logger = setup_logger()
 GO_SIGNAL = '1'
 STOP_SIGNAL = '0'
 
-app = Dash(__name__)
-"""A Dash application instance.
-This app has a layout that consists of a location component for URL handling,
-a graph for chart content, and an interval component for periodic updates.
-"""
+app = Dash(
+    __name__,
+    meta_tags=[{
+        "name": "viewport",
+        "content": "width=device-width, initial-scale=1",
+    }],
+    external_stylesheets=[dbc.themes.SUPERHERO]
+)
+app.title = "Breksta - Data Acquisition App"
+app.config["suppress_callback_exceptions"] = True
 
 # Attach the cache object to the app
 app.cache = CacheWebProcess()
