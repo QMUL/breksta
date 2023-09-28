@@ -93,7 +93,7 @@ def plot_data(fig: go.Figure, df: pd.DataFrame, stored_layout: Optional[dict] = 
         logger.error("DataFrame empty, or keys missing from columns. Returning empty...")
         return fig
 
-    # Check for new layout and apply if changed
+    # Update the layout to preserve user customizations between sessions
     update_axes_layout(fig, stored_layout)
 
     try:
@@ -112,29 +112,44 @@ def plot_data(fig: go.Figure, df: pd.DataFrame, stored_layout: Optional[dict] = 
 
 
 def update_axes_layout(fig: go.Figure, stored_layout: Optional[dict]) -> go.Figure:
-    """Track and apply changes to the figure layout."""
+    """Update the figure layout based on stored settings.
+
+    This function applies the layout settings stored in 'stored_layout' to the given figure.
+    Makes the graph user-friendly by applying layout customizations.
+
+    Args:
+        fig (go.Figure): The plotly figure object whose layout needs to be updated.
+        stored_layout (Optional[dict]): The stored layout settings.
+
+    Returns:
+        go.Figure: The updated plotly figure object.
+    """
+
+    # If stored_layout is empty, no user customizations are available to restore
     if not stored_layout:
         logger.debug("Stored layout is empty. Returning early.")
         return fig
 
-    logger.debug("Stored layout: %s", stored_layout)
-
-    # If the layout has an autosize key, turn on autorange
+    # Turn on autorange when 'autosize' is set to adjust the graph to optimal dimensions
     if stored_layout.get('autosize', False):
         fig.update_xaxes(autorange=True)
         fig.update_yaxes(autorange=True)
-    else:
-        try:
-            if all(key in stored_layout for key in ['xaxis.range[0]', 'xaxis.range[1]']):
-                fig.update_xaxes(range=[stored_layout['xaxis.range[0]'], stored_layout['xaxis.range[1]']], autorange=False)
+        return fig  # Return early as no further layout customization is needed
 
-            if all(key in stored_layout for key in ['yaxis.range[0]', 'yaxis.range[1]']):
-                fig.update_yaxes(range=[stored_layout['yaxis.range[0]'], stored_layout['yaxis.range[1]']], autorange=False)
+    # Update x- and y-axis range only if both lower and upper bounds are available
+    # This ensures a complete and meaningful update of the axis range. All 'autorange' keys persist; turn OFF
+    try:
+        if all(key in stored_layout for key in ['xaxis.range[0]', 'xaxis.range[1]']):
+            fig.update_xaxes(range=[stored_layout['xaxis.range[0]'], stored_layout['xaxis.range[1]']], autorange=False)
 
-        except KeyError as error:
-            logger.error("KeyError in layout: %s", error)
-        except TypeError as error:
-            logger.error("TypeError in layout: %s", error)
+        if all(key in stored_layout for key in ['yaxis.range[0]', 'yaxis.range[1]']):
+            fig.update_yaxes(range=[stored_layout['yaxis.range[0]'], stored_layout['yaxis.range[1]']], autorange=False)
+
+    # Log errors to trace missing keys or identify incorrect types that could break the layout update
+    except KeyError as error:
+        logger.error("KeyError in layout: %s", error)
+    except TypeError as error:
+        logger.error("TypeError in layout: %s", error)
 
     return fig
 
@@ -225,36 +240,46 @@ def fetch_data(experiment_id, control) -> pd.DataFrame:
     return df
 
 
-# Callback to store the graph's layout
+# Callback to persist the graph's layout for user-defined settings
 @app.callback(
     Output('stored-layout', 'data'),
     [Input('dynamic-graph', 'relayoutData')],
     [State('stored-layout', 'data')])
 def store_layout(relayout_data, stored_layout):
-    """Store the layout configuration of the Dash graph.
+    """Store and update the layout configuration of the Dash graph.
 
-    This function is a callback that gets triggered when the user interacts
-    with the graph (e.g., zooming, panning). It stores the new layout configuration
-    in a Dash dcc.Store component for future use.
+    This function is a callback triggered by user interactions like zooming, panning, or resizing.
+    It stores the new layout configuration in a Dash dcc.Store component, which can be retrieved
+    for rendering the graph with user-defined settings.
 
     Args:
-        relayoutData (dict): A dictionary containing the graph's layout configuration.
+        relayoutData (dict): A dictionary containing the graph's changed layout configuration.
+        stored_layout (dict): A dictionary containing the graph's previously stored layout configuration.
 
     Returns:
-        dict: The same layout configuration dictionary is returned to be stored in dcc.Store.
+        dict: The updated layout configuration dictionary to be stored in dcc.Store.
     """
+    # Prevent any updates if no user interactions have altered the layout
     if relayout_data is None:
         raise PreventUpdate
 
-    if stored_layout is None:
-        stored_layout = {}
+    # Ensure stored_layout is mutable for subsequent updates
+    stored_layout = stored_layout or {}
+
+    # If the layout has not changed, return early to avoid redundant operations
+    if stored_layout == relayout_data:
+        raise PreventUpdate
 
     if relayout_data.get('xaxis.autorange', False) and relayout_data.get('yaxis.autorange', False):
+        # Set to autosize to ensure the graph adjusts to optimal dimensions
         stored_layout = {'autosize': True}
     else:
+        # Roll over user-customized layout changes into stored_layout for ongoing persistence
         stored_layout.update(relayout_data)
+
+        # Remove 'autosize' to prevent conflict with user-defined axis ranges
         if 'autosize' in stored_layout:
-            del stored_layout['autosize']  # Remove autosize if specific ranges are applied
+            del stored_layout['autosize']
 
     logger.debug("relayoutdata: %s", stored_layout)
 
