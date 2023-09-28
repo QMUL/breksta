@@ -25,6 +25,7 @@ import pandas as pd  # For creating an empty DataFrame
 
 from app.logger_config import setup_logger
 from app.cache_module import CacheWebProcess
+from app.components.figure import initialize_figure
 from app.components.layout import create_layout
 
 logger = setup_logger()
@@ -48,6 +49,7 @@ app.config["suppress_callback_exceptions"] = True
 app.cache = CacheWebProcess()
 
 app.layout = create_layout(app)
+app.figure = initialize_figure()
 
 
 @app.callback(Output('dynamic-graph', 'figure'),
@@ -81,7 +83,7 @@ def draw_chart(pathname: str, n_intervals: int, stored_layout: dict) -> go.Figur
     df: pd.DataFrame = fetch_data(experiment_id, control)
 
     # Generate the figure
-    fig: go.Figure = plot_data(figure, df, stored_layout)
+    fig: go.Figure = plot_data(app.figure, df, stored_layout)
 
     return fig
 
@@ -160,28 +162,6 @@ def update_axes_layout(fig: go.Figure, stored_layout: Optional[dict]) -> go.Figu
     except TypeError as error:
         logger.error("TypeError in layout: %s", error)
 
-    return fig
-
-
-def initialize_figure() -> go.Figure:
-    """Create and initialize a Plotly graph object figure
-    Returns
-        fig (go.Figure): The default settings of the figure.
-    """
-    fig = go.Figure()
-    # Initialize with an empty line trace
-    fig.add_trace(go.Scatter(x=[], y=[], mode='lines'))
-    # Titles
-    fig.update_xaxes(title_text='Time (s)')
-    fig.update_yaxes(title_text='Value (u)')
-
-    # Add a margin and a legend, also dark <3
-    fig.update_layout(
-        margin={'l': 30, 'r': 10, 'b': 30, 't': 10},
-        legend={'x': 0, 'y': 1, 'xanchor': 'left'},
-        template='plotly_dark')
-
-    logger.debug("Plotly figure created and initialized.")
     return fig
 
 
@@ -358,6 +338,5 @@ if __name__ == '__main__':
     # Starts the Dash server with debugging enabled if the script is run directly.
     # Autoupdate is True by default. Debug=True creates two chart.py processes
     get_script_level_logs()
-    figure = initialize_figure()
 
     app.run(debug=True, dev_tools_hot_reload=False)
