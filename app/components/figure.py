@@ -32,36 +32,21 @@ def initialize_figure() -> go.Figure:
     return fig
 
 
-def plot_data(fig: go.Figure, df: pd.DataFrame, stored_layout: Optional[dict] = None) -> go.Figure:
-    """Create and update a Plotly graph object figure,
-    based on the provided DataFrame and layout.
+def plot_data(fig: go.Figure, df: pd.DataFrame) -> go.Figure:
+    """Update the figure's existing trace with new data. The data is assumed numerical.
 
     Args:
         df (pd.DataFrame): The data to plot.
-        stored_layout (dict, optional): The layout to apply to the figure.
 
     Returns:
         fig (go.Figure): The updated figure.
     """
-
     if df.empty or 'ts' not in df.columns or 'value' not in df.columns:
         logger.error("DataFrame empty, or keys missing from columns. Returning empty...")
         return fig
 
-    # Update the layout to preserve user customizations between sessions
-    update_axes_layout(fig, stored_layout)
-
-    try:
-        # Attempt to convert columns to numeric
-        x_data = pd.to_numeric(df['ts'])
-        y_data = pd.to_numeric(df['value'])
-    except ValueError:
-        logger.error("Columns have non-numeric data and can't change them. Returning empty...")
-        return fig
-    else:
-        # Update existing trace with new data (runs only if the above try block succeeds)
-        fig.data[0].x = x_data
-        fig.data[0].y = y_data
+    fig.data[0].x = df['ts']
+    fig.data[0].y = df['value']
 
     return fig
 

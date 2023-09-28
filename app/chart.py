@@ -77,16 +77,19 @@ def draw_chart(pathname: str, n_intervals: int, stored_layout: dict) -> go.Figur
     if control == STOP_SIGNAL:
         return dash.no_update
 
-    # Extract the experiment ID from the URL
+    # The experiment ID is crucial for fetching the relevant data
     experiment_id = extract_experiment_id_from_url(pathname)
 
+    # Update the layout to preserve user customizations between sessions
+    app.figure = update_axes_layout(app.figure, stored_layout)
+
     # Fetch the required data to populate the chart
-    df: pd.DataFrame = fetch_data(experiment_id)
+    dataframe: pd.DataFrame = fetch_data(experiment_id)
 
-    # Generate the figure
-    fig: go.Figure = plot_data(app.figure, df, stored_layout)
+    # Generate the chart figure based on the fetched data and stored layout
+    app.figure: go.Figure = plot_data(app.figure, dataframe)
 
-    return fig
+    return app.figure
 
 
 def extract_experiment_id_from_url(url):
