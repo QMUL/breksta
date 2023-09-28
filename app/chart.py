@@ -80,8 +80,8 @@ def draw_chart(pathname: str, n_intervals: int, stored_layout: dict) -> go.Figur
     # Extract the experiment ID from the URL
     experiment_id = extract_experiment_id_from_url(pathname)
 
-    # Fetch dataframe from database
-    df: pd.DataFrame = fetch_data(experiment_id, control)
+    # Fetch the required data to populate the chart
+    df: pd.DataFrame = fetch_data(experiment_id)
 
     # Generate the figure
     fig: go.Figure = plot_data(app.figure, df, stored_layout)
@@ -116,44 +116,32 @@ def extract_experiment_id_from_url(url):
     return experiment_id
 
 
-def fetch_data(experiment_id, control) -> pd.DataFrame:
-    """Fetch data based on experiment_id and control signal.
+def fetch_data(experiment_id) -> pd.DataFrame:
+    """Fetch data for a specific experiment and update the cache.
+
+    This function optimizes data retrieval by using a caching mechanism,
+    reducing the need for frequent database queries and enhancing application performance.
 
     Args:
         experiment_id (str): ID of the experiment to fetch data for.
-        control (str): Control signal to determine the action.
 
     Returns:
-        dataframe (pd.DataFrame): Data fetched or retrieved from cache.
+        pd.DataFrame: Data fetched or retrieved from the cache.
     """
-    if control == STOP_SIGNAL:
-        # Retrieve the last update from the cache
-        dataframe = app.cache.get_cached_data(experiment_id)
 
-        if dataframe is None:
-            logger.warning("No data in cache for this experiment.")
-            return pd.DataFrame()
+    # Update the cache to ensure that the most recent data is available for rendering
+    logger.debug("Fetching data from cache for experiment ID: %s", experiment_id)
+    app.cache.handle_data_update(experiment_id)
 
-        return dataframe
+    # Retrieve the most recent data from the cache to minimize database reads
+    dataframe = app.cache.get_cached_data(experiment_id)
 
-    if control == GO_SIGNAL:
-        # Update the cache
-        logger.debug("Fetch data from cache for experiment ID: %s", experiment_id)
-        app.cache.handle_data_update(experiment_id)
+    if dataframe is None:
+        # Log a warning and return an empty DataFrame if no data is found, which will result in an empty plot
+        logger.warning("No data found in cache for this experiment. This will result in an empty plot.")
+        return pd.DataFrame()
 
-        # Retrieve updated data from the cache
-        dataframe = app.cache.get_cached_data(experiment_id)
-        # Logger print causes dataframe gore in the file. Enable with caution
-        # logger.debug("Updating cache: \n%s", dataframe)
-
-        if dataframe is None:
-            logger.warning("No new data found.")
-            return pd.DataFrame()
-
-        return dataframe
-
-    logger.error("Control file contains an invalid value.")
-    raise ValueError("Invalid control signal.")
+    return dataframe
 
 
 # Callback to persist the graph's layout for user-defined settings
