@@ -72,11 +72,13 @@ def draw_chart(pathname: str, n_intervals: int, stored_layout: dict) -> go.Figur
     Returns:
         fig (go.Figure): A Plotly figure representing the chart to be drawn.
     """
+    # Due to Dash's callback behavior, we need to manually halt updates when STOP_SIGNAL is active
+    control = read_control_file()
+    if control == STOP_SIGNAL:
+        return dash.no_update
+
     # Extract the experiment ID from the URL
     experiment_id = extract_experiment_id_from_url(pathname)
-
-    # Read the control file
-    control: str = read_control_file()
 
     # Fetch dataframe from database
     df: pd.DataFrame = fetch_data(experiment_id, control)
