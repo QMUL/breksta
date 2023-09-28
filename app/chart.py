@@ -17,8 +17,8 @@ from dash.dependencies import Input, Output
 from dash.exceptions import PreventUpdate
 import pandas as pd  # For creating an empty DataFrame
 
-from app.capture import PmtDb
 from app.logger_config import setup_logger
+from app.cache_module import CacheWebProcess
 
 logger = setup_logger()
 
@@ -33,6 +33,9 @@ app = Dash(__name__)
 This app has a layout that consists of a location component for URL handling,
 a graph for chart content, and an interval component for periodic updates.
 """
+
+# Attach the cache object to the app
+app.cache = CacheWebProcess()
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
@@ -81,7 +84,7 @@ def plot_data(fig: go.Figure, df: pd.DataFrame, stored_layout: Optional[dict] = 
     """Create and update a Plotly graph object figure,
     based on the provided DataFrame and layout.
 
-    Parameters:
+    Args:
         df (pd.DataFrame): The data to plot.
         stored_layout (dict, optional): The layout to apply to the figure.
 
@@ -183,7 +186,7 @@ def extract_experiment_id_from_url(url):
     TODO: When "experiment_id is not None" we will be attempting to fetch
     a previous experiment.
 
-    Parameters:
+    Args:
         url (str): The URL from which to extract the experiment ID.
         Default value: "/"
 
@@ -206,7 +209,7 @@ def extract_experiment_id_from_url(url):
 def fetch_data(experiment_id, control) -> pd.DataFrame:
     """Fetch data from the PmtDb database based on experiment_id and control.
 
-    Parameters:
+    Args:
         experiment_id (str):
         The ID of the experiment for which to fetch data.
         control (str):
@@ -227,12 +230,18 @@ def fetch_data(experiment_id, control) -> pd.DataFrame:
         df = fetch_data.last_df
 
     elif control == GO_SIGNAL:
-        # fetch the new data and update the plot
-        database = PmtDb()
-        # Default value is "experiment_id is None" which fetches running experiment
-        df: pd.DataFrame = database.latest_readings(experiment=experiment_id)
-        fetch_data.last_df = df  # store the current dataframe as the last dataframe
+        # Fetch the new data and update the plot
+        df = app.cache.database.latest_readings(experiment=experiment_id)
 
+        # Fetch data and append it to the cache
+        dataframe = app.cache.handle_data_update(experiment_id)
+        logger.debug("Updating cache: \n%s", dataframe)
+
+        if df is not None:
+            fetch_data.last_df = df  # Store the current DataFrame as the last DataFrame
+
+        else:
+            logger.warning("No new data found.")
     else:
         logger.error("Control file contains an invalid value")
         df = pd.DataFrame()
@@ -350,4 +359,5 @@ if __name__ == '__main__':
     # Autoupdate is True by default. Debug=True creates two chart.py processes
     get_script_level_logs()
     figure = initialize_figure()
+
     app.run(debug=True, dev_tools_hot_reload=False)
