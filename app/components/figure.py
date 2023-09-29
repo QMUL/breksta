@@ -1,4 +1,13 @@
-"""go.Figure-related helper functions"""
+"""Helper Functions for Manipulating and Customizing Plotly Figures.
+
+This module provides a set of utility functions designed to simplify and standardize the creation,
+initialization, and customization of Plotly figure objects within the application.
+
+Functions:
+- `initialize_figure`: Sets up a default Plotly figure with options for custom axis titles.
+- `plot_data`: Adds the data to the plotting dataframe.
+- `update_axes_layout`: Updates the axis layout of a given Plotly figure based on stored user preferences.
+"""
 from typing import Optional
 import plotly.graph_objects as go
 import pandas as pd
@@ -8,21 +17,30 @@ from app.logger_config import setup_logger
 logger = setup_logger()
 
 
-def initialize_figure() -> go.Figure:
-    """Create and initialize a Plotly graph object figure
-    Returns
-        fig (go.Figure): The default settings of the figure.
+def initialize_figure(x_title: str = 'Time (s)', y_title: str = 'Value (u)') -> go.Figure:
+    """Create and initialize a Plotly graph object figure with customizable settings.
+
+    This function sets up a default Plotly figure to provide a consistent starting point for all subsequent plots.
+    It includes an empty trace, parameterized axis titles, and a default layout to enhance user experience.
+
+    Args:
+        x_title (str, optional): Title for the x-axis. Default is 'Time (s)'.
+        y_title (str, optional): Title for the y-axis. Default is 'Value (u)'.
+
+    Returns:
+        go.Figure: A Plotly figure object with default or customized settings.
     """
     fig = go.Figure()
 
-    # Initialize with an empty line trace
+    # Start with an empty line trace to provide a visual placeholder before actual data is plotted
     fig.add_trace(go.Scatter(x=[], y=[], mode='lines'))
 
-    # Titles
-    fig.update_xaxes(title_text='Time (s)')
-    fig.update_yaxes(title_text='Value (u)')
+    # Set axis titles based on the arguments for better data interpretation
+    fig.update_xaxes(title_text=x_title)
+    fig.update_yaxes(title_text=y_title)
 
-    # Add a margin and a legend, also dark <3
+    # Establish a default layout including margins and legends for a polished, readable plot
+    # also, dark mode for visual comfort
     fig.update_layout(
         margin={'l': 30, 'r': 10, 'b': 30, 't': 10},
         legend={'x': 0, 'y': 1, 'xanchor': 'left'},

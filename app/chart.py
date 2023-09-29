@@ -20,7 +20,7 @@ from dash import Dash, State
 from dash.dependencies import Input, Output
 from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc  # BOOTSTRAP, CYBORG,SUPERHERO
-import pandas as pd  # For creating an empty DataFrame
+import pandas as pd
 
 from app.logger_config import setup_logger
 from app.cache_module import CacheWebProcess
@@ -170,21 +170,21 @@ def store_layout(relayout_data, stored_layout):
     if relayout_data is None:
         raise PreventUpdate
 
-    # Ensure stored_layout is mutable for subsequent updates
+    # Initialize stored_layout to allow for dynamic updates based on user interactions
     stored_layout = stored_layout or {}
 
-    # If the layout has not changed, return early to avoid redundant operations
+    # Skip updates if the layout remains unchanged, to avoid redundant computations and storage
     if stored_layout == relayout_data:
         raise PreventUpdate
 
     if relayout_data.get('xaxis.autorange', False) and relayout_data.get('yaxis.autorange', False):
-        # Set to autosize to ensure the graph adjusts to optimal dimensions
+        # Opt for autosize to adapt the graph layout dynamically to optimal dimensions
         stored_layout = {'autosize': True}
     else:
-        # Roll over user-customized layout changes into stored_layout for ongoing persistence
+        # Incorporate any user-defined layout customizations into stored_layout for ongoing use
         stored_layout.update(relayout_data)
 
-        # Remove 'autosize' to prevent conflict with user-defined axis ranges
+        # Remove autosize to maintain user-defined axis ranges without conflict
         if 'autosize' in stored_layout:
             del stored_layout['autosize']
 
