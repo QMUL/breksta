@@ -87,7 +87,7 @@ def draw_chart(pathname: str, n_intervals: int, stored_layout: dict) -> go.Figur
     dataframe: pd.DataFrame = fetch_data(experiment_id)
 
     # Generate the chart figure based on the fetched data and stored layout
-    app.figure: go.Figure = plot_data(app.figure, dataframe)
+    app.figure = plot_data(app.figure, dataframe)
 
     return app.figure
 
