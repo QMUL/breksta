@@ -18,7 +18,7 @@ from typing import Optional
 from pathvalidate import sanitize_filename
 
 import pandas as pd
-from sqlalchemy import create_engine, ForeignKey, String, exc
+from sqlalchemy import create_engine, ForeignKey, String, exc, Boolean, Integer, DateTime
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 from app.logger_config import setup_logger
 
@@ -41,10 +41,10 @@ class Experiment(Base):
     __tablename__ = "experiment"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(64))
-    start: Mapped[datetime]
-    end: Mapped[Optional[datetime]]
-    exported: Mapped[bool] = mapped_column(default=False)
+    name: Mapped[str] = mapped_column(String(64), index=True)
+    start: Mapped[datetime] = mapped_column(DateTime)
+    end: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    exported: Mapped[bool] = mapped_column(Boolean, default=False)
 
 
 class PmtReading(Base):
@@ -54,9 +54,9 @@ class PmtReading(Base):
     """
     __tablename__ = "reading"
 
-    experiment: Mapped[int] = mapped_column(ForeignKey("experiment.id"))
-    value: Mapped[int]
-    ts: Mapped[datetime] = mapped_column(primary_key=True)
+    experiment: Mapped[int] = mapped_column(Integer, ForeignKey("experiment.id"))
+    value: Mapped[int] = mapped_column(Integer)
+    ts: Mapped[datetime] = mapped_column(DateTime, primary_key=True)
 
 
 def setup_session():
