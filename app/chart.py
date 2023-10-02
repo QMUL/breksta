@@ -258,6 +258,15 @@ def get_script_level_logs() -> None:
     logger.debug("Parent process ID: %s", os.getppid())
 
 
+@app.callback(
+    Output('export-status', 'children'),
+    Input('export-button', 'n_clicks'),
+    State('url', 'pathname')
+)
+def export_data(n_clicks, pathname) -> str:
+    """Export data from an experiment, from the web interface
+    """
+
 if __name__ == '__main__':
     # Entry point for the script.
     # Starts the Dash server with debugging enabled if the script is run directly.

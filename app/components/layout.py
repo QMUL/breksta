@@ -2,6 +2,7 @@
 from dash import Dash, html, dcc
 
 from app.components import slider_interval
+from app.components import export_button
 
 
 def create_layout(app: Dash) -> html.Div:
@@ -26,8 +27,14 @@ def create_layout(app: Dash) -> html.Div:
             html.H3(app.title),
             # Add a horizontal rule for visual separation
             html.Hr(),
-            # Include the interval slider component for user control over refresh rate
-            slider_interval.render(),
+            # Create a child component to house more components
+            html.Div([
+                # Include the interval slider component for user control over refresh rate
+                slider_interval.render(),
+                export_button.render(),
+                html.Div(id='export-status')
+            ], style={'display': 'flex', 'alignItems': 'center', 'justifyContent': 'space-between', 'padding': '20px'}
+            ),
             # Capture the current URL for dynamic routing and content rendering
             dcc.Location(
                 id='url',
