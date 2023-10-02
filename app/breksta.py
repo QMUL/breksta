@@ -487,8 +487,8 @@ class ExportControl(QWidget):
         def confirm_dialog(title, text):
             reply = QMessageBox.question(
                 self, title, text,
-                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-            return reply == QMessageBox.Yes
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)  # type: ignore
+            return reply == QMessageBox.Yes  # type: ignore
 
         if not is_exported and not confirm_dialog(
                 'Delete Unexported Experiment',
@@ -614,7 +614,7 @@ class TableWidget(QTableWidget):
         self.setHorizontalHeaderLabels(['Id', 'Name', 'Date started', 'Date ended', 'Exported'])
 
         # make the rows selectable
-        self.setSelectionBehavior(QTableWidget.SelectRows)
+        self.setSelectionBehavior(QTableWidget.SelectRows)  # type: ignore
 
         # adjust the column width
         self.setColumnWidth(0, int(0.03 * width))
@@ -657,8 +657,8 @@ class TableWidget(QTableWidget):
                     new_item = QTableWidgetItem(entry.strftime('%Y-%m-%d %H:%M'))
                 else:
                     new_item = QTableWidgetItem(str(entry))
-                new_item.setTextAlignment(Qt.AlignCenter)  # Sets text alignment to center
-                new_item.setFlags(new_item.flags() & ~Qt.ItemIsEditable)  # Makes item non-editable
+                new_item.setTextAlignment(Qt.AlignCenter)  # type: ignore # Sets text alignment to center
+                new_item.setFlags(new_item.flags() & ~Qt.ItemIsEditable)  # type: ignore # Makes item non-editable
                 self.setItem(row, col, new_item)
 
     def on_cell_click(self, row) -> None:
@@ -812,14 +812,14 @@ class MainWindow(QMainWindow):
         export = ExportWidget(win_width, self.table)
 
         tabs = QTabWidget()
-        tabs.setTabPosition(QTabWidget.North)
+        tabs.setTabPosition(QTabWidget.North)  # type: ignore
         tabs.addTab(capture, 'Capture')
         tabs.addTab(export, 'Export')
 
         self.setCentralWidget(tabs)
 
         exit_action = QAction("Exit", self)
-        exit_action.setShortcut(QKeySequence.Quit)
+        exit_action.setShortcut(QKeySequence.Quit)  # type: ignore
         exit_action.triggered.connect(self.close)
 
     # https://www.pythonguis.com/tutorials/pyside-qprocess-external-programs/
@@ -848,7 +848,7 @@ class MainWindow(QMainWindow):
 
                 self.logger.warning("Failed to start web process. Attempt %d of %d.", attempt + 1, retry_attempts)
 
-            except (TypeError, RuntimeError, QProcess.StartFailed) as err:
+            except (TypeError, RuntimeError, QProcess.StartFailed) as err:  # type: ignore
                 self.logger.debug('web process fell over: %s', err)
         else:
             # Alert the user of the failure with a QMessageBox
@@ -884,7 +884,7 @@ class MainWindow(QMainWindow):
             event: The close event triggered when the main window is closed.
         """
         # Check if the web process is running
-        if self.web_process.state() == QProcess.Running:
+        if self.web_process.state() == QProcess.Running:  # type: ignore
             # If it is, terminate the process
             self.web_process.terminate()
             # Wait a moment for the process to finish
