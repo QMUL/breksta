@@ -137,12 +137,11 @@ def fetch_data(experiment_id) -> pd.DataFrame:
     app.cache.handle_data_update(experiment_id)
 
     # Retrieve the most recent data from the cache to minimize database reads
-    dataframe = app.cache.get_cached_data(experiment_id)
+    dataframe: pd.DataFrame = app.cache.get_cached_data(experiment_id)
 
-    if dataframe is None:
-        # Log a warning and return an empty DataFrame if no data is found, which will result in an empty plot
+    if dataframe.empty:
+        # Log a warning and return the empty DataFrame if no data is found, which will result in an empty plot
         logger.warning("No data found in cache for this experiment. This will result in an empty plot.")
-        return pd.DataFrame()
 
     return dataframe
 

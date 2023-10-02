@@ -42,9 +42,9 @@ class CacheWebProcess:
             experiment_id: Identifier for the experiment.
 
         Returns:
-            pd.DataFrame: The cached data, or None if no data is cached for the given ID.
+            pd.DataFrame: The cached data, or an empty DataFrame if no data is cached for the given ID.
         """
-        return self.cached_data.get(experiment_id, None)
+        return self.cached_data.get(experiment_id, pd.DataFrame())
 
     def initialize_empty_cache(self) -> pd.DataFrame:
         """Initializes an empty cache DataFrame with predefined columns.
