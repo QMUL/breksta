@@ -29,7 +29,7 @@ class CacheWebProcess:
         self.logger = setup_logger()
 
         # Create empty Dictionary to hold DataFrames keyed by experiment_id
-        self.cached_data = {}
+        self.cached_data: dict[int, pd.DataFrame] = {}
 
         # Initialize datetimes for precise fetching
         self.last_datetime = None
