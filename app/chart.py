@@ -267,6 +267,31 @@ def export_data(n_clicks, pathname) -> str:
     """Export data from an experiment, from the web interface
     """
 
+    if n_clicks == 0:
+        return "Export_data returned early..."
+
+    logger.debug("Export button clicked on the web interface: No %s", n_clicks)
+    experiment_id = extract_experiment_id_from_url(pathname)
+
+    if experiment_id is None:
+        logger.debug("Experiment ID is None.. Experiment might still be running..")
+
+    # Update the cache to ensure that the most recent data is available for exporting
+    app.cache.handle_completed_experiment(experiment_id)
+    logger.debug("Fetching data from cache for experiment ID: %s", experiment_id)
+
+    dataframe = app.cache.get_cached_data(experiment_id)
+
+    if dataframe.empty:
+        return "No data to export."
+
+    # Export the DataFrame to a CSV file
+    dataframe.to_csv(f"{experiment_id}_data.csv", index=False)
+    logger.debug("Exporting %s_data.csv", experiment_id)
+
+    return f"Data for {experiment_id} has been exported successfully."
+
+
 if __name__ == '__main__':
     # Entry point for the script.
     # Starts the Dash server with debugging enabled if the script is run directly.
