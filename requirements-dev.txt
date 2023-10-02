@@ -1,0 +1,6 @@
+pylint
+flake8
+pytest
+coverage
+mypy
+pandas-stubs

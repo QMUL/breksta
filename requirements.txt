@@ -4,5 +4,4 @@ plotly
 pyside6
 sqlalchemy
 pathvalidate
-pytest
-coverage
+dash-bootstrap-components
