@@ -6,18 +6,19 @@ If the device changes, the initializer will also have to change.
 import time
 
 import ADS1x15 as ads
+from device.adc_config import ADS1115Gain, ADS1115Address
 from app.logger_config import setup_logger
 
 logger = setup_logger()
 
 
-def initialize_adc(i2c_bus=1, address=0x48, gain=ads.ADS1115.PGA_4_096V) -> ads.ADS1115 | None:
+def initialize_adc(i2c_bus=1, address=ADS1115Address.GND, gain=ADS1115Gain.PGA_4_096V) -> ads.ADS1115 | None:
     """
     Initializes and configures the ADC.
 
     Arguments:
         i2c_bus (int): The I2C bus number (default is 1).
-        address (int): The I2C address of the ADC (default is 0x48).
+        address (int): The I2C address of the ADC (default is GND).
         gain (int): Gain setting for the ADC (default is 4.096V).
 
     Returns:
@@ -29,9 +30,14 @@ def initialize_adc(i2c_bus=1, address=0x48, gain=ads.ADS1115.PGA_4_096V) -> ads.
     logger.debug("Address: %s", address)
     logger.debug("Gain: %s", gain)
 
-    if not is_gain_valid(gain):
+    if not ADS1115Gain.is_valid(gain):
         logger.info("Gain value is invalid. See documentation.")
         logger.debug("Gain value is %s", gain)
+        return None
+
+    if not ADS1115Address.is_valid(address):
+        logger.info("Address value is invalid. See documentation.")
+        logger.debug("Address value is %s", address)
         return None
 
     try:
@@ -46,27 +52,6 @@ def initialize_adc(i2c_bus=1, address=0x48, gain=ads.ADS1115.PGA_4_096V) -> ads.
         adc.setGain(gain)
 
     return adc
-
-
-def is_gain_valid(gain) -> bool:
-    """
-    Checks if the provided gain value is valid.
-
-    Arguments:
-        gain (int): Gain setting for the ADC.
-
-    Returns:
-        bool: True if the gain is valid, False otherwise.
-    """
-    valid_gains: list[int] = [
-        ads.ADS1115.PGA_4_096V,
-        ads.ADS1115.PGA_2_048V,
-        ads.ADS1115.PGA_1_024V,
-        ads.ADS1115.PGA_0_512V,
-        ads.ADS1115.PGA_0_256V
-    ]
-
-    return gain in valid_gains
 
 
 def read_adc_values(adc) -> dict:
@@ -101,6 +86,7 @@ def adc_regular_read(period: float) -> None:
     """
     # Initialize the ADC
     adc = initialize_adc()
+    logger.debug("Starting regular read every %s s", period)
     if not adc:
         logger.error("Failed to initialize the ADC. Exiting.")
         return
