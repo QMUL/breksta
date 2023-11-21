@@ -40,10 +40,13 @@ def initialize_adc(adc_config: ADCConfig) -> ads.ADS1115 | None:
         logger.error("Initializing ADS failed: %s", e)
         return None
 
-    # Set the gain if the method exists
-    if hasattr(adc, 'setGain'):
-        adc.setGain(adc_config.gain)
-        adc.setDataRate(adc_config.data_rate)
+    # Check if a critical method exists
+    if not hasattr(adc, 'setGain'):
+        logger.error("Initializing ADS failed: missing method 'setGain'.")
+        return None
+
+    adc.setGain(adc_config.gain)
+    adc.setDataRate(adc_config.data_rate)
 
     # commit changes
     single_read = commit_adc_config(adc)
@@ -80,7 +83,7 @@ def commit_adc_config(adc) -> bool:
 def is_adc_config_match(adc, config: ADCConfig) -> bool:
     """Use the getter device functions to ascertain the config has been correctly set.
     """
-    gain = adc.Gain()  # Get programmable gain amplifier configuration
+    gain = adc.getGain()  # Get programmable gain amplifier configuration
     if config.gain != gain:
         logger.error("ADC Configuration mismatch gain: input %s vs device %s", config.gain, gain)
         return False
