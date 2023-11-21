@@ -129,20 +129,33 @@ class ADS1115DataRate:
 
 @dataclass
 class ADCConfig:
+    """
+    Represents the configuration settings for an ADC (Analog-to-Digital Converter).
+
+    Attributes:
+        i2c_bus (int): The I2C bus number. Default value is 1.
+        address (int): The address of the ADC. Default value is ADS1115Address.GND.
+        gain (int): The gain setting of the ADC. Default value is ADS1115Gain.PGA_6_144V.
+        data_rate (int): The data rate of the ADC. Default value is ADS1115DataRate.DR_ADS111X_128.
+    """
+
     i2c_bus: int = 1
     address: int = ADS1115Address.GND
     gain: int = ADS1115Gain.PGA_6_144V
     data_rate: int = ADS1115DataRate.DR_ADS111X_128
 
     def __post_init__(self) -> None:
+        """
+        Validates and sets the configuration values to their defaults if they are invalid.
+        """
         if not ADS1115Gain.is_valid(self.gain):
-            logger.info("Invalid gain, using default.")
+            logger.error("Invalid gain, using default.")
             self.gain = ADS1115Gain.PGA_6_144V
 
         if not ADS1115Address.is_valid(self.address):
-            logger.info("Invalid address, using default.")
+            logger.error("Invalid address, using default.")
             self.address = ADS1115Address.GND
 
         if not ADS1115DataRate.is_valid(self.data_rate):
-            logger.info("Invalid data rate, using default.")
+            logger.error("Invalid data rate, using default.")
             self.data_rate = ADS1115DataRate.DR_ADS111X_128

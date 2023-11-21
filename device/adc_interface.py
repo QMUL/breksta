@@ -14,22 +14,24 @@ logger = setup_logger()
 
 def initialize_adc(adc_config: ADCConfig) -> ads.ADS1115 | None:
     """
-    Initializes and configures the ADC.
+    Initializes and configures the ADC using the provided configuration.
 
-    Arguments:
-        i2c_bus (int): The I2C bus number (default is 1).
-        address (int): The I2C address of the ADC (default is GND).
-        gain (int): Gain setting for the ADC (default is 4.096V).
-        data_rate (int): Data rate setting for the ADC (default is 128 samples/s)
+    Args:
+        adc_config (ADCConfig): Configuration object containing settings for the ADC,
+                                including I2C bus number, address, gain, and data rate.
 
     Returns:
-        adc: Configured ADC object.
-        None: If initialization failed
+        ads.ADS1115 | None: Configured ADC object or None if initialization fails.
+
+    The function attempts to initialize the ADC with the given configuration.
+    It also validates that the ADC configuration has been correctly set by performing a test read
+    and comparing the device's actual settings against the intended configuration.
     """
     logger.info("Initializing ADC/I2C device interface...")
     logger.debug("Bus ID: %s", adc_config.i2c_bus)
     logger.debug("Address: %s", adc_config.address)
     logger.debug("Gain: %s", adc_config.gain)
+    logger.debug("Data rate: %s", adc_config.data_rate)
 
     try:
         # Initialize the ADC with the specified I2C bus and address
@@ -43,9 +45,51 @@ def initialize_adc(adc_config: ADCConfig) -> ads.ADS1115 | None:
         adc.setGain(adc_config.gain)
         adc.setDataRate(adc_config.data_rate)
 
+    # commit changes
+    single_read = commit_adc_config(adc)
+    if not single_read:
+        return None
+
+    # validate the device's reported configuration matches the adc_config
+    if not is_adc_config_match(adc, adc_config):
+        return None
+
     logger.info("Initialization of ADC/I2C interface completed.")
 
     return adc
+
+
+def commit_adc_config(adc) -> bool:
+    """
+    Performs a test read to commit the ADC configuration.
+
+    Returns:
+        bool: True if the read operation is successful, False otherwise.
+    """
+    channel = 0
+    test = adc.readADC(channel)
+
+    # Check if the read value is a known error condition (e.g., 0 for invalid pin)
+    if test == 0:
+        logger.error("ADC returned an error value for channel %s. Read value: %s", channel, test)
+        return False
+
+    return True
+
+
+def is_adc_config_match(adc, config: ADCConfig) -> bool:
+    """Use the getter device functions to ascertain the config has been correctly set.
+    """
+    gain = adc.Gain()  # Get programmable gain amplifier configuration
+    if config.gain != gain:
+        logger.error("ADC Configuration mismatch gain: input %s vs device %s", config.gain, gain)
+        return False
+
+    data_rate = adc.getDataRate()  # Get data rate configuration
+    if config.data_rate != data_rate:
+        logger.error("ADC Configuration mismatch data rate: input %s vs device %s", config.data_rate, data_rate)
+        return False
+    return True
 
 
 def read_adc_values(adc) -> dict:
@@ -82,11 +126,11 @@ def adc_regular_read(period: float) -> None:
     config = ADCConfig()
     # Initialize the ADC
     adc = initialize_adc(adc_config=config)
-    logger.info("Starting regular read every %s s", period)
     if not adc:
         logger.error("Failed to initialize the ADC. Exiting.")
         return
 
+    logger.info("Starting regular read every %s s", period)
     while True:
         # Read ADC values
         adc_values = read_adc_values(adc)
