@@ -86,7 +86,7 @@ def adc_regular_read(period: float) -> None:
     """
     # Initialize the ADC
     adc = initialize_adc()
-    logger.debug("Starting regular read every %s s", period)
+    logger.info("Starting regular read every %s s", period)
     if not adc:
         logger.error("Failed to initialize the ADC. Exiting.")
         return

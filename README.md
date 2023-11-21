@@ -92,3 +92,55 @@ The project is operating under an Open License.
 ## Contact
 
 For questions or suggestions, please contact us at [email](mailto:example@example.com) or open an issue.
+
+
+## Integration notes
+
+- installed [ADS1x15-ADC library](https://github.com/chandrawi/ADS1x15-ADC)
+- added `dtparam=i2c_arm=on` on `/boot/config.txt`
+- created `/etc/modules-load.d/raspberrypi.conf` with:
+
+```txt
+i2c-dev
+i2c-bcm2708
+```
+
+- install it directly to use modification in PR:
+(modification removes lines 68-70 from `ADS1x15/ADS1x15.py`)
+
+```txt
+pip3 install setuptools wheel
+python3 setup.py bdist_wheel
+pip3 install dist/ADS1x15_ADC-1.2.1-py3-none-any.whl
+```
+
+WORKED:
+
+```sh
+python3
+>> import ADS1x15
+```
+
+OH NO:
+
+```sh
+>> ads = ADS1x15.ADS1115(1)
+PermissionError: Permission denied: '/dev/i2c-1'
+```
+
+[This](https://raspberrypi.stackexchange.com/questions/51375/how-to-allow-i2c-access-for-non-root-users) suggests the user has to be added to the i2c group
+YES YES!
+
+```sh
+$ sudo usermod -a -G i2c matt  # where matt is the <username>
+```
+
+and:
+
+```sh
+sudo i2cdetect -F 1
+Functionalities implemented by /dev/i2c-1:
+I2C             YES
+SMBus ...       YES
+...             YES
+```
