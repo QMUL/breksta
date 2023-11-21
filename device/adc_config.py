@@ -46,8 +46,9 @@ class ADS1115Gain:
     setting is supported by the ADC.
 
     Attributes:
+        PGA_6_144V (int): Gain setting for a full-scale range of ±6.144V (default).
         PGA_4_096V (int): Gain setting for a full-scale range of ±4.096V.
-        PGA_2_048V (int): Gain setting for a full-scale range of ±2.048V (default).
+        PGA_2_048V (int): Gain setting for a full-scale range of ±2.048V.
         PGA_1_024V (int): Gain setting for a full-scale range of ±1.024V.
         PGA_0_512V (int): Gain setting for a full-scale range of ±0.512V.
         PGA_0_256V (int): Gain setting for a full-scale range of ±0.256V.
@@ -55,11 +56,12 @@ class ADS1115Gain:
     Class Methods:
         is_valid(gain): Validates if the provided gain value is among the defined constants.
     """
-    PGA_4_096V = 0x0200
-    PGA_2_048V = 0x0400  # Default
-    PGA_1_024V = 0x0600
-    PGA_0_512V = 0x0800
-    PGA_0_256V = 0x0A00
+    PGA_6_144V = 0  # Default
+    PGA_4_096V = 1
+    PGA_2_048V = 2
+    PGA_1_024V = 4
+    PGA_0_512V = 8
+    PGA_0_256V = 16
 
     @classmethod
     def is_valid(cls, gain) -> bool:
@@ -72,5 +74,5 @@ class ADS1115Gain:
         Returns:
             bool: True if the gain setting is valid, False otherwise.
         """
-        return gain in [cls.PGA_4_096V, cls.PGA_2_048V,
+        return gain in [cls.PGA_6_144V, cls.PGA_4_096V, cls.PGA_2_048V,
                         cls.PGA_1_024V, cls.PGA_0_512V, cls.PGA_0_256V]
