@@ -80,11 +80,59 @@ class ADS1115Gain:
         """
         return gain in [cls.PGA_6_144V, cls.PGA_4_096V, cls.PGA_2_048V,
                         cls.PGA_1_024V, cls.PGA_0_512V, cls.PGA_0_256V]
+
+
+class ADS1115DataRate:
+    """
+    Represents the data rate settings for the ADS1115 ADC.
+
+    This class defines constants for different programmable data rate settings
+    available on the ADS1115 ADC. It also provides a method to validate if a given
+    setting is supported by the ADC.
+
+    Attributes:
+            DR_ADS111X_8 (int): 8 samples/s
+            DR_ADS111X_16 (int): 16 samples/s
+            DR_ADS111X_32 (int): 32 samples/s
+            DR_ADS111X_64 (int): 64 samples/s
+            DR_ADS111X_128 (int): 128 samples/s (default)
+            DR_ADS111X_250 (int): 250 samples/s
+            DR_ADS111X_475 (int): 475 samples/s
+            DR_ADS111X_860 (int): 860 samples/s
+
+    Class Methods:
+        is_valid(gain): Validates if the provided data rate value is among the defined constants.
+    """
+    DR_ADS111X_8 = 0  # slowest
+    DR_ADS111X_16 = 1
+    DR_ADS111X_32 = 2
+    DR_ADS111X_64 = 3
+    DR_ADS111X_128 = 4  # default
+    DR_ADS111X_250 = 5
+    DR_ADS111X_475 = 6
+    DR_ADS111X_860 = 7  # fastest
+
+    @classmethod
+    def is_valid(cls, data_rate) -> bool:
+        """
+        Validates the provided data rate setting.
+
+        Arguments:
+            data_rate (int): The data rate setting to validate.
+
+        Returns:
+            bool: True if the data rate setting is valid, False otherwise.
+        """
+        return data_rate in [cls.DR_ADS111X_8, cls.DR_ADS111X_16, cls.DR_ADS111X_32, cls.DR_ADS111X_64,
+                             cls.DR_ADS111X_128, cls.DR_ADS111X_250, cls.DR_ADS111X_475, cls.DR_ADS111X_860]
+
+
 @dataclass
 class ADCConfig:
     i2c_bus: int = 1
     address: int = ADS1115Address.GND
     gain: int = ADS1115Gain.PGA_6_144V
+    data_rate: int = ADS1115DataRate.DR_ADS111X_128
 
     def __post_init__(self) -> None:
         if not ADS1115Gain.is_valid(self.gain):
@@ -95,3 +143,6 @@ class ADCConfig:
             logger.info("Invalid address, using default.")
             self.address = ADS1115Address.GND
 
+        if not ADS1115DataRate.is_valid(self.data_rate):
+            logger.info("Invalid data rate, using default.")
+            self.data_rate = ADS1115DataRate.DR_ADS111X_128

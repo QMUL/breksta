@@ -20,6 +20,7 @@ def initialize_adc(adc_config: ADCConfig) -> ads.ADS1115 | None:
         i2c_bus (int): The I2C bus number (default is 1).
         address (int): The I2C address of the ADC (default is GND).
         gain (int): Gain setting for the ADC (default is 4.096V).
+        data_rate (int): Data rate setting for the ADC (default is 128 samples/s)
 
     Returns:
         adc: Configured ADC object.
@@ -40,6 +41,7 @@ def initialize_adc(adc_config: ADCConfig) -> ads.ADS1115 | None:
     # Set the gain if the method exists
     if hasattr(adc, 'setGain'):
         adc.setGain(adc_config.gain)
+        adc.setDataRate(adc_config.data_rate)
 
     logger.info("Initialization of ADC/I2C interface completed.")
 
