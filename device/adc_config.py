@@ -1,4 +1,8 @@
 """Manages ADC configuration settings like gain and address."""
+from dataclasses import dataclass
+from app.logger_config import setup_logger
+
+logger = setup_logger()
 
 
 class ADS1115Address:
@@ -76,3 +80,18 @@ class ADS1115Gain:
         """
         return gain in [cls.PGA_6_144V, cls.PGA_4_096V, cls.PGA_2_048V,
                         cls.PGA_1_024V, cls.PGA_0_512V, cls.PGA_0_256V]
+@dataclass
+class ADCConfig:
+    i2c_bus: int = 1
+    address: int = ADS1115Address.GND
+    gain: int = ADS1115Gain.PGA_6_144V
+
+    def __post_init__(self) -> None:
+        if not ADS1115Gain.is_valid(self.gain):
+            logger.info("Invalid gain, using default.")
+            self.gain = ADS1115Gain.PGA_6_144V
+
+        if not ADS1115Address.is_valid(self.address):
+            logger.info("Invalid address, using default.")
+            self.address = ADS1115Address.GND
+

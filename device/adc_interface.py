@@ -6,13 +6,13 @@ If the device changes, the initializer will also have to change.
 import time
 
 import ADS1x15 as ads
-from device.adc_config import ADS1115Gain, ADS1115Address
+from device.adc_config import ADCConfig
 from app.logger_config import setup_logger
 
 logger = setup_logger()
 
 
-def initialize_adc(i2c_bus=1, address=ADS1115Address.GND, gain=ADS1115Gain.PGA_4_096V) -> ads.ADS1115 | None:
+def initialize_adc(adc_config: ADCConfig) -> ads.ADS1115 | None:
     """
     Initializes and configures the ADC.
 
@@ -25,31 +25,23 @@ def initialize_adc(i2c_bus=1, address=ADS1115Address.GND, gain=ADS1115Gain.PGA_4
         adc: Configured ADC object.
         None: If initialization failed
     """
-    logger.info("Initializing device interface...")
-    logger.debug("Bus ID: %s", i2c_bus)
-    logger.debug("Address: %s", address)
-    logger.debug("Gain: %s", gain)
-
-    if not ADS1115Gain.is_valid(gain):
-        logger.info("Gain value is invalid. See documentation.")
-        logger.debug("Gain value is %s", gain)
-        return None
-
-    if not ADS1115Address.is_valid(address):
-        logger.info("Address value is invalid. See documentation.")
-        logger.debug("Address value is %s", address)
-        return None
+    logger.info("Initializing ADC/I2C device interface...")
+    logger.debug("Bus ID: %s", adc_config.i2c_bus)
+    logger.debug("Address: %s", adc_config.address)
+    logger.debug("Gain: %s", adc_config.gain)
 
     try:
         # Initialize the ADC with the specified I2C bus and address
-        adc = ads.ADS1115(i2c_bus, address)
+        adc = ads.ADS1115(adc_config.i2c_bus, adc_config.address)
     except Exception as e:
         logger.error("Initializing ADS failed: %s", e)
         return None
 
     # Set the gain if the method exists
     if hasattr(adc, 'setGain'):
-        adc.setGain(gain)
+        adc.setGain(adc_config.gain)
+
+    logger.info("Initialization of ADC/I2C interface completed.")
 
     return adc
 
@@ -84,8 +76,10 @@ def adc_regular_read(period: float) -> None:
     Arguments:
         period (float): Time interval (in seconds) between successive ADC reads.
     """
+    # Set up ADC configuration
+    config = ADCConfig()
     # Initialize the ADC
-    adc = initialize_adc()
+    adc = initialize_adc(adc_config=config)
     logger.info("Starting regular read every %s s", period)
     if not adc:
         logger.error("Failed to initialize the ADC. Exiting.")
