@@ -12,6 +12,42 @@ from device.adc_interface import initialize_adc
 logger = setup_logger()
 
 
+def read_adc_single_channel(adc, channel) -> float:
+    """
+    Reads values from a channel. Should be mode-agnostic.
+
+    Arguments: adc: the ADC object.
+    Returns: float: the value
+    """
+    # return adc.toVoltage(adc.readADC(channel))
+    return adc.readADC(channel).toVoltage()
+
+
+def read_adc_single_shot(adc, channel, period):
+    """Reads values from the ADC. Uses single mode."""
+    logger.info("Starting single-shot read every %ss", period)
+    # start = time.now()
+    while True:
+        # Read ADC values
+        voltage = read_adc_single_channel(adc, channel)
+        logger.debug("V: %s", voltage)
+        # Idle
+        time.sleep(period)
+        # TODO: implement a signal listener to break out of the loop?
+        # if signal: break
+
+
+def read_adc_continuous(adc, channel, period):
+    """Reads values from the ADC. Uses continuous operation mode."""
+    logger.info("Starting continuous read every %ss", period)
+    while True:
+        # raw = adc.getValue()
+        # print("{0:.3f} V".format(ADS.toVoltage(raw)))
+        voltage = read_adc_single_channel(adc, channel)
+        logger.debug("V: %s", voltage)
+        time.sleep(period)
+
+
 def read_adc_values_all_channels(adc) -> dict:
     """
     Reads values from the ADC channels/pins.
