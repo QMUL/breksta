@@ -12,9 +12,9 @@ from device.adc_interface import initialize_adc
 logger = setup_logger()
 
 
-def read_adc_values(adc) -> dict:
+def read_adc_values_all_channels(adc) -> dict:
     """
-    Reads values from the ADC channels.
+    Reads values from the ADC channels/pins.
 
     Arguments:
         adc: The ADC object.
@@ -24,7 +24,7 @@ def read_adc_values(adc) -> dict:
     adc_values = {}
     voltage_factor = adc.toVoltage()
 
-    for channel in range(4):  # Assuming 4 channels (0 to 3)
+    for channel in range(4):  # Assuming 4 channels (0 to 3), README calls them "Pins"
         value = adc.readADC(channel)
         voltage = value * voltage_factor
         adc_values[f'channel_{channel}'] = {'raw': value, 'voltage': voltage}
@@ -53,7 +53,7 @@ def adc_regular_read(period: float) -> None:
     logger.info("Starting regular read every %s s", period)
     while True:
         # Read ADC values
-        adc_values = read_adc_values(adc)
+        adc_values = read_adc_values_all_channels(adc)
 
         # Process and display the values
         for channel, values in adc_values.items():

@@ -164,15 +164,15 @@ class ADCConfig:
         Validates and sets the configuration values to their defaults if they are invalid.
         """
         if not ADS1115Gain.is_valid(self.gain):
-            logger.error("Invalid gain, using default.")
+            logger.error("Invalid ADC gain, using default.")
             self.gain = ADS1115Gain.PGA_6_144V
 
         if not ADS1115Address.is_valid(self.address):
-            logger.error("Invalid address, using default.")
+            logger.error("Invalid ADC address, using default.")
             self.address = ADS1115Address.GND
 
         if not ADS1115DataRate.is_valid(self.data_rate):
-            logger.error("Invalid data rate, using default.")
+            logger.error("Invalid ADC data rate, using default.")
             self.data_rate = ADS1115DataRate.DR_ADS111X_128
 
         try:

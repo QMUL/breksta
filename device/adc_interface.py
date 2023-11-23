@@ -51,8 +51,8 @@ def initialize_adc(adc_config: ADCConfig) -> ads.ADS1115 | None:
     adc.setDataRate(adc_config.data_rate)
 
     # commit changes
-    single_read = commit_adc_config(adc)
-    if not single_read:
+    singular_read = commit_adc_config(adc)
+    if not singular_read:
         return None
 
     # validate the device's reported configuration matches the adc_config

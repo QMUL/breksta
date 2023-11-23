@@ -10,7 +10,7 @@ from device.adc_interface import initialize_adc
 def config_adc_on_click():
     """
     On button click:
-    - Create a new adc configuration
+    - Create a new adc configuration by gathering all GUI-related values
     - initialize adc
     """
     config: ADCConfig = modify_adc_config()
@@ -27,10 +27,12 @@ def get_gui_i2c_bus_value():
 
 
 def get_gui_gain_value():
+    """WIP"""
     return -1
 
 
 def get_gui_address_value():
+    """WIP"""
     return -1
 
 
@@ -47,7 +49,6 @@ def get_gui_poll_mode_value():
 def modify_adc_config() -> ADCConfig:
     """
     Gathers ADC configuration settings from GUI elements and returns a new ADCConfig object.
-    This function should be connected to a button press event in the GUI.
     """
     new_gain = get_gui_gain_value()
     new_address = get_gui_address_value()
