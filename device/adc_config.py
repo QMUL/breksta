@@ -1,5 +1,6 @@
 """Manages ADC configuration settings like gain and address."""
 from dataclasses import dataclass
+from enum import Enum
 from app.logger_config import setup_logger
 
 logger = setup_logger()
@@ -127,6 +128,18 @@ class ADS1115DataRate:
                              cls.DR_ADS111X_128, cls.DR_ADS111X_250, cls.DR_ADS111X_475, cls.DR_ADS111X_860]
 
 
+class ADS1115Mode(Enum):
+    """
+    Sets the polling mode.
+
+    Attributes:
+        poll_mode_continuous (int): reads in continuously
+        poll_mode_single (int): reads in single-shot results
+    """
+    poll_mode_single = 1
+    poll_mode_continuous = 0
+
+
 @dataclass
 class ADCConfig:
     """
@@ -137,12 +150,14 @@ class ADCConfig:
         address (int): The address of the ADC. Default value is ADS1115Address.GND.
         gain (int): The gain setting of the ADC. Default value is ADS1115Gain.PGA_6_144V.
         data_rate (int): The data rate of the ADC. Default value is ADS1115DataRate.DR_ADS111X_128.
+        poll_mode (Enum): The polling/reading mode of the ADC. Default is ADS1115Mode.poll_mode_single.
     """
 
     i2c_bus: int = 1
     address: int = ADS1115Address.GND
     gain: int = ADS1115Gain.PGA_6_144V
     data_rate: int = ADS1115DataRate.DR_ADS111X_128
+    poll_mode: ADS1115Mode = ADS1115Mode.poll_mode_single
 
     def __post_init__(self) -> None:
         """
@@ -159,3 +174,11 @@ class ADCConfig:
         if not ADS1115DataRate.is_valid(self.data_rate):
             logger.error("Invalid data rate, using default.")
             self.data_rate = ADS1115DataRate.DR_ADS111X_128
+
+        try:
+            # This will check if self.poll_mode is a valid enum member
+            self.poll_mode = ADS1115Mode(self.poll_mode)
+        except ValueError:
+            # This block executes if self.poll_mode is not a valid ADS1115Mode value
+            logger.error("Invalid ADC polling mode, using default single-shot operation.")
+            self.poll_mode = ADS1115Mode.poll_mode_single  # Set to default or handle as needed

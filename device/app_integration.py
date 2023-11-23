@@ -35,6 +35,12 @@ def get_gui_address_value():
 
 
 def get_gui_data_rate_value():
+    """WIP"""
+    return -1
+
+
+def get_gui_poll_mode_value():
+    """WIP"""
     return -1
 
 
@@ -47,13 +53,15 @@ def modify_adc_config() -> ADCConfig:
     new_address = get_gui_address_value()
     new_data_rate = get_gui_data_rate_value()
     new_i2c_bus = get_gui_i2c_bus_value()
+    new_poll_mode = get_gui_poll_mode_value()
 
     # Create and return a new ADCConfig object with values from the GUI
     return ADCConfig(
         i2c_bus=new_i2c_bus,
         address=new_address,
         gain=new_gain,
-        data_rate=new_data_rate
+        data_rate=new_data_rate,
+        poll_mode=new_poll_mode
     )
 
 

@@ -4,7 +4,7 @@ The specific sensor model we use corresponds to the ADS1x15.ADS1115 object.
 If the device changes, the initializer will also have to change.
 """
 import ADS1x15 as ads
-from device.adc_config import ADCConfig
+from device.adc_config import ADCConfig, ADS1115Mode
 from app.logger_config import setup_logger
 
 logger = setup_logger()
@@ -30,6 +30,7 @@ def initialize_adc(adc_config: ADCConfig) -> ads.ADS1115 | None:
     logger.debug("Address: %s", adc_config.address)
     logger.debug("Gain: %s", adc_config.gain)
     logger.debug("Data rate: %s", adc_config.data_rate)
+    logger.debug("Polling mode: %s", adc_config.poll_mode)
 
     try:
         # Initialize the ADC with the specified I2C bus and address
@@ -37,6 +38,9 @@ def initialize_adc(adc_config: ADCConfig) -> ads.ADS1115 | None:
     except Exception as e:
         logger.error("Initializing ADS failed: %s", e)
         return None
+
+    # Set the polling mode before the single read
+    set_adc_polling_mode(adc, adc_config)
 
     # Check if a critical method exists
     if not hasattr(adc, 'setGain'):
@@ -58,6 +62,22 @@ def initialize_adc(adc_config: ADCConfig) -> ads.ADS1115 | None:
     logger.info("Initialization of ADC/I2C interface completed.")
 
     return adc
+
+
+def set_adc_polling_mode(adc, config: ADCConfig) -> None:
+    """
+    Sets the ADC polling mode to single-shot or continuous operation.
+    """
+    if config.poll_mode == ADS1115Mode.poll_mode_single:
+        adc.setMode(adc.MODE_SINGLE)
+        logger.debug("ADC polling mode: Single-shot operation.")
+    elif config.poll_mode == ADS1115Mode.poll_mode_continuous:
+        adc.setMode(adc.MODE_CONTINUOUS)
+        logger.debug("ADC polling mode: Continuous operation.")
+    else:
+        logger.error("Invalid ADC mode: %s", config.poll_mode)
+        logger.error("Defaulting to Single-shot operation.")
+        adc.setMode(adc.MODE_SINGLE)
 
 
 def commit_adc_config(adc) -> bool:
