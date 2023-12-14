@@ -39,15 +39,17 @@ class TestCacheWebProcess(TestCase):
         self.assertEqual(len(result), 3)
 
     def test_cache_handles_none_data(self) -> None:
-        """Tests that no data fetched leads to no cache being returned"""
+        """Tests that no data fetched leads to an empty DataFrame being returned"""
         # Mocking the database to return None
         self.mock_db.latest_readings.return_value = None
         experiment_id = 123
 
         self.cache_instance.handle_data_update(experiment_id)
 
-        # The cache should handle this gracefully and return None
-        self.assertIsNone(self.cache_instance.get_cached_data(experiment_id))
+        # The cache should handle this gracefully and return an empty DataFrame
+        returned_df = self.cache_instance.get_cached_data(experiment_id)
+        self.assertIsInstance(returned_df, pd.DataFrame)
+        self.assertTrue(returned_df.empty)
 
     def test_cache_handles_empty_data(self) -> None:
         """Tests that an empty DataFrame update leads to empty cache"""
