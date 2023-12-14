@@ -19,8 +19,8 @@ def read_adc_single_channel(adc, channel) -> float:
     Arguments: adc: the ADC object.
     Returns: float: the value
     """
-    # return adc.toVoltage(adc.readADC(channel))
-    return adc.readADC(channel).toVoltage()
+    reading = adc.toVoltage(adc.readADC(channel))
+    return reading
 
 
 def read_adc_single_shot(adc, channel, period):

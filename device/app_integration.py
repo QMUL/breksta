@@ -3,8 +3,9 @@ Handles the integration of the ADC functionality with other parts of the applica
 
 - Functions or classes that tie ADC functionalities into Breksta.
 """
-from device.adc_config import ADCConfig
+from device.adc_config import ADCConfig, ADS1115Mode
 from device.adc_interface import initialize_adc
+from device.adc_data_acquisition import read_adc_single_shot, read_adc_continuous
 
 
 def config_adc_on_click():
@@ -67,4 +68,12 @@ def modify_adc_config() -> ADCConfig:
 
 
 if __name__ == '__main__':
-    config_adc_on_click()
+    # For simple tests, when script called on its own:
+    # Configure the ADC
+    # Run a simple single-shot read
+    adc = config_adc_on_click()
+    channel = 0
+    period = 1
+
+    read_adc_single_shot(adc, channel, period)
+    # read_adc_continuous(adc, channel, period)
