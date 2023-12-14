@@ -58,7 +58,7 @@ class CacheWebProcess:
         cache_empty = pd.DataFrame(columns=['ts', 'value'])
         return cache_empty
 
-    def fetch_latest_data(self, experiment_id, last_timestamp=None) -> pd.DataFrame:
+    def fetch_latest_data(self, experiment_id, last_timestamp=None) -> pd.DataFrame | None:
         """Fetches new data since the last update for a given experiment.
 
         Args:
@@ -80,16 +80,17 @@ class CacheWebProcess:
         Returns:
             pd.DataFrame: The updated cached data for the given experiment ID, or None if no update.
         """
+        # Search for existing cache based on the experiment id, if not found create one
+        if experiment_id not in self.cached_data:
+            self.cached_data[experiment_id] = self.initialize_empty_cache()
+            self.logger.debug("Initializing cache for ID: %s", experiment_id)
+
+        # Check for new data entries
         new_data = self.fetch_latest_data(experiment_id, last_timestamp)
 
         if new_data is None:
             self.logger.warning("DataFrame requested is empty. No cache update.")
             return self.cached_data.get(experiment_id, None)
-
-        # Search for existing cache based on the experiment id, if not found create one
-        if experiment_id not in self.cached_data:
-            self.cached_data[experiment_id] = self.initialize_empty_cache()
-            self.logger.debug("Initializing cache for ID: %s", experiment_id)
 
         # Append new data to the existing cached dataframe
         self.cached_data[experiment_id] = pd.concat([self.cached_data[experiment_id], new_data])
