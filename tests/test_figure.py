@@ -13,7 +13,7 @@ from unittest import mock
 import plotly.graph_objects as go
 import pandas as pd
 
-import app.components as app
+from app.components import figure
 
 
 class TestInitializeFigure(unittest.TestCase):
@@ -29,11 +29,11 @@ class TestInitializeFigure(unittest.TestCase):
 
         self.logger_patch.start()
 
-        self.original_logger = app.figure.logger
-        app.figure.logger = self.mock_logger
+        self.original_logger = figure.logger
+        figure.logger = self.mock_logger
 
     def tearDown(self) -> None:
-        app.figure.logger = self.original_logger
+        figure.logger = self.original_logger
         self.logger_patch.stop()
         return super().tearDown()
 
@@ -43,7 +43,7 @@ class TestInitializeFigure(unittest.TestCase):
         axes ranges are automatic, axes titles are set,
         log is emitted.
         """
-        fig = app.figure.initialize_figure()
+        fig = figure.initialize_figure()
 
         self.assertIsInstance(fig, go.Figure)
         self.assertEqual(len(fig.data), 1)
@@ -77,12 +77,12 @@ class TestPlotData(unittest.TestCase):
 
         self.logger_patch.start()
 
-        self.original_logger = app.figure.logger
-        app.figure.logger = self.mock_logger
-        self.init_fig = app.figure.initialize_figure()
+        self.original_logger = figure.logger
+        figure.logger = self.mock_logger
+        self.init_fig = figure.initialize_figure()
 
     def tearDown(self) -> None:
-        app.figure.logger = self.original_logger
+        figure.logger = self.original_logger
         self.init_fig = None
         self.logger_patch.stop()
         return super().tearDown()
@@ -91,7 +91,7 @@ class TestPlotData(unittest.TestCase):
         """Test with an empty DataFrame, figure should return early"""
 
         empty_df = pd.DataFrame()
-        fig = app.figure.plot_data(self.init_fig, empty_df)
+        fig = figure.plot_data(self.init_fig, empty_df)
 
         # Verify that the logger was called with the expected debug message
         self.mock_logger.error.assert_called_with(
@@ -105,7 +105,7 @@ class TestPlotData(unittest.TestCase):
         # Create an invalid DataFrame that does not contain 'ts' and 'value' columns
         df = pd.DataFrame({'timestamp': [1, 2], 'val': [3, 4]})
 
-        fig = app.figure.plot_data(self.init_fig, df)
+        fig = figure.plot_data(self.init_fig, df)
 
         # Verify that the logger was called with the expected debug message
         self.mock_logger.error.assert_called_with(
@@ -120,7 +120,7 @@ class TestPlotData(unittest.TestCase):
             'ts': [1, 2, 3],
             'value': [10, 20, 30]})
 
-        fig = app.figure.plot_data(self.init_fig, df)
+        fig = figure.plot_data(self.init_fig, df)
 
         self.assertListEqual(list(fig.data[0]['x']), [1, 2, 3])
         self.assertListEqual(list(fig.data[0]['y']), [10, 20, 30])
@@ -131,7 +131,7 @@ class TestPlotData(unittest.TestCase):
             'ts': ['1', '2', '3'],
             'value': ['10', '20', '30']})
 
-        fig = app.figure.plot_data(self.init_fig, df)
+        fig = figure.plot_data(self.init_fig, df)
 
         self.assertListEqual(list(fig.data[0]['x']), [1, 2, 3])
         self.assertListEqual(list(fig.data[0]['y']), [10, 20, 30])
@@ -142,7 +142,7 @@ class TestPlotData(unittest.TestCase):
             'ts': ['1.0', '2.0', '3.0'],
             'value': ['10.0', '20.0', '30.0']})
 
-        fig = app.figure.plot_data(self.init_fig, df)
+        fig = figure.plot_data(self.init_fig, df)
 
         self.assertListEqual(list(fig.data[0]['x']), [1.0, 2.0, 3.0])
         self.assertListEqual(list(fig.data[0]['y']), [10.0, 20.0, 30.0])
@@ -153,14 +153,14 @@ class TestPlotData(unittest.TestCase):
             'ts': ['a', 'b', '4124'],
             'value': ['gg', 'lol', 'wat']})
 
-        fig = app.figure.plot_data(self.init_fig, df)
+        fig = figure.plot_data(self.init_fig, df)
 
         # Verify that an empty figure is returned
         self.assertEqual(fig.data, self.init_fig.data)
 
         # Verify that the logger was called with the expected debug message
         self.mock_logger.error.assert_called_with(
-            "Columns have non-numeric data and can't change them. Returning empty...")
+            "Data type conversion error. Returning existing figure...")
 
 
 class TestFigureLayout(unittest.TestCase):
@@ -176,13 +176,13 @@ class TestFigureLayout(unittest.TestCase):
 
         self.logger_patch.start()
 
-        self.original_logger = app.figure.logger
-        app.figure.logger = self.mock_logger
+        self.original_logger = figure.logger
+        figure.logger = self.mock_logger
 
-        self.figure = app.figure.initialize_figure()
+        self.figure = figure.initialize_figure()
 
     def tearDown(self) -> None:
-        app.figure.logger = self.original_logger
+        figure.logger = self.original_logger
         self.logger_patch.stop()
         self.figure = None
         return super().tearDown()
@@ -192,7 +192,7 @@ class TestFigureLayout(unittest.TestCase):
         fig_mock = mock.MagicMock()  # Mock the go.Figure object
         stored_layout = {}  # Initial empty state
 
-        app.figure.update_axes_layout(fig_mock, stored_layout)
+        figure.update_axes_layout(fig_mock, stored_layout)
 
         # Assertions
         fig_mock.update_xaxes.assert_not_called()  # The x-axes should not be updated
@@ -204,7 +204,7 @@ class TestFigureLayout(unittest.TestCase):
         stored_layout = {
             'xaxis.range[0]': 0, 'xaxis.range[1]': 10, 'yaxis.range[0]': -5, 'yaxis.range[1]': 5}
 
-        app.figure.update_axes_layout(self.figure, stored_layout)
+        figure.update_axes_layout(self.figure, stored_layout)
 
         # Assertions based on final state of figure layout
         self.assertEqual(self.figure['layout']['xaxis']['range'], (0, 10))
@@ -220,7 +220,7 @@ class TestFigureLayout(unittest.TestCase):
 
         stored_layout = {'autosize': True}  # Simulate a manual reset
 
-        app.figure.update_axes_layout(fig_mock, stored_layout)
+        figure.update_axes_layout(fig_mock, stored_layout)
 
         # Assertions
         fig_mock.update_xaxes.assert_called_once_with(autorange=True)  # The x-axis should be set to autorange
@@ -230,17 +230,17 @@ class TestFigureLayout(unittest.TestCase):
         """Integration-like test for sequence of manual changes and reset"""
         # Step 1: Initial manual set
         stored_layout_initial = {'xaxis.range[0]': -10, 'xaxis.range[1]': 10}
-        app.figure.update_axes_layout(self.figure, stored_layout_initial)
+        figure.update_axes_layout(self.figure, stored_layout_initial)
         self.assertEqual(self.figure['layout']['xaxis']['range'], (-10, 10))
         self.assertEqual(self.figure['layout']['xaxis']['autorange'], False)
 
         # Step 2: Reset layout
         stored_layout_reset = {'autosize': True}
-        app.figure.update_axes_layout(self.figure, stored_layout_reset)
+        figure.update_axes_layout(self.figure, stored_layout_reset)
         self.assertEqual(self.figure['layout']['xaxis']['autorange'], True)
 
         # Step 3: Manual set again
         stored_layout_new = {'xaxis.range[0]': 0, 'xaxis.range[1]': 20}
-        app.figure.update_axes_layout(self.figure, stored_layout_new)
+        figure.update_axes_layout(self.figure, stored_layout_new)
         self.assertEqual(self.figure['layout']['xaxis']['range'], (0, 20))
         self.assertEqual(self.figure['layout']['xaxis']['autorange'], False)
