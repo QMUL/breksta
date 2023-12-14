@@ -63,6 +63,14 @@ def plot_data(fig: go.Figure, df: pd.DataFrame) -> go.Figure:
         logger.error("DataFrame empty, or keys missing from columns. Returning empty...")
         return fig
 
+    # Ensure 'ts' and 'value' are of numeric type
+    try:
+        df['ts'] = pd.to_numeric(df['ts'])
+        df['value'] = pd.to_numeric(df['value'])
+    except ValueError:
+        logger.error("Data type conversion error. Returning existing figure...")
+        return fig
+
     fig.data[0].x = df['ts']
     fig.data[0].y = df['value']
 
