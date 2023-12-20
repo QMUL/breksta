@@ -140,3 +140,63 @@ class ADCConfigWidget(QWidget):
             "polling_mode": self.polling_mode_group.idClicked
         }
 
+
+class ADCConfigManager:
+    """Manages the configuration interactions for an ADCConfigWidget instance.
+
+    This manager class is responsible for connecting the ADCConfigWidget user interface elements
+    to logical handlers that update the ADC configuration settings.
+
+    Attributes:
+        config_widget (ADCConfigWidget): The associated class that creates the UI elements.
+    """
+    def __init__(self, config_widget: ADCConfigWidget) -> None:
+        self.config_widget = config_widget
+        self.setup_connections()
+
+    def setup_connections(self) -> None:
+        """Establishes connections between UI elements and their event handlers.
+
+        This method connects the change signals from the UI elements to their respective slot functions.
+        Ensures the ADC configuration is updated dynamically as the user interacts with the control panel.
+        """
+        self.config_widget.address_combo.currentIndexChanged.connect(self.on_address_change)
+        self.config_widget.gain_combo.currentIndexChanged.connect(self.on_gain_change)
+        self.config_widget.data_rate_combo.currentIndexChanged.connect(self.on_data_rate_change)
+        # Connect the button group's 'idToggled' signal to the handler
+        self.config_widget.polling_mode_group.idToggled.connect(self.on_polling_mode_change)
+
+    def on_address_change(self, index) -> None:
+        """Handle the address change"""
+        address = self.config_widget.address_combo.itemData(index)
+        print(f"Address changed to: 0x{address:X}")
+
+    def on_gain_change(self, index) -> None:
+        """Handle the gain change"""
+        gain = self.config_widget.gain_combo.itemData(index)
+        print(f"Gain changed to: {gain}")
+
+    def on_data_rate_change(self, index) -> None:
+        """Handle the gain change"""
+        data_rate = self.config_widget.data_rate_combo.itemData(index)
+        print(f"Data Rate changed to: {data_rate}")
+
+    def on_polling_mode_change(self, button_id, checked) -> None:
+        """Adjusts the ADC configuration based on the selected polling mode.
+
+        Enables or disables the data rate configuration based on the selected mode. Single-shot operation
+        does not require a data rate, hence the associated control is disabled to reflect this dependency.
+
+        Args:
+            button_id: The identifier of the radio button that triggered the event.
+            checked: A boolean indicating whether the radio button is checked.
+        """
+        # Only act on the signal when a button is checked, not unchecked
+        if checked:
+            if button_id == 0:
+                mode = "Single-shot Operation"
+                self.config_widget.data_rate_combo.setEnabled(False)
+            elif button_id == 1:
+                mode = "Continuous Operation"
+                self.config_widget.data_rate_combo.setEnabled(True)
+            print(f"Polling Mode changed to: {mode}")

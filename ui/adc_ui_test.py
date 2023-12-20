@@ -1,6 +1,6 @@
 import sys
 from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout
-from ui.adc_controlpanel import ADCConfigWidget
+from ui.adc_controlpanel import ADCConfigWidget, ADCConfigManager
 
 
 class TestWindow(QWidget):
@@ -10,8 +10,9 @@ class TestWindow(QWidget):
 
     def setupUI(self) -> None:
         layout = QVBoxLayout(self)
-        self.adc_configWidget = ADCConfigWidget()
-        layout.addWidget(self.adc_configWidget)
+        self.adc_config_widget = ADCConfigWidget()
+        self.adc_config_manager = ADCConfigManager(self.adc_config_widget)
+        layout.addWidget(self.adc_config_widget)
 
 
 if __name__ == "__main__":
