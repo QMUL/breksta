@@ -1,6 +1,6 @@
 """Encapsulates the ADC-related GUI functionality
 """
-from PySide6.QtWidgets import QWidget, QLabel, QComboBox, QRadioButton, QVBoxLayout
+from PySide6.QtWidgets import QWidget, QLabel, QComboBox, QRadioButton, QVBoxLayout, QButtonGroup
 
 from app.logger_config import setup_logger
 from device.adc_config import ADS1115Address as Address, ADS1115Gain as Gain, ADS1115DataRate as DR
@@ -14,8 +14,7 @@ class ADCConfigWidget(QWidget):
         self.logger = setup_logger()
         self.address_combo = None
         self.data_rate_combo = None
-        self.polling_mode_single = None
-        self.polling_mode_continuous = None
+        self.polling_mode_group = None
         self.gain_combo = None
 
         self.setup_ui()
@@ -116,19 +115,28 @@ class ADCConfigWidget(QWidget):
         layout.addWidget(self.data_rate_combo)
 
     def setup_polling_mode(self, layout: QVBoxLayout) -> None:
-        """Creates the Polling mode Radio buttons elements.
-        Uses the ADS1115 class to populate the values."""
-        self.polling_mode_single = QRadioButton("Single-shot Operation")
-        self.polling_mode_continuous = QRadioButton("Continuous Operation")
-        self.polling_mode_single.setChecked(True)  # Default to Single-Shot
+        """Creates the Polling mode Radio buttons elements."""
+        self.polling_mode_group = QButtonGroup(self)
+
+        # Create radio buttons
+        polling_mode_single = QRadioButton("Single-shot Operation")
+        polling_mode_continuous = QRadioButton("Continuous Operation")
+        polling_mode_single.setChecked(True)  # Default to Single-Shot
+
+        # Add radio buttons to the group with IDs
+        self.polling_mode_group.addButton(polling_mode_single, 0)
+        self.polling_mode_group.addButton(polling_mode_continuous, 1)
+
+        # Add radio buttons to the layout
         layout.addWidget(QLabel("Polling Mode:"))
-        layout.addWidget(self.polling_mode_single)
-        layout.addWidget(self.polling_mode_continuous)
+        layout.addWidget(polling_mode_single)
+        layout.addWidget(polling_mode_continuous)
 
     def get_config_values(self):
         return {
             "address": self.address_combo.currentText(),
             "gain": self.gain_combo.currentText(),
             "data_rate": self.data_rate_combo.currentText(),
-            "polling_mode": self.polling_mode_single.isChecked()
+            "polling_mode": self.polling_mode_group.idClicked
         }
+
