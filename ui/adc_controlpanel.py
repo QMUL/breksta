@@ -46,15 +46,17 @@ class ADCConfigWidget(QWidget):
         """Creates the Address combo text element.
         Uses the ADS1115 class to populate the values."""
         address_label = QLabel("Address:")
-        self.address_combo = QComboBox()
 
-        for address in [
-            Address.GND,
-            Address.VDD,
-            Address.SDA,
-            Address.SCL
-        ]:
-            self.address_combo.addItem(f"0x{address:X}", address)
+        # Mapping of addresses to descriptive strings
+        address_mapping: dict[int, str] = {
+            Address.GND: "GND",
+            Address.VDD: "VDD",
+            Address.SDA: "SDA",
+            Address.SCL: "SCL"
+        }
+
+        for address, description in address_mapping.items():
+            self.address_combo.addItem(f"0x{address:X} ({description})", address)
 
         # set the default value
         self.address_combo.setCurrentIndex(0)
