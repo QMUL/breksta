@@ -9,6 +9,11 @@ from device.adc_config import ADS1115Address as Address, ADS1115Gain as Gain, AD
 class ADCConfigWidget(QWidget):
     """Handles the creation and initialization of the ADC configuration UI elements.
     """
+    # BUS = 1
+    ADDRESS_DEFAULT = Address.GND
+    GAIN_DEFAULT = Gain.PGA_6_144V
+    DATA_RATE_DEFAULT = DR.DR_ADS111X_128
+
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self.logger = setup_logger()
@@ -23,19 +28,13 @@ class ADCConfigWidget(QWidget):
         """Creates the layout and the elements, then binds them together.
         """
         layout = QVBoxLayout(self)
+        self.logger.debug("Setting up ADC control panel UI elements and values:")
 
         self.setup_bus_label(layout)
         self.setup_address_combo(layout)
         self.setup_gain_combo(layout)
         self.setup_polling_mode(layout)
         self.setup_data_rate(layout)
-
-        self.logging_setup()
-
-    def logging_setup(self) -> None:
-        """Helper to house all logging."""
-        self.logger.debug("Setting up ADC control panel UI elements and values:")
-        self.logger.debug("Address: %s", self.address_combo.currentText())
 
     def setup_bus_label(self, layout: QVBoxLayout) -> None:
         """Creates the Bus fixed text element."""
@@ -55,12 +54,12 @@ class ADCConfigWidget(QWidget):
             Address.SCL: "SCL"
         }
 
-        for address, description in address_mapping.items():
+        for index, (address, description) in enumerate(address_mapping.items()):
             self.address_combo.addItem(f"0x{address:X} ({description})", address)
+            if address == self.ADDRESS_DEFAULT:
+                self.address_combo.setCurrentIndex(index)
 
-        # set the default value
-        self.address_combo.setCurrentIndex(0)
-
+        self.logger.debug("Address: %s", self.address_combo.currentText())
         layout.addWidget(address_label)
         layout.addWidget(self.address_combo)
 
@@ -79,12 +78,12 @@ class ADCConfigWidget(QWidget):
             Gain.PGA_0_256V: "±0.256V"
         }
 
-        for gain_value, gain_text in gain_mapping.items():
+        for index, (gain_value, gain_text) in enumerate(gain_mapping.items()):
             self.gain_combo.addItem(gain_text, gain_value)
+            if gain_value == self.GAIN_DEFAULT:
+                self.gain_combo.setCurrentIndex(index)
 
-        # Hard-set the default value
-        self.gain_combo.setCurrentIndex(0)
-
+        self.logger.debug("Gain: %s", self.gain_combo.currentText())
         layout.addWidget(gain_label)
         layout.addWidget(self.gain_combo)
 
@@ -104,13 +103,13 @@ class ADCConfigWidget(QWidget):
             DR.DR_ADS111X_860: "860 SPS (Fastest)"
         }
 
-        for data_rate_value, data_rate_text in data_rate_mapping.items():
+        for index, (data_rate_value, data_rate_text) in enumerate(data_rate_mapping.items()):
             self.data_rate_combo.addItem(data_rate_text, data_rate_value)
-
-        # Hard-set the default value
-        self.data_rate_combo.setCurrentIndex(4)
+            if data_rate_value == self.DATA_RATE_DEFAULT:
+                self.data_rate_combo.setCurrentIndex(index)
 
         self.data_rate_combo.setEnabled(False)
+        self.logger.debug("Data Rate: %s", self.data_rate_combo.currentText())
         layout.addWidget(QLabel("Data Rate:"))
         layout.addWidget(self.data_rate_combo)
 
@@ -129,6 +128,7 @@ class ADCConfigWidget(QWidget):
         layout.addWidget(QLabel("Polling Mode:"))
         layout.addWidget(polling_mode_single)
         layout.addWidget(polling_mode_continuous)
+        self.logger.debug("Polling: %s", self.polling_mode_group.checkedButton().text())
 
     def get_config_values(self):
         return {
