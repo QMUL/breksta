@@ -12,11 +12,11 @@ class ADCConfigWidget(QWidget):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self.logger = setup_logger()
-        self.address_combo = None
-        self.data_rate_combo = None
-        self.polling_mode_group = None
-        self.gain_combo = None
-
+        self.address_combo = QComboBox()
+        self.gain_combo = QComboBox()
+        self.data_rate_combo = QComboBox()
+        self.polling_mode_group = QButtonGroup()
+        # Directly call the setup_ui method to initialize UI components
         self.setup_ui()
 
     def setup_ui(self) -> None:
@@ -56,7 +56,7 @@ class ADCConfigWidget(QWidget):
         ]:
             self.address_combo.addItem(f"0x{address:X}", address)
 
-        # Hard-set the default value
+        # set the default value
         self.address_combo.setCurrentIndex(0)
 
         layout.addWidget(address_label)
@@ -66,7 +66,6 @@ class ADCConfigWidget(QWidget):
         """Creates the Gain combo text element.
         Uses the ADS1115 class to populate the values."""
         gain_label = QLabel("Gain:")
-        self.gain_combo = QComboBox()
 
         # Mapping of gain constants to descriptive strings
         gain_mapping: dict[int, str] = {
@@ -90,7 +89,6 @@ class ADCConfigWidget(QWidget):
     def setup_data_rate(self, layout: QVBoxLayout) -> None:
         """Creates the Data Rate combo box element.
         Uses the ADS1115 class to populate the values."""
-        self.data_rate_combo = QComboBox()
 
         # Mapping of data rate values to descriptive strings
         data_rate_mapping: dict[int, str] = {
@@ -116,8 +114,6 @@ class ADCConfigWidget(QWidget):
 
     def setup_polling_mode(self, layout: QVBoxLayout) -> None:
         """Creates the Polling mode Radio buttons elements."""
-        self.polling_mode_group = QButtonGroup(self)
-
         # Create radio buttons
         polling_mode_single = QRadioButton("Single-shot Operation")
         polling_mode_continuous = QRadioButton("Continuous Operation")
