@@ -3,7 +3,12 @@
 from PySide6.QtWidgets import QWidget, QLabel, QComboBox, QRadioButton, QVBoxLayout, QButtonGroup
 
 from app.logger_config import setup_logger
-from device.adc_config import ADS1115Address as Address, ADS1115Gain as Gain, ADS1115DataRate as DR
+from device.adc_config import (
+    ADS1115Address as Address,
+    ADS1115Gain as Gain,
+    ADS1115Mode as Mode,
+    ADS1115DataRate as DR
+)
 
 
 class ADCConfigWidget(QWidget):
@@ -12,11 +17,12 @@ class ADCConfigWidget(QWidget):
     # BUS = 1
     ADDRESS_DEFAULT = Address.GND
     GAIN_DEFAULT = Gain.PGA_6_144V
+    MODE_DEFAULT = Mode.poll_mode_single
     DATA_RATE_DEFAULT = DR.DR_ADS111X_128
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, logger, parent=None) -> None:
         super().__init__(parent)
-        self.logger = setup_logger()
+        self.logger = logger if logger is not None else setup_logger()
         self.address_combo = QComboBox()
         self.gain_combo = QComboBox()
         self.data_rate_combo = QComboBox()
@@ -118,11 +124,12 @@ class ADCConfigWidget(QWidget):
         # Create radio buttons
         polling_mode_single = QRadioButton("Single-shot Operation")
         polling_mode_continuous = QRadioButton("Continuous Operation")
-        polling_mode_single.setChecked(True)  # Default to Single-Shot
 
-        # Add radio buttons to the group with IDs
-        self.polling_mode_group.addButton(polling_mode_single, 0)
-        self.polling_mode_group.addButton(polling_mode_continuous, 1)
+        # Add radio buttons to the group with Enums as IDs
+        self.polling_mode_group.addButton(polling_mode_single, Mode.poll_mode_single.value)
+        self.polling_mode_group.addButton(polling_mode_continuous, Mode.poll_mode_continuous.value)
+
+        self.polling_mode_group.button(self.MODE_DEFAULT.value).setChecked(True)
 
         # Add radio buttons to the layout
         layout.addWidget(QLabel("Polling Mode:"))
@@ -130,12 +137,12 @@ class ADCConfigWidget(QWidget):
         layout.addWidget(polling_mode_continuous)
         self.logger.debug("Polling: %s", self.polling_mode_group.checkedButton().text())
 
-    def get_config_values(self):
+    def get_config_values(self) -> dict[str, str]:
         return {
             "address": self.address_combo.currentText(),
             "gain": self.gain_combo.currentText(),
             "data_rate": self.data_rate_combo.currentText(),
-            "polling_mode": self.polling_mode_group.idClicked
+            "polling_mode": self.polling_mode_group.checkedButton().text()
         }
 
 
@@ -148,7 +155,9 @@ class ADCConfigManager:
     Attributes:
         config_widget (ADCConfigWidget): The associated class that creates the UI elements.
     """
-    def __init__(self, config_widget: ADCConfigWidget) -> None:
+    def __init__(self, config_widget: ADCConfigWidget, logger) -> None:
+        self.logger = logger if logger is not None else setup_logger()
+
         self.config_widget = config_widget
         self.setup_connections()
 
@@ -164,20 +173,20 @@ class ADCConfigManager:
         # Connect the button group's 'idToggled' signal to the handler
         self.config_widget.polling_mode_group.idToggled.connect(self.on_polling_mode_change)
 
-    def on_address_change(self, index) -> None:
+    def on_address_change(self, index: int) -> None:
         """Handle the address change"""
         address = self.config_widget.address_combo.itemData(index)
-        print(f"Address changed to: 0x{address:X}")
+        self.logger.debug("Address changed to: 0x%X", address)
 
-    def on_gain_change(self, index) -> None:
+    def on_gain_change(self, index: int) -> None:
         """Handle the gain change"""
         gain = self.config_widget.gain_combo.itemData(index)
-        print(f"Gain changed to: {gain}")
+        self.logger.debug("Gain changed to: %s", gain)
 
-    def on_data_rate_change(self, index) -> None:
+    def on_data_rate_change(self, index: int) -> None:
         """Handle the gain change"""
         data_rate = self.config_widget.data_rate_combo.itemData(index)
-        print(f"Data Rate changed to: {data_rate}")
+        self.logger.debug("Data Rate changed to: %s", data_rate)
 
     def on_polling_mode_change(self, button_id, checked) -> None:
         """Adjusts the ADC configuration based on the selected polling mode.
@@ -191,10 +200,10 @@ class ADCConfigManager:
         """
         # Only act on the signal when a button is checked, not unchecked
         if checked:
-            if button_id == 0:
+            if button_id == Mode.poll_mode_single.value:
                 mode = "Single-shot Operation"
                 self.config_widget.data_rate_combo.setEnabled(False)
-            elif button_id == 1:
+            elif button_id == Mode.poll_mode_continuous.value:
                 mode = "Continuous Operation"
                 self.config_widget.data_rate_combo.setEnabled(True)
-            print(f"Polling Mode changed to: {mode}")
+            self.logger.debug("Polling Mode changed to: %s", mode)
