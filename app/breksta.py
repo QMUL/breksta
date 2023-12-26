@@ -15,12 +15,13 @@ from PySide6.QtGui import QAction, QKeySequence
 from PySide6.QtWidgets import (
     QApplication, QComboBox, QHBoxLayout, QLabel, QLineEdit, QMainWindow,
     QPushButton, QTabWidget, QVBoxLayout, QWidget, QTableWidget,
-    QTableWidgetItem, QStyledItemDelegate, QFileDialog, QMessageBox)
+    QTableWidgetItem, QStyledItemDelegate, QFileDialog, QMessageBox, QGroupBox)
 from PySide6.QtWebEngineWidgets import QWebEngineView
 
 from app.capture import DevCapture
 from app.capture import PmtDb
 from app.logger_config import setup_logger
+from ui.adc_controlpanel import ADCConfigManager, ADCConfigWidget
 
 # Programmatically set PYTHONPATH for breksta ONLY
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
@@ -56,9 +57,26 @@ class CaptureControl(QWidget):
         self.ui.freq_box.currentTextChanged.connect(self.set_freq)
         self.ui.dur_box.currentTextChanged.connect(self.set_dur)
 
-        # Create a layout for this class, and add the UI elements to it
+        # Set up ADC UI elements and their manager. Widget is auto-added to stack.
+        adc_widget = ADCConfigWidget(self.logger)
+        self.adc_manager = ADCConfigManager(adc_widget, self.logger)
+
         layout = QVBoxLayout()
-        layout.addWidget(self.ui)
+        # Create a layout for this class, and add the UI elements to it
+        control_layout = QVBoxLayout()
+        control_layout.addWidget(self.ui)
+        controls_group_box = QGroupBox("Controls")
+        controls_group_box.setLayout(control_layout)
+        layout.addWidget(controls_group_box)
+
+        # Add the adc_widget within a group box for better grouping
+        adc_group_box = QGroupBox("ADC Settings")
+        adc_layout = QVBoxLayout()
+        adc_layout.addWidget(adc_widget)
+        adc_group_box.setLayout(adc_layout)
+
+        layout.addWidget(adc_group_box)
+
         self.setLayout(layout)
 
         # Set up the device for data capture and create a QTimer object
