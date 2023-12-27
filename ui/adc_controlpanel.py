@@ -23,10 +23,6 @@ class ADCConfigWidget(QWidget):
     def __init__(self, logger, parent=None) -> None:
         super().__init__(parent)
         self.logger = logger if logger is not None else setup_logger()
-        self.address_combo = QComboBox()
-        self.gain_combo = QComboBox()
-        self.data_rate_combo = QComboBox()
-        self.polling_mode_group = QButtonGroup()
         # Directly call the setup_ui method to initialize UI components
         self.setup_ui()
 
@@ -34,6 +30,10 @@ class ADCConfigWidget(QWidget):
         """Creates the layout and the elements, then binds them together.
         """
         layout = QVBoxLayout(self)
+        self.address_combo = QComboBox()
+        self.gain_combo = QComboBox()
+        self.data_rate_combo = QComboBox()
+        self.polling_mode_group = QButtonGroup()
         self.logger.debug("Setting up ADC control panel UI elements and values:")
 
         self.setup_bus_label(layout)
@@ -150,14 +150,6 @@ class ADCConfigWidget(QWidget):
         layout.addWidget(polling_mode_continuous)
         self.logger.debug("Polling: %s", self.polling_mode_group.checkedButton().text())
 
-    def get_config_values(self) -> dict[str, str]:
-        return {
-            "address": self.address_combo.currentText(),
-            "gain": self.gain_combo.currentText(),
-            "data_rate": self.data_rate_combo.currentText(),
-            "polling_mode": self.polling_mode_group.checkedButton().text()
-        }
-
 
 class ADCConfigManager:
     """Manages the configuration interactions for an ADCConfigWidget instance.
@@ -220,3 +212,12 @@ class ADCConfigManager:
                 mode = "Continuous Operation"
                 self.config_widget.data_rate_combo.setEnabled(True)
             self.logger.debug("Polling Mode changed to: %s", mode)
+
+    def get_config_values(self) -> dict[str, str]:
+        """Extracts the current values of the ADC configuration."""
+        return {
+            "address": self.config_widget.address_combo.currentText(),
+            "gain": self.config_widget.gain_combo.currentText(),
+            "data_rate": self.config_widget.data_rate_combo.currentText(),
+            "polling_mode": self.config_widget.polling_mode_group.checkedButton().text()
+        }
