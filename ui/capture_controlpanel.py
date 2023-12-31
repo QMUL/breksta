@@ -2,6 +2,7 @@
 Module that houses all the UI element creation and initialization for signal capturing.
 """
 from PySide6.QtWidgets import QWidget, QLabel, QComboBox, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit
+from PySide6.QtCore import Signal
 
 from app.logger_config import setup_logger
 
@@ -12,6 +13,10 @@ class CaptureControlUI(QWidget):
     """
     DEFAULT_EXPERIMENT_NAME = "experiment-name"
     DEFAULT_EXPERIMENT_DURATION = 1  # 1 hour
+
+    # Define custom signals
+    experimentStarted = Signal()
+    experimentStopped = Signal()
 
     def __init__(self, logger) -> None:
         super().__init__()
@@ -37,6 +42,9 @@ class CaptureControlUI(QWidget):
         self.setup_experiment_duration_box(self.dur_box, layout)
 
         self.setLayout(layout)
+
+        self.start_button.clicked.connect(self.experimentStarted.emit)
+        self.stop_button.clicked.connect(self.experimentStopped.emit)
 
     def setup_start_button(self, button, layout: QVBoxLayout) -> None:
         """Create Start button"""
