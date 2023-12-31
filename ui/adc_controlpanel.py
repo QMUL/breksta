@@ -7,14 +7,16 @@ from device.adc_config import (
     ADS1115Address as Address,
     ADS1115Gain as Gain,
     ADS1115Mode as Mode,
-    ADS1115DataRate as DR
+    ADS1115DataRate as DR,
+    ADCConfig
 )
+from device.adc_run import ADCReader, ContinuousADCReader, SingleShotADCReader
 
 
 class ADCConfigWidget(QWidget):
     """Handles the creation and initialization of the ADC configuration UI elements.
     """
-    # BUS = 1
+    BUS = 1
     ADDRESS_DEFAULT = Address.GND
     GAIN_DEFAULT = Gain.PGA_6_144V
     MODE_DEFAULT = Mode.poll_mode_single
@@ -213,11 +215,34 @@ class ADCConfigManager:
                 self.config_widget.data_rate_combo.setEnabled(True)
             self.logger.debug("Polling Mode changed to: %s", mode)
 
-    def get_config_values(self) -> dict[str, str]:
-        """Extracts the current values of the ADC configuration."""
-        return {
-            "address": self.config_widget.address_combo.currentText(),
-            "gain": self.config_widget.gain_combo.currentText(),
-            "data_rate": self.config_widget.data_rate_combo.currentText(),
-            "polling_mode": self.config_widget.polling_mode_group.checkedButton().text()
-        }
+    def get_adc_config(self) -> ADCConfig:
+        """Extracts the current ADC configuration values from the UI."""
+        bus = self.config_widget.BUS
+        address = self.config_widget.address_combo.itemData(self.config_widget.address_combo.currentIndex())
+        gain = self.config_widget.gain_combo.itemData(self.config_widget.gain_combo.currentIndex())
+        data_rate = self.config_widget.data_rate_combo.itemData(self.config_widget.data_rate_combo.currentIndex())
+
+        polling_mode_id = self.config_widget.polling_mode_group.checkedId()
+        polling_mode = Mode(polling_mode_id)  # Convert to Mode enum
+
+        config = ADCConfig(
+            i2c_bus=bus,
+            address=address,
+            gain=gain,
+            data_rate=data_rate,
+            poll_mode=polling_mode
+        )
+
+        self.logger.debug("Pushing ADC Configuration: %s", config)
+        return config
+
+    def get_adc_reader(self, config, channel, period) -> ADCReader:
+        self.logger.debug("Selecting ADC Reader for %s operation", config.poll_mode)
+
+        match config.poll_mode:
+            case Mode.poll_mode_single:
+                return SingleShotADCReader(config, channel, period, self.logger)
+            case Mode.poll_mode_continuous:
+                return ContinuousADCReader(config, channel, period, self.logger)
+            case _:
+                raise ValueError(f"Invalid ADC mode: {config.poll_mode}")
