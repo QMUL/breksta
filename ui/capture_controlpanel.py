@@ -1,10 +1,10 @@
 """
 Module that houses all the UI element creation and initialization for signal capturing.
 """
-from PySide6.QtWidgets import QWidget, QLabel, QComboBox, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit
+from PySide6.QtWidgets import QWidget, QLabel, QComboBox, QVBoxLayout, QPushButton, QLineEdit
 from PySide6.QtCore import Signal
-
 from app.logger_config import setup_logger
+from ui.layout import create_horizontal_box
 
 
 class CaptureControlUI(QWidget):
@@ -61,10 +61,8 @@ class CaptureControlUI(QWidget):
         name_label = QLabel('Experiment name')
         name_box.setText(self.DEFAULT_EXPERIMENT_NAME)
 
-        name_layout = QHBoxLayout()
-        name_layout.addWidget(name_label)
-        name_layout.addWidget(name_box)
-        layout.addLayout(name_layout)
+        box = create_horizontal_box(name_box, name_label)
+        layout.addLayout(box)
 
     def setup_frequency_box(self, freq_box, layout: QVBoxLayout) -> None:
         """Creates the capturing frequency combo box."""
@@ -72,10 +70,8 @@ class CaptureControlUI(QWidget):
         freq_box.addItems(list(map(str, (2, 4, 8, 10, 15, 30, 60, 120))))
         freq_box.setCurrentIndex(0)
 
-        freq_layout = QHBoxLayout()
-        freq_layout.addWidget(freq_label)
-        freq_layout.addWidget(freq_box)
-        layout.addLayout(freq_layout)
+        box = create_horizontal_box(freq_box, freq_label)
+        layout.addLayout(box)
 
     def setup_experiment_duration_box(self, dur_box, layout: QVBoxLayout) -> None:
         """Creates the experiment duration combo box."""
@@ -83,10 +79,8 @@ class CaptureControlUI(QWidget):
         dur_box.addItems(list(map(str, (1, 2, 4, 6, 8, 10, 12, 24, 36, 48, 72, 240))))
         dur_box.setCurrentIndex(0)
 
-        dur_layout = QHBoxLayout()
-        dur_layout.addWidget(dur_label)
-        dur_layout.addWidget(dur_box)
-        layout.addLayout(dur_layout)
+        box = create_horizontal_box(dur_box, dur_label)
+        layout.addLayout(box)
 
 
 class CaptureControlManager:

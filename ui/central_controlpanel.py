@@ -2,9 +2,10 @@
 Glues together all UI and Manager classes.
 """
 import sys
-from PySide6.QtWidgets import QApplication, QVBoxLayout, QGroupBox, QWidget
+from PySide6.QtWidgets import QApplication, QVBoxLayout, QWidget
 from ui.adc_controlpanel import ADCConfigWidget, ADCConfigManager
 from ui.capture_controlpanel import CaptureControlUI, CaptureControlManager
+from ui.layout import create_group_box_layout
 from app.logger_config import setup_logger
 
 
@@ -75,24 +76,14 @@ class CentralizedControlManager(QWidget):
         self.adc_ui.setEnabled(True)
         self.logger.debug("Experiment stopped - ADC controls enabled.")
 
-    def create_group_box_layout(self, widget, name: str) -> QGroupBox:
-        """
-        Creates a Vertical box layout and encapsulates it into a Group Box with a given name.
-        """
-        group_box = QGroupBox(name)
-        group_layout = QVBoxLayout()
-        group_layout.addWidget(widget)
-        group_box.setLayout(group_layout)
-        return group_box
-
     def create_layout(self, capture, adc) -> None:
         """Creates the final Capture tab layout, which encompasses UI elements in their own box."""
         layout = QVBoxLayout()
 
-        controls_group_box = self.create_group_box_layout(capture, "Controls")
+        controls_group_box = create_group_box_layout(capture, "Controls")
         layout.addWidget(controls_group_box)
 
-        adc_group_box = self.create_group_box_layout(adc, "ADC Settings")
+        adc_group_box = create_group_box_layout(adc, "ADC Settings")
         layout.addWidget(adc_group_box)
 
         self.setLayout(layout)

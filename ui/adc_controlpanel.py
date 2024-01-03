@@ -6,7 +6,7 @@ Includes:
 - creating the ADC configuration object
 - selecting the ADC reading operation mode
 """
-from PySide6.QtWidgets import QWidget, QLabel, QComboBox, QRadioButton, QVBoxLayout, QButtonGroup, QHBoxLayout
+from PySide6.QtWidgets import QWidget, QLabel, QComboBox, QRadioButton, QVBoxLayout, QButtonGroup
 
 from app.logger_config import setup_logger
 from device.adc_config import (
@@ -17,6 +17,7 @@ from device.adc_config import (
     ADCConfig
 )
 from device.adc_run import ADCReader, ContinuousADCReader, SingleShotADCReader
+from ui.layout import create_horizontal_box
 
 
 class ADCConfigWidget(QWidget):
@@ -75,11 +76,9 @@ class ADCConfigWidget(QWidget):
 
         self.logger.debug("Address: %s", self.address_combo.currentText())
 
-        # Add label and UI element in Horizontal box/one-liner
-        addr_layout = QHBoxLayout()
-        addr_layout.addWidget(address_label)
-        addr_layout.addWidget(self.address_combo)
-        layout.addLayout(addr_layout)
+        # Add label and UI element in Horizontal box
+        box = create_horizontal_box(self.address_combo, address_label)
+        layout.addLayout(box)
 
     def setup_gain_combo(self, layout: QVBoxLayout) -> None:
         """Creates the Gain combo text element.
@@ -103,11 +102,9 @@ class ADCConfigWidget(QWidget):
 
         self.logger.debug("Gain: %s", self.gain_combo.currentText())
 
-        # Add label and UI element in Horizontal box/one-liner
-        gain_layout = QHBoxLayout()
-        gain_layout.addWidget(gain_label)
-        gain_layout.addWidget(self.gain_combo)
-        layout.addLayout(gain_layout)
+        # Add label and UI element in Horizontal box
+        box = create_horizontal_box(self.gain_combo, gain_label)
+        layout.addLayout(box)
 
     def setup_data_rate(self, layout: QVBoxLayout) -> None:
         """Creates the Data Rate combo box element.
@@ -134,11 +131,9 @@ class ADCConfigWidget(QWidget):
         self.data_rate_combo.setEnabled(False)
         self.logger.debug("Data Rate: %s", self.data_rate_combo.currentText())
 
-        # Add label and UI element in Horizontal box/one-liner
-        dr_layout = QHBoxLayout()
-        dr_layout.addWidget(data_rate_label)
-        dr_layout.addWidget(self.data_rate_combo)
-        layout.addLayout(dr_layout)
+        # Add label and UI element in Horizontal box
+        box = create_horizontal_box(self.data_rate_combo, data_rate_label)
+        layout.addLayout(box)
 
     def setup_polling_mode(self, layout: QVBoxLayout) -> None:
         """Creates the Polling mode Radio buttons elements."""
