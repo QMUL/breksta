@@ -1,3 +1,4 @@
+"""Manual inspection module for the creation and instantiation of Capture tab UI elements."""
 import sys
 from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QGroupBox
 from ui.adc_controlpanel import ADCConfigWidget, ADCConfigManager
@@ -6,6 +7,7 @@ from app.logger_config import setup_logger
 
 
 class TestWindow(QWidget):
+    """Test harness class for manual inspection of the Capture tab UI elements."""
     def __init__(self) -> None:
         super().__init__()
         self.logger = setup_logger()
@@ -13,14 +15,15 @@ class TestWindow(QWidget):
         self.capture_manager = CaptureControlManager(self.capture_control, self.logger)
         self.adc_config_widget = ADCConfigWidget(self.logger)
         self.adc_config_manager = ADCConfigManager(self.adc_config_widget, self.logger)
-        self.setup_UI()
-        config = self.adc_config_manager.get_adc_config()
+        self.setup_ui()
+        self.config = self.adc_config_manager.get_adc_config()
 
-    def setupUI_adc(self) -> None:
+    def setup_ui_adc(self) -> None:
+        """Creates the ADC UI interface only. Has to be explicitly called."""
         layout = QVBoxLayout(self)
         layout.addWidget(self.adc_config_widget)
 
-    def setup_UI(self) -> None:
+    def setup_ui(self) -> None:
         """
         Creates the Unified UI interface.
 

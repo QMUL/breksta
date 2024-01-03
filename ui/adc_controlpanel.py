@@ -1,4 +1,10 @@
-"""Encapsulates the ADC-related GUI functionality
+"""Encapsulates the ADC-related GUI functionality.
+
+Includes:
+- creating and initializing the ADC configuration UI elements,
+- connecting the UI elements with their event handlers
+- creating the ADC configuration object
+- selecting the ADC reading operation mode
 """
 from PySide6.QtWidgets import QWidget, QLabel, QComboBox, QRadioButton, QVBoxLayout, QButtonGroup, QHBoxLayout
 
@@ -25,11 +31,11 @@ class ADCConfigWidget(QWidget):
     def __init__(self, logger, parent=None) -> None:
         super().__init__(parent)
         self.logger = logger if logger is not None else setup_logger()
-        # Directly call the setup_ui method to initialize UI components
-        self.setup_ui()
+
+        self.setup_ui()  # Directly call the setup_ui method to initialize UI components
 
     def setup_ui(self) -> None:
-        """Creates the layout and the elements, then binds them together.
+        """Creates the box layout, then creates the UI elements and adds them to the layout.
         """
         layout = QVBoxLayout(self)
         self.address_combo = QComboBox()
@@ -169,7 +175,7 @@ class ADCConfigManager:
         self.setup_connections()
 
     def setup_connections(self) -> None:
-        """Establishes connections between UI elements and their event handlers.
+        """Establish connections between UI elements and their event handlers.
 
         This method connects the change signals from the UI elements to their respective slot functions.
         Ensures the ADC configuration is updated dynamically as the user interacts with the control panel.
@@ -196,7 +202,7 @@ class ADCConfigManager:
         self.logger.debug("Data Rate changed to: %s", data_rate)
 
     def on_polling_mode_change(self, button_id, checked) -> None:
-        """Adjusts the ADC configuration based on the selected polling mode.
+        """Adjust the ADC configuration based on the selected polling mode.
 
         Enables or disables the data rate configuration based on the selected mode. Single-shot operation
         does not require a data rate, hence the associated control is disabled to reflect this dependency.
@@ -216,7 +222,7 @@ class ADCConfigManager:
             self.logger.debug("Polling Mode changed to: %s", mode)
 
     def get_adc_config(self) -> ADCConfig:
-        """Extracts the current ADC configuration values from the UI."""
+        """Extract the current ADC configuration values from the UI."""
         bus = self.config_widget.BUS
         address = self.config_widget.address_combo.itemData(self.config_widget.address_combo.currentIndex())
         gain = self.config_widget.gain_combo.itemData(self.config_widget.gain_combo.currentIndex())
@@ -237,6 +243,7 @@ class ADCConfigManager:
         return config
 
     def get_adc_reader(self, config, channel, period) -> ADCReader:
+        """Selects the appropriate ADC Reader object, according to the operation mode."""
         self.logger.debug("Selecting ADC Reader for %s operation", config.poll_mode)
 
         match config.poll_mode:
