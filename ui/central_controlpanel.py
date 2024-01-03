@@ -24,7 +24,6 @@ class CentralizedControlManager(QWidget):
         adc_ui (ADCConfigWidget): The UI component for ADC configuration.
         adc_manager (ADCConfigManager): Manages ADC configurations and operations.
         logger: Used for logging events and activities within the manager.
-        period (int): The frequency/period for capture operations.
     """
     DEFAULT_CHANNEL = 0
 
@@ -42,12 +41,13 @@ class CentralizedControlManager(QWidget):
         self.capture_manager = capture_manager
         self.adc_ui = adc_ui
         self.adc_manager = adc_manager
-        self.period = self.capture_manager.frequency
         self.channel = self.DEFAULT_CHANNEL
 
         # Connect signals to slots
         self.capture_ui.experimentStarted.connect(self.on_experiment_started)
         self.capture_ui.experimentStopped.connect(self.on_experiment_stopped)
+
+        self.create_layout(self.capture_ui, self.adc_ui)
 
     def on_experiment_started(self) -> None:
         """
@@ -61,8 +61,9 @@ class CentralizedControlManager(QWidget):
         self.adc_ui.setEnabled(False)
         self.logger.debug("Experiment started - ADC controls disabled.")
         adc = self.adc_manager.get_adc_config()
+        period: int = self.capture_manager.frequency
 
-        with self.adc_manager.get_adc_reader(adc, self.channel, self.period) as reader:
+        with self.adc_manager.get_adc_reader(adc, self.channel, period) as reader:
             reader.run_adc()
 
     def on_experiment_stopped(self) -> None:
@@ -97,7 +98,6 @@ if __name__ == "__main__":
     ADC_ui = ADCConfigWidget(def_logger)
     capt_manager = CaptureControlManager(capt_ui, def_logger)
     ADC_manager = ADCConfigManager(ADC_ui, def_logger)
-    manager = CentralizedControlManager(capt_ui, capt_manager, ADC_ui, ADC_manager, def_logger)
-    manager.create_layout(capt_ui, ADC_ui)
-    manager.show()
+    window = CentralizedControlManager(capt_ui, capt_manager, ADC_ui, ADC_manager, def_logger)
+    window.show()
     sys.exit(app.exec())
