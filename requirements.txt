@@ -5,4 +5,4 @@ pyside6
 sqlalchemy
 pathvalidate
 dash-bootstrap-components
-ADS1x15-ADC
+#ADS1x15-ADC

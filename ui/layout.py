@@ -2,10 +2,10 @@
 from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QGroupBox
 
 
-def create_group_box_layout(widget, name: str) -> QGroupBox:
-    """Creates a Vertical box layout and encapsulates it into a Group Box with a given name.
+def create_group_box(widget, name: str) -> QGroupBox:
+    """Adds a UI element to a Vertical box layout and encapsulates it into a Group Box with a given name.
     Args:
-        widget: The QWidget to be added to the layout and the Group Box.
+        widget: The UI element added to the layout and the Group Box.
         name (str): The name of the Group Box.
     """
     group_box = QGroupBox(name)
@@ -16,10 +16,10 @@ def create_group_box_layout(widget, name: str) -> QGroupBox:
 
 
 def create_horizontal_box(widget, label) -> QHBoxLayout:
-    """Creates a Horizontal box layout and adds a widget to it.
+    """Adds a UI element to a Horizontal box layout.
     Args:
-        widget: The QWidget to be added to the box.
-        label: The QWidget's label.
+        widget: The UI element added to the box.
+        label: The element's label.
     """
     box_layout = QHBoxLayout()
     box_layout.addWidget(label)

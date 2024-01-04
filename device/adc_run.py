@@ -18,8 +18,8 @@ class ADCReader(ABC):
             self.adc = self.configure_adc(config)
             if self.adc is None:
                 self.logger.critical("ADC could not be initialized.")
-        except Exception as e:
-            print(e)
+        except Exception as err:
+            self.logger.exception("ADC initialization failed: %s", err)
             raise
 
         self.channel = channel

@@ -1,11 +1,11 @@
 """
-Glues together all UI and Manager classes.
+Glues together all UI and Manager classes for the Capture Tab.
 """
 import sys
 from PySide6.QtWidgets import QApplication, QVBoxLayout, QWidget
 from ui.adc_controlpanel import ADCConfigWidget, ADCConfigManager
 from ui.capture_controlpanel import CaptureControlUI, CaptureControlManager
-from ui.layout import create_group_box_layout
+from ui.layout import create_group_box
 from app.logger_config import setup_logger
 
 
@@ -81,23 +81,28 @@ class CentralizedControlManager(QWidget):
         """Creates the final Capture tab layout, which encompasses UI elements in their own box."""
         layout = QVBoxLayout()
 
-        controls_group_box = create_group_box_layout(capture, "Controls")
+        controls_group_box = create_group_box(capture, "Controls")
         layout.addWidget(controls_group_box)
 
-        adc_group_box = create_group_box_layout(adc, "ADC Settings")
+        adc_group_box = create_group_box(adc, "ADC Settings")
         layout.addWidget(adc_group_box)
 
         self.setLayout(layout)
 
 
+def get_manager_instance(logger) -> CentralizedControlManager:
+    """Instantiates all dependencies, injects them, and returns the Central instance."""
+    capt_ui = CaptureControlUI(logger)
+    adc_ui = ADCConfigWidget(logger)
+    capt_manager = CaptureControlManager(capt_ui, logger)
+    adc_manager = ADCConfigManager(adc_ui, logger)
+    return CentralizedControlManager(capt_ui, capt_manager, adc_ui, adc_manager, logger)
+
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    def_logger = setup_logger()
+    logger = setup_logger()
 
-    capt_ui = CaptureControlUI(def_logger)
-    ADC_ui = ADCConfigWidget(def_logger)
-    capt_manager = CaptureControlManager(capt_ui, def_logger)
-    ADC_manager = ADCConfigManager(ADC_ui, def_logger)
-    window = CentralizedControlManager(capt_ui, capt_manager, ADC_ui, ADC_manager, def_logger)
+    window: CentralizedControlManager = get_manager_instance(logger)
     window.show()
     sys.exit(app.exec())
