@@ -53,7 +53,7 @@ class SingleShotADCReader(ADCReader):
     def run_adc(self) -> float:
         # read_adc_single_shot(self.adc, self.channel, self.period)
         result = read_adc_single_channel(self.adc, self.channel)
-        print(result * self.toVoltage)
+        self.logger.debug(result * self.toVoltage)
         return result * self.toVoltage
 
 
@@ -61,5 +61,5 @@ class ContinuousADCReader(ADCReader):
     def run_adc(self) -> float:
         # read_adc_continuous(self.adc, self.channel, self.period)
         result = read_adc_single_channel(self.adc, self.channel)
-        print(result * self.toVoltage)
+        self.logger.debug(result * self.toVoltage)
         return result * self.toVoltage
