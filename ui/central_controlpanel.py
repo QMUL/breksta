@@ -6,6 +6,7 @@ from PySide6.QtWidgets import QApplication, QVBoxLayout, QWidget
 from ui.adc_controlpanel import ADCConfigWidget, ADCConfigManager
 from ui.capture_controlpanel import CaptureControlUI, CaptureControlManager
 from ui.layout import create_group_box
+from ui.chart_manager import start_chart_process as start_chart, stop_chart_process as stop_chart
 from app.logger_config import setup_logger
 
 
@@ -58,6 +59,10 @@ class CentralizedControlManager(QWidget):
         ensures that the ADC reader is contextually managed to handle its lifecycle effectively
         during the experiment.
         """
+        # Start/resume charting
+        start_chart(self.logger)
+
+        # Handle ADC-related logic
         self.adc_ui.setEnabled(False)
         self.logger.debug("Experiment started - ADC controls disabled.")
         adc = self.adc_manager.get_adc_config()
@@ -74,6 +79,10 @@ class CentralizedControlManager(QWidget):
         subsequent experiments. This method is crucial for resetting the state of the UI
         post-experiment.
         """
+        # Stop charting
+        stop_chart(self.logger)
+
+        # Handle ADC-related logic
         self.adc_ui.setEnabled(True)
         self.logger.debug("Experiment stopped - ADC controls enabled.")
 
