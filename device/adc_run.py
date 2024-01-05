@@ -24,6 +24,7 @@ class ADCReader(ABC):
 
         self.channel = channel
         self.period = period
+        self.toVoltage = self.adc.toVoltage()
 
     def configure_adc(self, config: ADCConfig):
         """
@@ -51,10 +52,14 @@ class ADCReader(ABC):
 class SingleShotADCReader(ADCReader):
     def run_adc(self) -> float:
         # read_adc_single_shot(self.adc, self.channel, self.period)
-        return read_adc_single_channel(self.adc, self.channel)
+        result = read_adc_single_channel(self.adc, self.channel)
+        print(result * self.toVoltage)
+        return result * self.toVoltage
 
 
 class ContinuousADCReader(ADCReader):
     def run_adc(self) -> float:
         # read_adc_continuous(self.adc, self.channel, self.period)
-        return read_adc_single_channel(self.adc, self.channel)
+        result = read_adc_single_channel(self.adc, self.channel)
+        print(result * self.toVoltage)
+        return result * self.toVoltage
