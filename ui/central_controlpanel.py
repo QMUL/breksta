@@ -67,9 +67,9 @@ class CentralizedControlManager(QWidget):
         self.logger.debug("Experiment started - ADC controls disabled.")
         adc = self.adc_manager.get_adc_config()
         period: int = self.capture_manager.frequency
-
+        reader = self.adc_manager.get_adc_reader(adc, self.channel, period)
         # with self.adc_manager.get_adc_reader(adc, self.channel, period) as reader:
-        self.capture_manager.sampling_timer.timeout.connect(self.adc_manager.get_adc_reader.run_adc)
+        self.capture_manager.sampling_timer.timeout.connect(reader.run_adc)
 
     def on_experiment_stopped(self) -> None:
         """
