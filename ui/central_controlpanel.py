@@ -89,6 +89,7 @@ class CentralizedControlManager(QWidget):
         # Handle ADC-related logic
         self.adc_ui.setEnabled(True)
         self.logger.debug("Experiment stopped - ADC controls enabled.")
+        self.capture_manager.sampling_timer.stop()
 
     def create_layout(self, capture, adc) -> None:
         """Creates the final Capture tab layout, which encompasses UI elements in their own box."""
