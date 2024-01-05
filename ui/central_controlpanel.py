@@ -69,7 +69,7 @@ class CentralizedControlManager(QWidget):
         period: int = self.capture_manager.frequency
 
         with self.adc_manager.get_adc_reader(adc, self.channel, period) as reader:
-            reader.run_adc()
+            self.capture_manager.sampling_timer.timeout.connect(reader.run_adc())
 
     def on_experiment_stopped(self) -> None:
         """

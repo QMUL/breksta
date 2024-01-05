@@ -6,7 +6,7 @@ Handles the integration of the ADC functionality with other parts of the applica
 from abc import ABC, abstractmethod
 from device.adc_config import ADCConfig
 from device.adc_interface import initialize_adc
-from device.adc_data_acquisition import read_adc_single_shot, read_adc_continuous
+from device.adc_data_acquisition import read_adc_single_shot, read_adc_continuous, read_adc_single_channel
 from app.logger_config import setup_logger
 
 
@@ -44,15 +44,17 @@ class ADCReader(ABC):
         pass
 
     @abstractmethod
-    def run_adc(self):
+    def run_adc(self) -> float:
         pass
 
 
 class SingleShotADCReader(ADCReader):
-    def run_adc(self):
-        read_adc_single_shot(self.adc, self.channel, self.period)
+    def run_adc(self) -> float:
+        # read_adc_single_shot(self.adc, self.channel, self.period)
+        return read_adc_single_channel(self.adc, self.channel)
 
 
 class ContinuousADCReader(ADCReader):
-    def run_adc(self):
-        read_adc_continuous(self.adc, self.channel, self.period)
+    def run_adc(self) -> float:
+        # read_adc_continuous(self.adc, self.channel, self.period)
+        return read_adc_single_channel(self.adc, self.channel)

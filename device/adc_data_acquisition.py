@@ -19,7 +19,7 @@ def read_adc_single_channel(adc, channel) -> float:
     Arguments: adc: the ADC object.
     Returns: float: the value
     """
-    reading = adc.toVoltage(adc.readADC(channel))
+    reading: float = adc.toVoltage(adc.readADC(channel))
     return reading
 
 
