@@ -44,11 +44,13 @@ class CentralizedControlManager(QWidget):
         self.adc_manager = adc_manager
         self.channel = self.DEFAULT_CHANNEL
 
-        # Connect signals to slots
+        self.create_layout(self.capture_ui, self.adc_ui)
+        self.setup_connections()
+
+    def setup_connections(self) -> None:
+        """Connect signals to slots"""
         self.capture_ui.experimentStarted.connect(self.on_experiment_started)
         self.capture_ui.experimentStopped.connect(self.on_experiment_stopped)
-
-        self.create_layout(self.capture_ui, self.adc_ui)
 
     def on_experiment_started(self) -> None:
         """
@@ -115,8 +117,8 @@ def get_manager_instance(logger) -> CentralizedControlManager:
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    logger = setup_logger()
+    _logger = setup_logger()
 
-    window: CentralizedControlManager = get_manager_instance(logger)
+    window: CentralizedControlManager = get_manager_instance(_logger)
     window.show()
     sys.exit(app.exec())
