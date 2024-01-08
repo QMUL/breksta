@@ -4,9 +4,8 @@ Handles the integration of the ADC functionality with other parts of the applica
 - Functions or classes that tie ADC functionalities into Breksta.
 """
 from abc import ABC, abstractmethod
-from device.adc_config import ADCConfig
 from device.adc_interface import initialize_adc
-from device.adc_data_acquisition import read_adc_single_shot, read_adc_continuous, read_adc_single_channel
+from device.adc_data_acquisition import read_adc_single_channel
 from app.logger_config import setup_logger
 
 
@@ -14,27 +13,20 @@ class ADCReader(ABC):
     def __init__(self, config, channel, period, logger) -> None:
         self.logger = logger if logger else setup_logger()
 
-        try:
-            self.adc = self.configure_adc(config)
-            if self.adc is None:
-                self.logger.critical("ADC could not be initialized.")
-        except Exception as err:
-            self.logger.exception("ADC initialization failed: %s", err)
-            raise
+        self.adc = initialize_adc(adc_config=config)
+        self.is_initialized = self.adc is not None
+        if not self.is_initialized:
+            self.logger.critical("ADC could not be initialized.")
 
-        self.channel = channel
-        self.period = period
-        self.toVoltage = self.adc.toVoltage()
+        self.channel: int = channel
+        self.period: int = period
 
-    def configure_adc(self, config: ADCConfig):
-        """
-        On instantiation of the class, create a new adc configuration by reading all GUI-related values
-        and initialize the ADC device.
-        """
-        adc = initialize_adc(adc_config=config)
-        if not adc:
-            return None
-        return adc
+        if hasattr(self.adc, 'toVoltage'):
+            self.to_voltage: float = self.adc.toVoltage()
+
+    def is_operational(self) -> bool:
+        """ Check if the ADCReader is in a valid state. """
+        return self.is_initialized
 
     def __enter__(self):
         # Setup actions (if any)
@@ -51,15 +43,21 @@ class ADCReader(ABC):
 
 class SingleShotADCReader(ADCReader):
     def run_adc(self) -> float:
-        # read_adc_single_shot(self.adc, self.channel, self.period)
-        result = read_adc_single_channel(self.adc, self.channel)
-        self.logger.debug(result * self.toVoltage)
-        return result * self.toVoltage
+        if not self.is_operational():
+            self.logger.error("ADCReader is not operational.")
+            return 0.0
+
+        result: float = read_adc_single_channel(self.adc, self.channel)
+        self.logger.debug(result * self.to_voltage)
+        return result * self.to_voltage
 
 
 class ContinuousADCReader(ADCReader):
     def run_adc(self) -> float:
-        # read_adc_continuous(self.adc, self.channel, self.period)
-        result = read_adc_single_channel(self.adc, self.channel)
-        self.logger.debug(result * self.toVoltage)
-        return result * self.toVoltage
+        if not self.is_operational():
+            self.logger.error("ADCReader is not operational.")
+            return 0.0
+
+        result: float = read_adc_single_channel(self.adc, self.channel)
+        self.logger.debug(result * self.to_voltage)
+        return result * self.to_voltage
