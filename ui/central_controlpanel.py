@@ -43,6 +43,7 @@ class CentralizedControlManager(QWidget):
         self.adc_ui = adc_ui
         self.adc_manager = adc_manager
         self.channel = self.DEFAULT_CHANNEL
+        self.adc_reader = None
 
         self.create_layout(self.capture_ui, self.adc_ui)
         self.setup_connections()
@@ -64,18 +65,19 @@ class CentralizedControlManager(QWidget):
         # Start/resume charting
         start_chart(self.logger)
 
-        # Handle ADC-related logic
+        # Handle ADC-related logic. Get a valid config, push it to ADC, initialize ADC, choose Reader
         self.adc_ui.setEnabled(False)
         self.logger.debug("Experiment started - ADC controls disabled.")
-        adc = self.adc_manager.get_adc_config()
+        adc_config = self.adc_manager.get_adc_config()
         period: int = self.capture_manager.frequency
-        self.reader = self.adc_manager.get_adc_reader(adc, self.channel, period)
-        # with self.adc_manager.get_adc_reader(adc, self.channel, period) as reader:
-        self.capture_manager.sampling_timer.timeout.connect(self.reader.run_adc)
-        self.capture_manager.set_timer(
-            self.capture_manager.sampling_timer,
-            period
-        )
+
+        self.adc_reader = self.adc_manager.get_adc_reader(adc_config, self.channel, period)
+        if self.adc_reader.is_operational():
+            self.capture_manager.sampling_timer.timeout.connect(self.adc_reader.run_adc)
+            self.capture_manager.set_timer(
+                self.capture_manager.sampling_timer,
+                period
+            )
 
     def on_experiment_stopped(self) -> None:
         """
