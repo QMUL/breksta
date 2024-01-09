@@ -3,11 +3,12 @@ Glues together all UI and Manager classes for the Capture Tab.
 """
 import sys
 from PySide6.QtWidgets import QApplication, QVBoxLayout, QWidget
+from PySide6.QtCore import Signal
+from app.logger_config import setup_logger
 from ui.adc_controlpanel import ADCConfigWidget, ADCConfigManager
 from ui.capture_controlpanel import CaptureControlUI, CaptureControlManager
 from ui.layout import create_group_box
 from ui.chart_manager import start_chart_process as start_chart, stop_chart_process as stop_chart
-from app.logger_config import setup_logger
 
 
 class CentralizedControlManager(QWidget):
@@ -27,6 +28,7 @@ class CentralizedControlManager(QWidget):
         logger: Used for logging events and activities within the manager.
     """
     DEFAULT_CHANNEL = 0
+    output_signal = Signal(float)
 
     def __init__(
             self,
@@ -71,13 +73,10 @@ class CentralizedControlManager(QWidget):
         adc_config = self.adc_manager.get_adc_config()
         period: int = self.capture_manager.frequency
 
+        timer = self.capture_manager.sampling_timer
         self.adc_reader = self.adc_manager.get_adc_reader(adc_config, self.channel, period)
-        if self.adc_reader.is_operational():
-            self.capture_manager.sampling_timer.timeout.connect(self.adc_reader.run_adc)
-            self.capture_manager.set_timer(
-                self.capture_manager.sampling_timer,
-                period
-            )
+
+        self.start_reading(self.adc_reader, timer, period)
 
     def on_experiment_stopped(self) -> None:
         """
@@ -94,6 +93,18 @@ class CentralizedControlManager(QWidget):
         self.adc_ui.setEnabled(True)
         self.logger.debug("Experiment stopped - ADC controls enabled.")
         self.capture_manager.sampling_timer.stop()
+
+    def start_reading(self, adc_reader, timer, period) -> None:
+        """Checks the ADC is initialized successfully and starts the timer."""
+        if adc_reader.is_operational():
+
+            def on_timeout() -> None:
+                result: float = adc_reader.run_adc()
+                self.output_signal.emit(result)
+                print(result)
+
+            timer.timeout.connect(on_timeout)
+            self.capture_manager.set_timer(timer, period)
 
     def create_layout(self, capture, adc) -> None:
         """Creates the final Capture tab layout, which encompasses UI elements in their own box."""
