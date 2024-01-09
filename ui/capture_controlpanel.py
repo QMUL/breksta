@@ -15,8 +15,8 @@ class CaptureControlUI(QWidget):
     DEFAULT_EXPERIMENT_DURATION = 1  # 1 hour
 
     # Define custom signals
-    experimentStarted = Signal()
-    experimentStopped = Signal()
+    start_button_signal = Signal()
+    stop_button_signal = Signal()
 
     def __init__(self, logger) -> None:
         super().__init__()
@@ -43,8 +43,8 @@ class CaptureControlUI(QWidget):
 
         self.setLayout(layout)
 
-        self.start_button.clicked.connect(self.experimentStarted.emit)
-        self.stop_button.clicked.connect(self.experimentStopped.emit)
+        self.start_button.clicked.connect(self.start_button_signal.emit)
+        self.stop_button.clicked.connect(self.stop_button_signal.emit)
 
     def setup_start_button(self, button, layout: QVBoxLayout) -> None:
         """Create Start button"""

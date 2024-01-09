@@ -52,8 +52,8 @@ class CentralizedControlManager(QWidget):
 
     def setup_connections(self) -> None:
         """Connect signals to slots"""
-        self.capture_ui.experimentStarted.connect(self.on_experiment_started)
-        self.capture_ui.experimentStopped.connect(self.on_experiment_stopped)
+        self.capture_ui.start_button_signal.connect(self.on_experiment_started)
+        self.capture_ui.stop_button_signal.connect(self.on_experiment_stopped)
 
     def on_experiment_started(self) -> None:
         """
