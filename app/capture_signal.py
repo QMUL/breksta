@@ -49,9 +49,9 @@ class DeviceCapture:
         """Database actions when Stopping an experiment."""
         # Close up database entry and clean up
         self.database.stop_experiment()
-        self.experiment_id = None
         self.logger.debug(
             "Experiment stopping named: %s and ID: %d", self.experiment_name, self.experiment_id)
+        self.experiment_id = None
 
     @Slot(float)
     def write_to_database(self, data) -> None:
