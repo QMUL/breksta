@@ -64,7 +64,7 @@ class DeviceCapture:
             raise
 
 
-if __name__ == "__main__":
+def main():
     app = QApplication(sys.argv)
     _logger = setup_logger()
 
@@ -75,3 +75,8 @@ if __name__ == "__main__":
     device_capture = DeviceCapture(manager=window, database=_database, logger=_logger)
 
     sys.exit(app.exec())
+
+
+if __name__ == "__main__":
+    import cProfile
+    cProfile.run('main()', 'profile_output')
