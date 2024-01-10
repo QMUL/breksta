@@ -6,19 +6,20 @@ in order to write readings to the database.
 import sys
 from typing import Optional
 from PySide6.QtWidgets import QApplication
-from PySide6.QtCore import Slot  # Signal
+from PySide6.QtCore import QObject, Slot, Signal
 from app.capture import PmtDb
 from app.logger_config import setup_logger
 from ui.central_controlpanel import CentralizedControlManager, get_manager_instance
 
 
-class DeviceCapture:
+class DeviceCapture(QObject):
     """Class that handles the signal capturing and database pushing of readings."""
 
     # external signal for the slot in the ChartWidget
-    # experiment_started_signal = Signal(int)
+    experiment_started_signal = Signal(int)
 
     def __init__(self, manager: CentralizedControlManager, database, logger) -> None:
+        super().__init__()
         self.logger = logger
         self.manager = manager
         self.database = database
@@ -40,7 +41,7 @@ class DeviceCapture:
         # Grab the experiment name, create new database entry and accompanying experiment ID
         self.experiment_name = self.manager.capture_ui.name_box.text()
         self.experiment_id = self.database.start_experiment(self.experiment_name)
-        # self.experiment_started_signal.emit(self.experiment_id)
+        self.experiment_started_signal.emit(self.experiment_id)
         self.logger.debug(
             "Experiment started named: %s and ID: %d", self.experiment_name, self.experiment_id)
 

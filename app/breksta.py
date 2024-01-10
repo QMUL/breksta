@@ -21,6 +21,7 @@ from PySide6.QtWebEngineWidgets import QWebEngineView
 from app.capture import DevCapture
 from app.capture import PmtDb
 from app.logger_config import setup_logger
+from app.capture_signal import DeviceCapture
 from ui.adc_controlpanel import ADCConfigManager, ADCConfigWidget
 
 # Programmatically set PYTHONPATH for breksta ONLY
@@ -319,6 +320,7 @@ class CaptureWidget(QWidget):
         self.logger = setup_logger()
 
         layout = QHBoxLayout()
+        controls, capture_db, chart = self.instantiate_objects()
 
         controls = CaptureControl(table)
         controls.setFixedWidth(int(0.25 * width))
@@ -326,15 +328,19 @@ class CaptureWidget(QWidget):
         chart = ChartWidget()
         chart.setFixedWidth(int(0.75 * width))
 
-        # Signal from the controls to the chart routed here.
-        # Helps avoid a hideous God Object.
-        controls.started.connect(chart.plot_experiment)
-
+        # Signal from capture_signal to the chart routed here. Helps avoid a hideous God Object.
+        capture_db.experiment_started_signal.connect(chart.plot_experiment)
         layout.addWidget(controls)
         layout.addWidget(chart)
 
         self.setLayout(layout)
 
+    def instantiate_objects(self) -> tuple[CentralizedControlManager, DeviceCapture, ChartWidget]:
+        """Create the instances of all objects."""
+        controls: CentralizedControlManager = get_manager_instance(self.logger)
+        capture_db = DeviceCapture(manager=controls, logger=self.logger, database=self.database)
+        chart = ChartWidget(self.logger)
+        return controls, capture_db, chart
 
 class ExportControl(QWidget):
     """A QWidget subclass that provides control buttons and functionalities for
