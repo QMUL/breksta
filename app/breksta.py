@@ -23,6 +23,7 @@ from app.capture import PmtDb
 from app.logger_config import setup_logger
 from app.capture_signal import DeviceCapture
 from ui.adc_controlpanel import ADCConfigManager, ADCConfigWidget
+from ui.central_controlpanel import CentralizedControlManager, get_manager_instance
 
 # Programmatically set PYTHONPATH for breksta ONLY
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
@@ -313,11 +314,12 @@ class ChartWidget(QWebEngineView):
 class CaptureWidget(QWidget):
     """Stick the capture and chart widgets in a parent layout.
     """
-    def __init__(self, width, table, logger) -> None:
+    def __init__(self, width, database, logger) -> None:
 
         QWidget.__init__(self)
 
         self.logger = logger if logger else setup_logger()
+        self.database = database
 
         layout = QHBoxLayout()
         controls, capture_db, chart = self.instantiate_objects()
@@ -630,7 +632,7 @@ class TableWidget(QTableWidget):
     # create a signal that carries an integer
     experimentSelected = Signal(int)
 
-    def __init__(self, width, db: Optional[PmtDb] = None, logger) -> None:
+    def __init__(self, width, database, logger) -> None:
         """Initializes the table widget with 0 rows and 5 columns.
         The columns are labeled with 'Id', 'Name', 'Date started', 'Date ended', and 'Exported'.
         """
@@ -638,8 +640,8 @@ class TableWidget(QTableWidget):
 
         self.logger = logger if logger else setup_logger()
 
-        # Initialize the database connection ONCE in breksta, inside the table widget
-        self.database = PmtDb() if db is None else db
+        # Database connection initialized in MainWindow ONCE in breksta
+        self.database = database
 
         # initialise with invalid id, test
         self.selected_experiment_id: Optional[int] = None
@@ -841,10 +843,7 @@ class MainWindow(QMainWindow):
 
         self.setFixedSize(win_width, win_height)
 
-        self.table = TableWidget(win_width)  # Only create one instance of TableWidget
-
-        capture = CaptureWidget(win_width, self.table)
-        export = ExportWidget(win_width, self.table)
+        capture, export = self.instantiate_objects(win_width, self.logger)
 
         tabs = QTabWidget()
         tabs.setTabPosition(QTabWidget.North)  # type: ignore
@@ -856,6 +855,15 @@ class MainWindow(QMainWindow):
         exit_action = QAction("Exit", self)
         exit_action.setShortcut(QKeySequence.Quit)  # type: ignore
         exit_action.triggered.connect(self.close)
+
+    def instantiate_objects(self, win_width, logger) -> tuple[CaptureWidget, ExportWidget]:
+        """Create the instances of all objects."""
+        session = setup_session()
+        database = PmtDb(Session=session, logger=logger)
+        capture = CaptureWidget(win_width, database, logger)
+        table = TableWidget(win_width, database, logger)
+        export = ExportWidget(win_width, table, logger)
+        return capture, export
 
     # https://www.pythonguis.com/tutorials/pyside-qprocess-external-programs/
     # https://doc.qt.io/qtforpython/PySide6/QtCore/QProcess.html
