@@ -115,6 +115,7 @@ class CentralizedControlManager(QWidget):
 
         adc_group_box = create_group_box(adc, "ADC Settings")
         layout.addWidget(adc_group_box)
+        layout.addStretch()
 
         self.setLayout(layout)
 

@@ -374,11 +374,11 @@ class ExportWidget(QWidget):
 
         # add export controls
         controls = ExportControl(table, self.logger)
-        controls.setFixedWidth(int(0.25 * width))
+        controls.setFixedWidth(int(0.2 * width))
 
         # add experiment widget
         experiment_data = ExperimentWidget(width, table, controls, self.logger)
-        experiment_data.setFixedWidth(int(0.61 * width))
+        experiment_data.setFixedWidth(int(0.75 * width))
 
         layout.addWidget(controls)
         layout.addWidget(experiment_data)
