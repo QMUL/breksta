@@ -5,7 +5,6 @@ import sys
 import datetime
 import os
 import shutil
-
 from typing import Optional
 
 import plotly.graph_objects as go
@@ -16,6 +15,7 @@ from PySide6.QtWidgets import (
     QPushButton, QTabWidget, QVBoxLayout, QWidget, QTableWidget,
     QTableWidgetItem, QStyledItemDelegate, QFileDialog, QMessageBox)
 from PySide6.QtWebEngineWidgets import QWebEngineView
+from PySide6.QtQuick import QQuickWindow, QSGRendererInterface
 
 from app.capture import PmtDb, setup_session
 from app.logger_config import setup_logger
@@ -714,6 +714,7 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication()
+    QQuickWindow.setGraphicsApi(QSGRendererInterface.GraphicsApi.OpenGL)
     window = MainWindow()
     window.start_web()
     window.show()
