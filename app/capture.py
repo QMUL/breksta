@@ -61,21 +61,24 @@ class PmtReading(Base):
     ts: Mapped[datetime] = mapped_column(primary_key=True)
 
 
+def setup_session():
+    """Create the Session if it doesn't exist."""
+    engine = create_engine('sqlite:///pmt.db')
+    Base.metadata.create_all(engine)
+    Session = sessionmaker(bind=engine)
+    return Session
+
+
 class PmtDb:
     """Handles interactions with the database which contains experiments and PMT readings.
     The class provides functionalities to start and stop experiments, write readings to the database,
     fetch the latest readings, export data, delete experiments, and mark experiments as exported.
     """
-    def __init__(self, Session=None, logger) -> None:
+    def __init__(self, Session, logger) -> None:
 
         self.logger = logger if logger else setup_logger()
 
-        if Session is None:
-            engine = create_engine('sqlite:///pmt.db')
-            Base.metadata.create_all(engine)
-            self.Session = sessionmaker(bind=engine)
-        else:
-            self.Session = Session
+        self.Session = Session if Session else setup_session()
 
         self.experiment_id: Optional[int] = None
         self.start_time: Optional[datetime] = None

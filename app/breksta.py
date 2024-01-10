@@ -19,7 +19,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtWebEngineWidgets import QWebEngineView
 
 from app.capture import DevCapture
-from app.capture import PmtDb
+from app.capture import PmtDb, setup_session
 from app.logger_config import setup_logger
 from app.capture_signal import DeviceCapture
 from ui.adc_controlpanel import ADCConfigManager, ADCConfigWidget

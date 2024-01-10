@@ -7,7 +7,7 @@ import sys
 from typing import Optional
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import QObject, Slot, Signal
-from app.capture import PmtDb
+from app.capture import PmtDb, setup_session
 from app.logger_config import setup_logger
 from ui.central_controlpanel import CentralizedControlManager, get_manager_instance
 
@@ -71,7 +71,8 @@ def main():
 
     window: CentralizedControlManager = get_manager_instance(_logger)
     window.show()
-    _database = PmtDb(logger=_logger)
+    session = setup_session()
+    _database = PmtDb(Session=session, logger=_logger)
 
     device_capture = DeviceCapture(manager=window, database=_database, logger=_logger)
 
@@ -79,5 +80,4 @@ def main():
 
 
 if __name__ == "__main__":
-    import cProfile
-    cProfile.run('main()', 'profile_output')
+    main()
