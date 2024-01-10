@@ -321,20 +321,15 @@ class CaptureWidget(QWidget):
         self.logger = logger if logger else setup_logger()
         self.database = database
 
-        layout = QHBoxLayout()
         controls, capture_db, chart = self.instantiate_objects()
 
-        controls = CaptureControl(table)
-        controls.setFixedWidth(int(0.25 * width))
-
-        chart = ChartWidget()
-        chart.setFixedWidth(int(0.75 * width))
+        controls.setFixedWidth(int(0.2 * width))
+        chart.setFixedWidth(int(0.8 * width))
 
         # Signal from capture_signal to the chart routed here. Helps avoid a hideous God Object.
         capture_db.experiment_started_signal.connect(chart.plot_experiment)
-        layout.addWidget(controls)
-        layout.addWidget(chart)
 
+        layout = self.create_layout(controls, chart)
         self.setLayout(layout)
 
     def instantiate_objects(self) -> tuple[CentralizedControlManager, DeviceCapture, ChartWidget]:
@@ -343,6 +338,17 @@ class CaptureWidget(QWidget):
         capture_db = DeviceCapture(manager=controls, logger=self.logger, database=self.database)
         chart = ChartWidget(self.logger)
         return controls, capture_db, chart
+
+    def create_layout(self, controls, chart) -> QHBoxLayout:
+        """
+        Create the Controls tab layout.
+        There are two components: the controls and the chart objects.
+        """
+        layout = QHBoxLayout()
+        layout.addWidget(controls)
+        layout.addWidget(chart)
+        return layout
+
 
 class ExportControl(QWidget):
     """A QWidget subclass that provides control buttons and functionalities for
@@ -636,7 +642,11 @@ class TableWidget(QTableWidget):
         """Initializes the table widget with 0 rows and 5 columns.
         The columns are labeled with 'Id', 'Name', 'Date started', 'Date ended', and 'Exported'.
         """
-        QTableWidget.__init__(self, 0, 5)
+
+        NUM_OF_COLUMNS = 5
+        NUM_OF_ROWS = 0
+
+        QTableWidget.__init__(self, NUM_OF_ROWS, NUM_OF_COLUMNS)
 
         self.logger = logger if logger else setup_logger()
 
@@ -809,7 +819,10 @@ class ExperimentWidget(QWidget):
 
         self.setLayout(layout)
 
-        # connect the experimentSelected signal to the slots
+        self.setup_connections(table)
+
+    def setup_connections(self, table) -> None:
+        """connect the experimentSelected signal to the slots"""
         table.experimentSelected.connect(self.graph.refresh_graph)
         table.experimentSelected.connect(self.export_control.update_selected_experiment)
 
