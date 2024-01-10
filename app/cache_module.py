@@ -18,14 +18,14 @@ class CacheWebProcess:
         last_datetime: Timestamp of the last cache update.
         current_datetime: Timestamp of the current cache state.
     """
-    def __init__(self, database=None) -> None:
+    def __init__(self, database) -> None:
         """Initializes CacheWebProcess with optional database object.
 
         Args:
             database: Optional database object for custom database interactions.
         """
         # If a database object is provided, use it; otherwise, create a PmtDb instance
-        self.database = database if database is not None else PmtDb()
+        self.database = database
 
         self.logger = setup_logger()
 

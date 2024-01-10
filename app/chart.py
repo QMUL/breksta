@@ -26,8 +26,11 @@ from app.logger_config import setup_logger
 from app.cache_module import CacheWebProcess
 from app.components.figure import initialize_figure, plot_data, update_axes_layout
 from app.components.layout import create_layout
+from app.capture import PmtDb, setup_session
 
 logger = setup_logger()
+session = setup_session()
+database = PmtDb(session, logger)
 
 # Control signals
 GO_SIGNAL = '1'
@@ -45,7 +48,7 @@ app.title = "Breksta - Data Acquisition App"
 app.config["suppress_callback_exceptions"] = True
 
 # Attach the cache object to the app
-app.cache = CacheWebProcess()
+app.cache = CacheWebProcess(database)
 
 app.layout = create_layout(app)
 app.figure = initialize_figure()
