@@ -4,8 +4,6 @@ from typing import Optional
 from datetime import datetime
 
 import pandas as pd
-
-from app.capture import PmtDb
 from app.logger_config import setup_logger
 
 

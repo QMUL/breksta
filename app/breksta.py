@@ -39,6 +39,7 @@ class ChartWidget(QWebEngineView):
         QWebEngineView.__init__(self)
 
         self.logger = logger if logger else setup_logger()
+        self.logger.debug("WebEngineView initialized.")
 
     @Slot(int)
     def plot_experiment(self, experiment_id: int) -> str:
@@ -54,6 +55,7 @@ class ChartWidget(QWebEngineView):
         Could pass the experiment ID as a parameter to the web app.
         https://doc.qt.io/qtforpython/PySide6/QtCore/Slot.html
         """
+        self.logger.debug("WebEngineView starting..")
         if experiment_id is None:
             self.logger.error("experiment_id is None. Invalid value.")
 
@@ -78,15 +80,15 @@ class CaptureWidget(QWidget):
         self.logger = logger if logger else setup_logger()
         self.database = database
 
-        controls, capture_db, chart = self.instantiate_objects()
+        self.controls, self.capture_db, self.chart = self.instantiate_objects()
 
-        controls.setFixedWidth(int(0.2 * width))
-        chart.setFixedWidth(int(0.8 * width))
+        self.controls.setFixedWidth(int(0.2 * width))
+        self.chart.setFixedWidth(int(0.8 * width))
 
         # Signal from capture_signal to the chart routed here. Helps avoid a hideous God Object.
-        capture_db.experiment_started_signal.connect(chart.plot_experiment)
+        self.capture_db.experiment_started_signal.connect(self.chart.plot_experiment)
 
-        layout = self.create_layout(controls, chart)
+        layout = self.create_layout(self.controls, self.chart)
         self.setLayout(layout)
 
     def instantiate_objects(self) -> tuple[CentralizedControlManager, DeviceCapture, ChartWidget]:
@@ -613,12 +615,12 @@ class MainWindow(QMainWindow):
 
         self.setFixedSize(win_width, win_height)
 
-        capture, export = self.instantiate_objects(win_width, self.logger)
+        self.capture, self.export = self.instantiate_objects(win_width, self.logger)
 
         tabs = QTabWidget()
         tabs.setTabPosition(QTabWidget.North)  # type: ignore
-        tabs.addTab(capture, 'Capture')
-        tabs.addTab(export, 'Export')
+        tabs.addTab(self.capture, 'Capture')
+        tabs.addTab(self.export, 'Export')
 
         self.setCentralWidget(tabs)
 
@@ -714,7 +716,6 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication()
-    QQuickWindow.setGraphicsApi(QSGRendererInterface.GraphicsApi.OpenGL)
     window = MainWindow()
     window.start_web()
     window.show()
