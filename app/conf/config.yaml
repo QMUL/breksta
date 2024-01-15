@@ -1,0 +1,21 @@
+hydra:  #Hydra by default changes the current working directory to a new directory under outputs/ each time it runs. This behavior will change in future Hydra versions. The following snippet adjusts to new behaviour.
+  run:
+    dir: .
+
+# Configuration for a local SQLite database
+# Additional DB settings like pool_size, timeout can be added here
+db:
+  driver: sqlite
+  name: pmt.db
+  path: ./db
+
+server:
+  port: 8050  # Port for Dash App
+  url: http://localhost/${server.port}
+  # Consider adding more settings like debug_mode, ssl_cert, etc.
+
+logger:
+  level: DEBUG
+  # Further configurations like log_format, output_file can be added here
+
+# Additional configuration groups can be created for different environments

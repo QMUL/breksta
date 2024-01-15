@@ -7,3 +7,5 @@ pathvalidate
 dash-bootstrap-components
 pyarrow
 #ADS1x15-ADC
+hydra-core
+python-dotenv
