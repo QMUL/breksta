@@ -9,7 +9,7 @@ Includes:
 import os
 from PySide6.QtWidgets import QWidget, QLabel, QComboBox, QRadioButton, QVBoxLayout, QButtonGroup
 
-from app.logger_config import setup_logger
+from app.logger_config import Logger
 from app.sine_wave_generator import SineWaveGenerator
 from device.adc_config import (
     ADS1115Address as Address,

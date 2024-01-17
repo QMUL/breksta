@@ -37,7 +37,7 @@ class ChartWidget(QWebEngineView):
 
         QWebEngineView.__init__(self)
 
-        self.logger = logger if logger else setup_logger()
+        self.logger = logger  # if logger else setup_logger()
         self.logger.debug("WebEngineView initialized.")
 
     def _on_downloadRequested(self, download) -> None:
@@ -89,7 +89,7 @@ class CaptureWidget(QWidget):
 
         QWidget.__init__(self)
 
-        self.logger = logger if logger else setup_logger()
+        self.logger = logger  # if logger else setup_logger()
         self.database = database
 
         self.controls, self.capture_db, self.chart = self.instantiate_objects()
@@ -134,7 +134,7 @@ class ExportControl(QWidget):
         """
         QWidget.__init__(self)
 
-        self.logger = logger if logger else setup_logger()
+        self.logger = logger  # if logger else setup_logger()
 
         # Create vertical box
         layout = QVBoxLayout()
@@ -383,7 +383,7 @@ class ExportWidget(QWidget):
 
         QWidget.__init__(self)
 
-        self.logger = logger if logger else setup_logger()
+        self.logger = logger  # if logger else setup_logger()
 
         # Horizontal box
         layout = QHBoxLayout()
@@ -421,7 +421,7 @@ class TableWidget(QTableWidget):
 
         QTableWidget.__init__(self, num_of_rows, num_of_columns)
 
-        self.logger = logger if logger else setup_logger()
+        self.logger = logger  # if logger else setup_logger()
 
         # Database connection initialized in MainWindow ONCE in breksta
         self.database = database
@@ -513,7 +513,7 @@ class ExperimentGraph(QWebEngineView):
     def __init__(self, width, table, logger) -> None:
         QWebEngineView.__init__(self)
 
-        self.logger = logger if logger else setup_logger()
+        self.logger = logger  # if logger else setup_logger()
 
         # Reference to TableWidget instance, used to access selected_experiment_id
         self.table = table
@@ -557,7 +557,7 @@ class ExperimentWidget(QWidget):
 
         QWidget.__init__(self)
 
-        self.logger = logger if logger else setup_logger()
+        self.logger = logger  # if logger else setup_logger()
 
         # Vertical box layout
         layout = QVBoxLayout()
@@ -586,12 +586,12 @@ class MainWindow(QMainWindow):
     Includes all widgets and controls. It also handles the lifecycle of the
     web process running the Dash server.
     """
-    def __init__(self) -> None:
+    def __init__(self, logger) -> None:
 
         QMainWindow.__init__(self)
 
         # Initialize logging
-        self.logger = setup_logger()
+        self.logger = logger
         self.logger.info('=' * 50)
         self.logger.info('APP SPOOLING UP!')
 
@@ -709,8 +709,9 @@ class MainWindow(QMainWindow):
 
 
 if __name__ == "__main__":
+    _logger = setup_logger("DEBUG")
     app = QApplication()
-    window = MainWindow()
+    window = MainWindow(_logger)
     window.start_web()
     window.show()
     sys.exit(app.exec())

@@ -12,9 +12,7 @@ from typing import Optional
 import plotly.graph_objects as go
 import pandas as pd
 
-from app.logger_config import setup_logger
-
-logger = setup_logger()
+from app.chart import logger
 
 
 def initialize_figure(x_title: str = 'Time (s)', y_title: str = 'Voltage (V)') -> go.Figure:

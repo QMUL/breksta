@@ -8,7 +8,7 @@ from typing import Optional
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import QObject, Slot, Signal
 from app.database import PmtDb, setup_session
-from app.logger_config import setup_logger
+from app.logger_config import Logger
 from ui.central_controlpanel import CentralizedControlManager, get_manager_instance
 
 
@@ -68,7 +68,7 @@ class DeviceCapture(QObject):
 def _main():
     """Entry point to perform manual testing. Private method."""
     app = QApplication(sys.argv)
-    _logger = setup_logger()
+    _logger = Logger.get_instance()
 
     window: CentralizedControlManager = get_manager_instance(_logger)
     window.show()

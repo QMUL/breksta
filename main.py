@@ -5,8 +5,12 @@ from PySide6.QtWidgets import QApplication
 import hydra
 from hydra.core.config_store import ConfigStore
 from dotenv import load_dotenv
-from app.config import Config
 from app.breksta import MainWindow
+from app.config import Config
+from app.logger_config import Logger, logger
+
+print("this should go first")
+# logger = Logger("DEBUG")
 
 
 @hydra.main(version_base="1.3", config_path="app/conf", config_name="config")
@@ -21,7 +25,7 @@ def main(cfg: Config) -> None:
 
     # Start Qt application and instantiate the entry point window
     app = QApplication()
-    window = MainWindow()
+    window = MainWindow(logger)
     window.start_web()
     window.show()
     sys.exit(app.exec())

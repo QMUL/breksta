@@ -2,14 +2,14 @@
 import sys
 from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout
 from ui.capture_controlpanel import CaptureControlUI, CaptureControlManager
-from app.logger_config import setup_logger
+from app.logger_config import Logger
 
 
 class TestWindow(QWidget):
     """Test harness class for manual inspection of Capture Control UI elements."""
     def __init__(self) -> None:
         super().__init__()
-        self.logger = setup_logger()
+        self.logger = Logger.get_instance()
         self.setup_ui()
 
     def setup_ui(self) -> None:

@@ -4,10 +4,10 @@ The specific sensor model we use corresponds to the ADS1x15.ADS1115 object.
 If the device changes, the initializer will also have to change.
 """
 import ADS1x15 as ads
-from device.adc_config import ADCConfig, ADS1115Mode
-from app.logger_config import setup_logger
-
-logger = setup_logger()
+from device.adc_config import ADCConfig, ADS1115Mode, logger
+# from app.logger_config import Logger
+# from app.breksta import _logger as logger
+# logger = Logger.get_instance()
 
 
 def initialize_adc(adc_config: ADCConfig) -> ads.ADS1115 | None:

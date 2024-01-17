@@ -4,14 +4,14 @@ from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout
 from ui.adc_controlpanel import ADCConfigWidget, ADCConfigManager
 from ui.capture_controlpanel import CaptureControlUI, CaptureControlManager
 from ui.layout import create_group_box
-from app.logger_config import setup_logger
+from app.logger_config import Logger
 
 
 class TestWindow(QWidget):
     """Test harness class for manual inspection of the Capture tab UI elements."""
     def __init__(self) -> None:
         super().__init__()
-        self.logger = setup_logger()
+        self.logger = Logger.get_instance()
         self.capture_control = CaptureControlUI(self.logger)
         self.capture_manager = CaptureControlManager(self.capture_control, self.logger)
         self.adc_config_widget = ADCConfigWidget(self.logger)

@@ -1,0 +1,9 @@
+db:
+  driver: sqlite
+  name: pmt.db
+  path: ./db
+server:
+  port: 8050
+  url: http://localhost/${server.port}
+logger:
+  level: DEBUG

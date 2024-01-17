@@ -5,11 +5,11 @@ Focuses on acquiring data from the ADC.
 - Data processing or filtering methods specific to ADC data.
 """
 import time
-from app.logger_config import setup_logger
-from device.adc_config import ADCConfig
+# from app.logger_config import Logger
+from device.adc_config import ADCConfig, logger
 from device.adc_interface import initialize_adc
 
-logger = setup_logger()
+# logger = Logger.get_instance()
 
 
 def read_adc_single_channel(adc, channel) -> float:

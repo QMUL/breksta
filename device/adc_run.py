@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 from typing import Any
 from device.adc_interface import initialize_adc
 from device.adc_data_acquisition import read_adc_single_channel
-from app.logger_config import setup_logger
+from app.logger_config import Logger
 
 
 class ADCReader(ABC):

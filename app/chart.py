@@ -22,13 +22,14 @@ from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc  # BOOTSTRAP, CYBORG,SUPERHERO
 import pandas as pd
 
-from app.logger_config import setup_logger
+# from app.logger_config import Logger
 from app.cache_module import CacheWebProcess
 from app.components.figure import initialize_figure, plot_data, update_axes_layout, downsample_data
 from app.components.layout import create_layout
 from app.database import PmtDb, setup_session
+from app.logger_config import Logger
 
-logger = setup_logger()
+logger = Logger.get_instance()
 
 
 def setup_auxiliaries() -> tuple[CacheWebProcess, go.Figure]:

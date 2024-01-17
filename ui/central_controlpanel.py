@@ -5,7 +5,7 @@ import sys
 from typing import Optional
 from PySide6.QtWidgets import QApplication, QVBoxLayout, QWidget
 from PySide6.QtCore import Signal, Slot, Qt
-from app.logger_config import setup_logger
+from app.logger_config import Logger
 from device.adc_run import ADCReader
 from ui.adc_controlpanel import ADCConfigWidget, ADCConfigManager
 from ui.capture_controlpanel import CaptureControlUI, CaptureControlManager
@@ -41,7 +41,7 @@ class CentralizedControlManager(QWidget):
             logger
     ) -> None:
         super().__init__()
-        self.logger = logger if logger else setup_logger()
+        self.logger = logger  # if logger else setup_logger()
         self.capture_ui = capture_ui
         self.capture_manager = capture_manager
         self.adc_ui = adc_ui
@@ -142,7 +142,7 @@ def get_manager_instance(logger) -> CentralizedControlManager:
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    _logger = setup_logger()
+    _logger = Logger.get_instance()
 
     window: CentralizedControlManager = get_manager_instance(_logger)
     window.show()

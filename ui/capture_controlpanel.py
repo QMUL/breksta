@@ -3,7 +3,7 @@ Module that houses all the UI element creation and initialization for signal cap
 """
 from PySide6.QtWidgets import QWidget, QLabel, QComboBox, QVBoxLayout, QPushButton, QLineEdit
 from PySide6.QtCore import Signal, QTimer, Slot
-from app.logger_config import setup_logger
+from app.logger_config import Logger
 from ui.layout import create_horizontal_box
 
 
@@ -22,7 +22,7 @@ class CaptureControlUI(QWidget):
     def __init__(self, logger) -> None:
         super().__init__()
 
-        self.logger = logger if logger else setup_logger()
+        self.logger = logger  # if logger else setup_logger()
         self.setup_ui()
 
     def setup_ui(self) -> None:
