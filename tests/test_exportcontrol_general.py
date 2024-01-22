@@ -31,22 +31,13 @@ class TestExportControl(unittest.TestCase):
     def setUp(self) -> None:
         # Create a mock logger
         self.mock_logger = MagicMock()
-        # Mock the logger within ExportControl module
-        self.logger_patch = patch("app.breksta.setup_logger", return_value=self.mock_logger)
-        self.logger_patch.start()
 
         # Create instances of classes with the mock database
         self.mock_db = MagicMock()
 
         width = 1
-        self.table = TableWidget(width, self.mock_db)
-        self.export_control = ExportControl(self.table)
-
-    def tearDown(self) -> None:
-        self.table = None
-        self.export_control = None
-        self.logger_patch.stop()
-        return super().tearDown()
+        self.table = TableWidget(width, self.mock_db, self.mock_logger)
+        self.export_control = ExportControl(self.table, self.mock_logger)
 
     @patch.object(ExportControl, "choose_directory", return_value=None)
     def test_choose_directory_no_folder_chosen(self, mock_choose_directory) -> None:

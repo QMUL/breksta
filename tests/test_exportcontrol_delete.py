@@ -31,24 +31,14 @@ class TestExportControl(unittest.TestCase):
     def setUp(self) -> None:
         # Create a mock logger
         self.mock_logger = MagicMock()
-        # Mock the logger within ExportControl and TableWidget modules
-        self.logger_patch = patch("app.breksta.setup_logger", return_value=self.mock_logger)
-        self.logger_patch.start()
 
         # Mock the database to separate testing from actual database; also avoids side-effects.
         self.mock_db = MagicMock()
 
         # Create instances of classes with the mock database
         width = 1
-        self.table = TableWidget(width, self.mock_db)
-        self.export_control = ExportControl(self.table)
-
-    def tearDown(self) -> None:
-        self.table = None
-        self.export_control = None
-
-        self.logger_patch.stop()
-        return super().tearDown()
+        self.table = TableWidget(width, self.mock_db, self.mock_logger)
+        self.export_control = ExportControl(self.table, self.mock_logger)
 
     def test_delete_button_no_experiment_selected(self) -> None:
         """Test that delete button does not call delete_experiment when no experiment is selected"""
