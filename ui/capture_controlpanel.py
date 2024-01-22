@@ -13,6 +13,7 @@ class CaptureControlUI(QWidget):
     """
     DEFAULT_EXPERIMENT_NAME = "experiment-name"
     DEFAULT_EXPERIMENT_DURATION = 1  # 1 hour
+    DEFAULT_EXPERIMENT_POLLRATE = 2  # 2 seconds
 
     # Define custom signals
     start_button_signal = Signal()

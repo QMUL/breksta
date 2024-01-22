@@ -167,6 +167,13 @@ class ADCConfigManager:
         self.logger = logger if logger is not None else setup_logger()
 
         self.config_widget = config_widget
+
+        self.address = self.config_widget.address_combo.itemData(self.config_widget.address_combo.currentIndex())
+        self.gain = self.config_widget.gain_combo.itemData(self.config_widget.gain_combo.currentIndex())
+        self.data_rate = self.config_widget.data_rate_combo.itemData(self.config_widget.data_rate_combo.currentIndex())
+        polling_mode_id = self.config_widget.polling_mode_group.checkedId()
+        self.polling_mode = Mode(polling_mode_id)  # Convert to Mode enum
+
         self.setup_connections()
 
     def setup_connections(self) -> None:
@@ -183,18 +190,18 @@ class ADCConfigManager:
 
     def on_address_change(self, index: int) -> None:
         """Handle the address change"""
-        address = self.config_widget.address_combo.itemData(index)
-        self.logger.debug("Address changed to: 0x%X", address)
+        self.address = self.config_widget.address_combo.itemData(index)
+        self.logger.debug("Address changed to: 0x%X", self.address)
 
     def on_gain_change(self, index: int) -> None:
         """Handle the gain change"""
-        gain = self.config_widget.gain_combo.itemData(index)
-        self.logger.debug("Gain changed to: %s", gain)
+        self.gain = self.config_widget.gain_combo.itemData(index)
+        self.logger.debug("Gain changed to: %s", self.gain)
 
     def on_data_rate_change(self, index: int) -> None:
         """Handle the gain change"""
-        data_rate = self.config_widget.data_rate_combo.itemData(index)
-        self.logger.debug("Data Rate changed to: %s", data_rate)
+        self.data_rate = self.config_widget.data_rate_combo.itemData(index)
+        self.logger.debug("Data Rate changed to: %s", self.data_rate)
 
     def on_polling_mode_change(self, button_id, checked) -> None:
         """Adjust the ADC configuration based on the selected polling mode.
@@ -216,22 +223,18 @@ class ADCConfigManager:
                 self.config_widget.data_rate_combo.setEnabled(True)
             self.logger.debug("Polling Mode changed to: %s", mode)
 
+            polling_mode_id = self.config_widget.polling_mode_group.checkedId()
+            self.polling_mode = Mode(polling_mode_id)  # Convert to Mode enum
+
     def get_adc_config(self) -> ADCConfig:
         """Extract the current ADC configuration values from the UI."""
-        bus = self.config_widget.BUS
-        address = self.config_widget.address_combo.itemData(self.config_widget.address_combo.currentIndex())
-        gain = self.config_widget.gain_combo.itemData(self.config_widget.gain_combo.currentIndex())
-        data_rate = self.config_widget.data_rate_combo.itemData(self.config_widget.data_rate_combo.currentIndex())
-
-        polling_mode_id = self.config_widget.polling_mode_group.checkedId()
-        polling_mode = Mode(polling_mode_id)  # Convert to Mode enum
 
         config = ADCConfig(
-            i2c_bus=bus,
-            address=address,
-            gain=gain,
-            data_rate=data_rate,
-            poll_mode=polling_mode
+            i2c_bus=self.config_widget.BUS,
+            address=self.address,
+            gain=self.gain,
+            data_rate=self.data_rate,
+            poll_mode=self.polling_mode
         )
 
         self.logger.debug("Pushing ADC Configuration: %s", config)
