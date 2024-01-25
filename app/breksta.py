@@ -21,6 +21,7 @@ from app.capture import PmtDb, setup_session
 from app.logger_config import setup_logger
 from app.capture_signal import DeviceCapture
 from ui.central_controlpanel import CentralizedControlManager, get_manager_instance
+from app.components.figure import initialize_figure, plot_data
 
 # Programmatically set PYTHONPATH for breksta ONLY
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
@@ -507,6 +508,9 @@ class ExperimentGraph(QWebEngineView):
         # Display a placeholder graph initially
         self.display_placeholder_graph(width)
 
+        self.figure = initialize_figure()
+
+
     def display_placeholder_graph(self, width) -> None:
         """Displays a placeholder text before an experiment is selected.
         """
@@ -540,17 +544,37 @@ class ExperimentGraph(QWebEngineView):
         # Propagate the database connection
         database = self.table.database
 
-        exp_data = database.latest_readings(self.table.selected_experiment_id)
+        try:
+            df = database.latest_readings(self.table.selected_experiment_id)
+            exp_data = self.downsample_data(df)
+        except:
+            print("failure to grab DataFrame")
 
         if exp_data is not None:
             # Create a scatter plot with timestamp as x and value as y
-            fig = go.Figure(data=go.Scatter(x=exp_data['ts'], y=exp_data['value']))
+            # fig = go.Figure(data=go.Scattergl(x=exp_data['ts'], y=exp_data['value']))
 
             # Convert the Plotly figure to HTML and load it
-            raw_html = fig.to_html(full_html=False, include_plotlyjs='cdn')
+            # raw_html = fig.to_html(full_html=False, include_plotlyjs='cdn')
+            # self.setHtmlWould b
+
+            try:
+                figure = plot_data(self.figure, exp_data)
+            except:
+                print("failure to print DataFrame")
+
+            raw_html = figure.to_html(full_html=False, include_plotlyjs='cdn')
             self.setHtml(raw_html)
+
         else:
             self.logger.warning("No data to plot for the selected experiment.")
+
+    def downsample_data(self, df, step=10, max_points=10**5):
+        points = len(df)
+        if points <= max_points:
+            return df
+
+        return df.iloc[::step]
 
 
 class ExperimentWidget(QWidget):
@@ -579,6 +603,7 @@ class ExperimentWidget(QWidget):
         self.setLayout(layout)
 
         self.setup_connections(table)
+
 
     def setup_connections(self, table) -> None:
         """connect the experimentSelected signal to the slots"""
