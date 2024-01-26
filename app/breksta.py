@@ -547,8 +547,9 @@ class ExperimentGraph(QWebEngineView):
         try:
             df = database.latest_readings(self.table.selected_experiment_id)
             exp_data = self.downsample_data(df)
-        except:
-            print("failure to grab DataFrame")
+        except Exception as err:
+            exp_data = None
+            self.logger.error("failure to grab DataFrame: %s", err)
 
         if exp_data is not None:
             # Create a scatter plot with timestamp as x and value as y
@@ -560,8 +561,8 @@ class ExperimentGraph(QWebEngineView):
 
             try:
                 figure = plot_data(self.figure, exp_data)
-            except:
-                print("failure to print DataFrame")
+            except Exception as err:
+                self.logger.error("failure to print DataFrame: %s", err)
 
             raw_html = figure.to_html(full_html=False, include_plotlyjs='cdn')
             self.setHtml(raw_html)
