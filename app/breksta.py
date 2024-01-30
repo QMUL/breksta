@@ -15,7 +15,6 @@ from PySide6.QtWidgets import (
     QPushButton, QTabWidget, QVBoxLayout, QWidget, QTableWidget,
     QTableWidgetItem, QStyledItemDelegate, QFileDialog, QMessageBox)
 from PySide6.QtWebEngineWidgets import QWebEngineView
-from PySide6.QtQuick import QQuickWindow, QSGRendererInterface
 
 from app.capture import PmtDb, setup_session
 from app.logger_config import setup_logger
@@ -270,8 +269,8 @@ class ExportControl(QWidget):
             if reply:  # only attempt deletion if the user confirmed
                 database.delete_experiment(self.selected_experiment_id)
 
-        except Exception as err:  # abort process if any error occurs
-            self.logger.exception("Delete button failed due to: %s", err)
+        except OSError as err:
+            self.logger.exception("Operation failed due to: %s", err)
             self.restore_database()
 
         else:
@@ -403,10 +402,10 @@ class TableWidget(QTableWidget):
         The columns are labeled with 'Id', 'Name', 'Date started', 'Date ended', and 'Exported'.
         """
 
-        NUM_OF_COLUMNS = 5
-        NUM_OF_ROWS = 0
+        num_of_columns = 5
+        num_of_rows = 0
 
-        QTableWidget.__init__(self, NUM_OF_ROWS, NUM_OF_COLUMNS)
+        QTableWidget.__init__(self, num_of_rows, num_of_columns)
 
         self.logger = logger if logger else setup_logger()
 
@@ -510,7 +509,6 @@ class ExperimentGraph(QWebEngineView):
 
         self.figure = initialize_figure()
 
-
     def display_placeholder_graph(self, width) -> None:
         """Displays a placeholder text before an experiment is selected.
         """
@@ -537,41 +535,27 @@ class ExperimentGraph(QWebEngineView):
         """Refresh the graph to reflect the data for the currently selected experiment.
         """
 
-        if self.table.selected_experiment_id is None:
+        experiment_id: int = self.table.selected_experiment_id
+        if experiment_id is None:
             self.logger.debug("Cannot refresh preview graph. No experiment selected.")
             return
 
-        # Propagate the database connection
         database = self.table.database
 
-        try:
-            df = database.latest_readings(self.table.selected_experiment_id)
-            exp_data = self.downsample_data(df)
-        except Exception as err:
-            exp_data = None
-            self.logger.error("failure to grab DataFrame: %s", err)
+        df = database.latest_readings(experiment_id)
+        exp_data = self.downsample_data(df)
 
-        if exp_data is not None:
-            # Create a scatter plot with timestamp as x and value as y
-            # fig = go.Figure(data=go.Scattergl(x=exp_data['ts'], y=exp_data['value']))
-
-            # Convert the Plotly figure to HTML and load it
-            # raw_html = fig.to_html(full_html=False, include_plotlyjs='cdn')
-            # self.setHtmlWould b
-
-            try:
-                figure = plot_data(self.figure, exp_data)
-            except Exception as err:
-                self.logger.error("failure to print DataFrame: %s", err)
-
-            raw_html = figure.to_html(full_html=False, include_plotlyjs='cdn')
-            self.setHtml(raw_html)
-
-        else:
+        if exp_data is None:
             self.logger.warning("No data to plot for the selected experiment.")
 
+        figure = plot_data(self.figure, exp_data)
+
+        raw_html = figure.to_html(full_html=False, include_plotlyjs='cdn')
+        self.setHtml(raw_html)
+
     def downsample_data(self, df, step=10, max_points=10**5):
-        points = len(df)
+        """Trim down the dataframe to 1/step data points."""
+        points: int = len(df)
         if points <= max_points:
             return df
 
@@ -604,7 +588,6 @@ class ExperimentWidget(QWidget):
         self.setLayout(layout)
 
         self.setup_connections(table)
-
 
     def setup_connections(self, table) -> None:
         """connect the experimentSelected signal to the slots"""

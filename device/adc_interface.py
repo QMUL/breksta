@@ -35,7 +35,7 @@ def initialize_adc(adc_config: ADCConfig) -> ads.ADS1115 | None:
     try:
         # Initialize the ADC with the specified I2C bus and address
         adc = ads.ADS1115(adc_config.i2c_bus, adc_config.address)
-    except Exception as e:
+    except OSError as e:
         logger.error("Initializing ADS failed: %s", e)
         return None
 

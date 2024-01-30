@@ -56,6 +56,7 @@ class ADCReader(ABC):
 
     @abstractmethod
     def run_adc(self) -> float:
+        """Method must perform a single data ADC acquisition."""
         pass
 
 

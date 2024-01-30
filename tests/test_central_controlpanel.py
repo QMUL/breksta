@@ -78,7 +78,7 @@ class TestCentralizedControlManager(unittest.TestCase):
             item = layout.itemAt(i)
             if isinstance(item.widget(), QGroupBox):
                 continue  # GroupBox found, continue with the next item
-            elif isinstance(item, QSpacerItem):
+            if isinstance(item, QSpacerItem):
                 continue  # SpacerItem found, continue with the next item
-            else:
-                self.fail(f"Unexpected item type at position {i}: {type(item).__name__}")
+
+            self.fail(f"Unexpected item type at position {i}: {type(item).__name__}")

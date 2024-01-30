@@ -65,7 +65,8 @@ class DeviceCapture(QObject):
             raise
 
 
-def main():
+def _main():
+    """Entry point to perform manual testing. Private method."""
     app = QApplication(sys.argv)
     _logger = setup_logger()
 
@@ -74,10 +75,10 @@ def main():
     session = setup_session()
     _database = PmtDb(Session=session, logger=_logger)
 
-    device_capture = DeviceCapture(manager=window, database=_database, logger=_logger)
+    _ = DeviceCapture(manager=window, database=_database, logger=_logger)
 
     sys.exit(app.exec())
 
 
 if __name__ == "__main__":
-    main()
+    _main()

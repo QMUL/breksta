@@ -26,23 +26,16 @@ def read_adc_single_channel(adc, channel) -> float:
 def read_adc_single_shot(adc, channel, period):
     """Reads values from the ADC. Uses single mode."""
     logger.info("Starting single-shot read every %ss", period)
-    # start = time.now()
     while True:
-        # Read ADC values
         voltage = read_adc_single_channel(adc, channel)
         logger.debug("V: %s", voltage)
-        # Idle
         time.sleep(period)
-        # TODO: implement a signal listener to break out of the loop?
-        # if signal: break
 
 
 def read_adc_continuous(adc, channel, period):
     """Reads values from the ADC. Uses continuous operation mode."""
     logger.info("Starting continuous read every %ss", period)
     while True:
-        # raw = adc.getValue()
-        # print("{0:.3f} V".format(ADS.toVoltage(raw)))
         voltage = read_adc_single_channel(adc, channel)
         logger.debug("V: %s", voltage)
         time.sleep(period)
@@ -60,7 +53,8 @@ def read_adc_values_all_channels(adc) -> dict:
     adc_values = {}
     voltage_factor = adc.toVoltage()
 
-    for channel in range(4):  # Assuming 4 channels (0 to 3), README calls them "Pins"
+    # Assuming 4 channels (0 to 3), README calls them "Pins"
+    for channel in range(4):
         value = adc.readADC(channel)
         voltage = value * voltage_factor
         adc_values[f'channel_{channel}'] = {'raw': value, 'voltage': voltage}

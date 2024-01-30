@@ -1,3 +1,5 @@
+"""Tests the ADC configuration is correctly assembled, shown in the UI,
+and committed to the device."""
 import unittest
 from unittest.mock import MagicMock, patch
 
@@ -6,6 +8,7 @@ from device.adc_config import ADCConfig, ADS1115Address, ADS1115Gain, ADS1115Dat
 
 
 class TestADCConfig(unittest.TestCase):
+    """Check the configuration assembly for validity."""
     def setUp(self) -> None:
         self.mock_logger = MagicMock()
         # Mock the logger within adc_config module

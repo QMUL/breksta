@@ -6,7 +6,7 @@ break the application.
 import unittest
 import tempfile
 from unittest import mock
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 from PySide6.QtWidgets import QApplication, QMessageBox
 from app.breksta import ExportControl, TableWidget
@@ -68,7 +68,7 @@ class TestExportControl(unittest.TestCase):
                 self.export_control.table.item = MagicMock(return_value=mock_item)
 
                 # Mock the QMessageBox.question method to return 'Yes'
-                with mock.patch('PySide6.QtWidgets.QMessageBox.question', return_value=QMessageBox.Yes):
+                with mock.patch('PySide6.QtWidgets.QMessageBox.question', return_value=QMessageBox.Yes):  # type: ignore
                     # Select an experiment and try to delete it
                     self.export_control.selected_experiment_id = 1
                     self.export_control.table.selected_row = 0
@@ -93,7 +93,7 @@ class TestExportControl(unittest.TestCase):
                 self.export_control.table.item = MagicMock(return_value=mock_item)
 
                 # Mock the QMessageBox.question method to return 'Yes'
-                with mock.patch('PySide6.QtWidgets.QMessageBox.question', return_value=QMessageBox.Yes):
+                with mock.patch('PySide6.QtWidgets.QMessageBox.question', return_value=QMessageBox.Yes):  # type: ignore
 
                     # Select an experiment and try to delete it
                     self.export_control.selected_experiment_id = 1
@@ -121,7 +121,7 @@ class TestExportControl(unittest.TestCase):
             # Simulate a user response of "No" via the QMessageBox.
             # This mock ensures that the user's decision to decline deletion
             # is captured and affects the behavior of the method under test.
-            with mock.patch('PySide6.QtWidgets.QMessageBox.question', return_value=QMessageBox.No):
+            with mock.patch('PySide6.QtWidgets.QMessageBox.question', return_value=QMessageBox.No):  # type: ignore
 
                 # Create a mock item with a text method.
                 # You can adjust this mock's return value to align with the specific
@@ -159,7 +159,10 @@ class TestExportControl(unittest.TestCase):
             # Simulate two user responses via the QMessageBox: first Yes, then No.
             # The order of these responses is crucial to the test, as the logic
             # of the method being tested depends on the exported status of the experiment.
-            with mock.patch('PySide6.QtWidgets.QMessageBox.question', side_effect=[QMessageBox.Yes, QMessageBox.No]):
+            with mock.patch('PySide6.QtWidgets.QMessageBox.question', side_effect=[
+                QMessageBox.Yes,  # type: ignore
+                QMessageBox.No  # type: ignore
+            ]):
 
                 # Create a mock item with a text method that always returns "True".
                 # This ensures that the is_exported status will always be True,

@@ -102,8 +102,8 @@ class TestExportControl(unittest.TestCase):
     @patch.object(ExportControl, "choose_directory", return_value="/mock/directory")
     def test_successful_export_on_export_button_clicked(self, mock_choose_directory) -> None:
         """Test that clicking the export button successfully exports the data."""
-        TEST_EXPERIMENT_ID = 123  # mock ID
-        self.export_control.selected_experiment_id = TEST_EXPERIMENT_ID
+        test_experiment_id = 123  # mock ID
+        self.export_control.selected_experiment_id = test_experiment_id
         self.export_control.folder_path = "/mock/directory"
 
         # Mock the instance's method
@@ -112,7 +112,7 @@ class TestExportControl(unittest.TestCase):
         self.export_control.on_export_button_clicked()
 
         self.export_control.table.database.export_data_single.assert_called_once_with(
-            TEST_EXPERIMENT_ID, "/mock/directory")
+            test_experiment_id, "/mock/directory")
 
     @patch.object(ExportControl, "choose_directory", return_value="/mock/directory")
     def test_failed_export_on_export_button_clicked(self, mock_choose_directory) -> None:

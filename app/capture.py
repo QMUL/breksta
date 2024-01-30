@@ -150,9 +150,6 @@ class PmtDb:
         Returns:
             DataFrame or None: A DataFrame containing the readings and their timestamps,
             or None if no readings were found.
-
-        TODO: If we're continuing with the web-app for charting, cache the DB queries
-        with Memcached or similar, query only the latest values.
         """
         with self.Session() as sess:
             expt = sess.query(Experiment).filter(Experiment.id == experiment_id).first()
