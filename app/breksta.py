@@ -55,7 +55,9 @@ class ChartWidget(QWebEngineView):
         Could pass the experiment ID as a parameter to the web app.
         https://doc.qt.io/qtforpython/PySide6/QtCore/Slot.html
         """
+        
         self.logger.debug("WebEngineView starting..")
+
         if experiment_id is None:
             self.logger.error("experiment_id is None. Invalid value.")
 
