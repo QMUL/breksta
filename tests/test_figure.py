@@ -190,7 +190,7 @@ class TestFigureLayout(unittest.TestCase):
     def test_initial_layout_state(self) -> None:
         """Tests the initial layout state is that of an empty dictionary"""
         fig_mock = mock.MagicMock()  # Mock the go.Figure object
-        stored_layout = {}  # Initial empty state
+        stored_layout: dict = {}  # Initial empty state
 
         figure.update_axes_layout(fig_mock, stored_layout)
 

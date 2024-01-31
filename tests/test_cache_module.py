@@ -23,8 +23,6 @@ class TestCacheWebProcess(TestCase):
         self.cache_instance = CacheWebProcess(database=self.mock_db)
 
     def tearDown(self) -> None:
-        self.mock_db = None
-        self.cache_instance = None
         self.logger_patch.stop()
         return super().tearDown()
 

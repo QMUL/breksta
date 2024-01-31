@@ -66,7 +66,8 @@ class CacheWebProcess:
         Returns:
             pd.DataFrame: The latest data fetched from the database, or None if no new data.
         """
-        return self.database.latest_readings(experiment_id=experiment_id, since=last_timestamp)
+        dataframe: pd.DataFrame | None = self.database.latest_readings(experiment_id=experiment_id, since=last_timestamp)
+        return dataframe
 
     def update_cache(self, experiment_id, last_timestamp=None) -> pd.DataFrame:
         """Updates the cache with new data based on the last timestamp and experiment ID.
@@ -88,7 +89,7 @@ class CacheWebProcess:
 
         if new_data is None:
             self.logger.warning("DataFrame requested is empty. No cache update.")
-            return self.cached_data.get(experiment_id, None)
+            return self.cached_data.get(experiment_id, pd.DataFrame())
 
         # Append new data to the existing cached dataframe
         self.cached_data[experiment_id] = pd.concat([self.cached_data[experiment_id], new_data])

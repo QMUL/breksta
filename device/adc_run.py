@@ -33,8 +33,9 @@ class ADCReader(ABC):
 
         self.adc = initialize_adc(adc_config=config)
         self.is_initialized = self.adc is not None
-        if not self.is_initialized:
+        if not self.adc:
             self.logger.critical("ADC could not be initialized.")
+            return
 
         self.channel: int = channel
         self.period: int = period
@@ -55,7 +56,7 @@ class ADCReader(ABC):
         pass
 
     @abstractmethod
-    def run_adc(self) -> float:
+    def run_adc(self) -> float | None:
         """Method must perform a single data ADC acquisition."""
         pass
 
@@ -67,7 +68,7 @@ class SingleShotADCReader(ADCReader):
     This class overrides the run_adc method to perform a single ADC data acquisition.
     """
 
-    def run_adc(self) -> float:
+    def run_adc(self) -> float | None:
         """
         Performs a single ADC data acquisition.
 
@@ -80,7 +81,7 @@ class SingleShotADCReader(ADCReader):
 
         if not self.is_operational():
             self.logger.error("ADCReader is not operational.")
-            return 0.0
+            return None
 
         result: float = read_adc_single_channel(self.adc, self.channel)
         self.logger.debug(result * self.to_voltage)
@@ -96,7 +97,7 @@ class ContinuousADCReader(ADCReader):
     further development for true continuous reading functionality.
     """
 
-    def run_adc(self) -> float:
+    def run_adc(self) -> float | None:
         """
         Intended for continuous ADC data acquisition.
 
@@ -110,7 +111,7 @@ class ContinuousADCReader(ADCReader):
 
         if not self.is_operational():
             self.logger.error("ADCReader is not operational.")
-            return 0.0
+            return None
 
         result: float = read_adc_single_channel(self.adc, self.channel)
         self.logger.debug(result * self.to_voltage)

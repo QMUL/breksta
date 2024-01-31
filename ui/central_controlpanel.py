@@ -2,9 +2,11 @@
 Glues together all UI and Manager classes for the Capture Tab.
 """
 import sys
+from typing import Optional
 from PySide6.QtWidgets import QApplication, QVBoxLayout, QWidget
 from PySide6.QtCore import Signal
 from app.logger_config import setup_logger
+from device.adc_run import ADCReader
 from ui.adc_controlpanel import ADCConfigWidget, ADCConfigManager
 from ui.capture_controlpanel import CaptureControlUI, CaptureControlManager
 from ui.layout import create_group_box
@@ -45,7 +47,7 @@ class CentralizedControlManager(QWidget):
         self.adc_ui = adc_ui
         self.adc_manager = adc_manager
         self.channel = self.DEFAULT_CHANNEL
-        self.adc_reader = None
+        self.adc_reader: Optional[ADCReader] = None
 
         self.create_layout(self.capture_ui, self.adc_ui)
         self.setup_connections()
@@ -101,7 +103,6 @@ class CentralizedControlManager(QWidget):
             def on_timeout() -> None:
                 result: float = adc_reader.run_adc()
                 self.output_signal.emit(result)
-                print(result)
 
             timer.timeout.connect(on_timeout)
             self.capture_manager.set_timer(timer, period)
