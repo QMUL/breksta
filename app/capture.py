@@ -168,18 +168,6 @@ class PmtDb:
 
         return df
 
-    def export_data(self) -> None:
-        """Exports the data of all experiments to a CSV file.
-        """
-        # Query the database and get data
-        data = self.query_database()
-
-        # Convert data into a DataFrame
-        df = pd.DataFrame(data)
-
-        # Save DataFrame as a CSV file
-        df.to_csv('export.csv')
-
     def export_data_single(self, experiment_id, folder_path) -> None:
         """Exports the data of a single experiment to a CSV file in the specified directory.
         The CSV file is named with the experiment's name and start time.
@@ -247,36 +235,6 @@ class PmtDb:
             self.logger.critical("IntegrityError while deleting experiment: %s", err)
         except exc.OperationalError as err:
             self.logger.critical("OperationalError while deleting experiment: %s", err)
-
-    def query_database(self):
-        """Queries the database and returns a DataFrame of all readings,
-        with the timestamps as integer seconds relative to the start time of each experiment.
-
-        Returns:
-            DataFrame: A DataFrame containing all readings from the database.
-        """
-        with self.Session() as sess:
-            # Get a list of all experiments
-            experiments = sess.query(Experiment).all()
-
-            # Initialize an empty list to hold the data from all experiments
-            data = []
-
-            for expt in experiments:
-                # Query the readings for the current experiment
-                query = sess.query(PmtReading.ts, PmtReading.value).filter(PmtReading.experiment == expt.id)
-
-                df = pd.DataFrame(query)
-
-                df['ts'] = (df.ts - expt.start).dt.total_seconds()
-
-                # Add the experiment data to the overall data
-                data.append(df)
-
-        # Concatenate all data into a single DataFrame
-        all_data = pd.concat(data)
-
-        return all_data
 
     def get_experiments(self):
         """Fetches all experiments from the database.
