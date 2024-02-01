@@ -321,30 +321,3 @@ class PmtDb:
 
         # Return False if the function did not return True earlier
         return False
-
-
-class DevCapture:
-    """Class that simulates a data capture device.
-    The class provides a method to take a reading, which generates a simulated PMT reading and writes it to the database.
-
-    TODO: How can we tell if we're running on a real Pi?
-    """
-    def __init__(self, db) -> None:
-        self.db = db
-        self.logger = setup_logger()
-
-        self.omega = 2.0 * math.pi / 60
-
-    def take_reading(self):
-        """Simulates taking a PMT reading.
-        The reading is a sine wave with some noise, and it is written to the database.
-
-        Returns:
-            int: The simulated PMT reading.
-        """
-        noise = (0.08 * random.random()) - 0.04
-        signal = 0.92 * math.sin(self.omega * (datetime.now() - self.db.start_time).seconds)
-        reading = 32768 + int(32768 * (signal + noise))
-        self.db.write_reading(reading)
-        self.logger.debug(reading)
-        return reading
