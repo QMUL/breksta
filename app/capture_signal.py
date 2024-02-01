@@ -7,7 +7,7 @@ import sys
 from typing import Optional
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import QObject, Slot, Signal
-from app.capture import PmtDb, setup_session
+from app.database import PmtDb, setup_session
 from app.logger_config import setup_logger
 from ui.central_controlpanel import CentralizedControlManager, get_manager_instance
 

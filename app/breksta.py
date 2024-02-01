@@ -16,7 +16,7 @@ from PySide6.QtWidgets import (
     QTableWidgetItem, QStyledItemDelegate, QFileDialog, QMessageBox)
 from PySide6.QtWebEngineWidgets import QWebEngineView
 
-from app.capture import PmtDb, setup_session
+from app.database import PmtDb, setup_session
 from app.logger_config import setup_logger
 from app.capture_signal import DeviceCapture
 from ui.central_controlpanel import CentralizedControlManager, get_manager_instance
@@ -55,7 +55,7 @@ class ChartWidget(QWebEngineView):
         Could pass the experiment ID as a parameter to the web app.
         https://doc.qt.io/qtforpython/PySide6/QtCore/Slot.html
         """
-        
+
         self.logger.debug("WebEngineView starting..")
 
         if experiment_id is None:

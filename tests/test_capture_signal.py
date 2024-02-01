@@ -10,7 +10,7 @@ from sqlalchemy.orm import sessionmaker
 from PySide6.QtWidgets import QApplication
 from ui.central_controlpanel import CentralizedControlManager, get_manager_instance
 from app.capture_signal import DeviceCapture
-from app.capture import PmtDb, Base
+from app.database import PmtDb, Base
 
 # In Qt, every GUI application must have exactly one instance of QApplication or one of its subclasses.
 # It's a requirement for managing a lot of application-wide resources, for initializing various Qt

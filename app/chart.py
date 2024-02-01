@@ -26,7 +26,7 @@ from app.logger_config import setup_logger
 from app.cache_module import CacheWebProcess
 from app.components.figure import initialize_figure, plot_data, update_axes_layout
 from app.components.layout import create_layout
-from app.capture import PmtDb, setup_session
+from app.database import PmtDb, setup_session
 
 logger = setup_logger()
 session = setup_session()
