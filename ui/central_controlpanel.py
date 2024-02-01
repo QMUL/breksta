@@ -76,7 +76,7 @@ class CentralizedControlManager(QWidget):
         period: int = self.capture_manager.frequency
 
         timer = self.capture_manager.sampling_timer
-        self.adc_reader = self.adc_manager.get_adc_reader(adc_config, self.channel, period)
+        self.adc_reader = self.adc_manager.get_device(adc_config, self.channel, period)
 
         self.start_reading(self.adc_reader, timer, period)
 

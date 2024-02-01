@@ -60,6 +60,13 @@ To run the application:
     pip install -r requirements-dev.txt
     ```
 
+### Selecting devices
+
+To bypass ADC selection and use the Sine Wave generator, before starting the app use:
+```sh
+export USE_MOCK_DEVICE=1
+```
+
 ### Contributing
 
 For contributions, please open a Pull Request detailing the changes made, issues fixed, or features added.

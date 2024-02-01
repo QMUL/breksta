@@ -12,8 +12,6 @@ Otherwise, SQLAlchemy speaks Postgres, so it should be able to talk to
 QuestDB, a column-store for IOT time-series:
     https://questdb.io/
 """
-import math
-import random
 import os
 from datetime import datetime
 from typing import Optional

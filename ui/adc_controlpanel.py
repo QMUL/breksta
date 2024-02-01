@@ -6,9 +6,11 @@ Includes:
 - creating the ADC configuration object
 - selecting the ADC reading operation mode
 """
+import os
 from PySide6.QtWidgets import QWidget, QLabel, QComboBox, QRadioButton, QVBoxLayout, QButtonGroup
 
 from app.logger_config import setup_logger
+from app.sine_wave_generator import SineWaveGenerator
 from device.adc_config import (
     ADS1115Address as Address,
     ADS1115Gain as Gain,
@@ -251,3 +253,13 @@ class ADCConfigManager:
                 return ContinuousADCReader(config, channel, period, self.logger)
             case _:
                 raise ValueError(f"Invalid ADC mode: {config.poll_mode}")
+
+    def get_device(self, config, channel, period) -> ADCReader:
+        """Wrapper method to select between real and mock ADC Readers based on application context."""
+
+        if os.getenv('USE_MOCK_DEVICE', '0') == '1':
+            self.logger.info("Using Mock Sine Wave Generator for testing")
+            return SineWaveGenerator(config, channel, period, self.logger)
+
+        # Use the existing helper to get the ADC
+        return self.get_adc_reader(config, channel, period)
