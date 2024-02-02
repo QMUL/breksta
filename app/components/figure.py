@@ -17,7 +17,7 @@ from app.logger_config import setup_logger
 logger = setup_logger()
 
 
-def initialize_figure(x_title: str = 'Time (s)', y_title: str = 'Value (u)') -> go.Figure:
+def initialize_figure(x_title: str = 'Time (s)', y_title: str = 'Voltage (V)') -> go.Figure:
     """Create and initialize a Plotly graph object figure with customizable settings.
 
     This function sets up a default Plotly figure to provide a consistent starting point for all subsequent plots.

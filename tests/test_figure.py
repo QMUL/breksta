@@ -57,7 +57,7 @@ class TestInitializeFigure(unittest.TestCase):
 
         # Check axes' titles
         self.assertEqual(fig.layout.xaxis.title.text, 'Time (s)')
-        self.assertEqual(fig.layout.yaxis.title.text, 'Value (u)')
+        self.assertEqual(fig.layout.yaxis.title.text, 'Voltage (V)')
 
         # Verify that the logger was called with the expected debug message
         self.mock_logger.debug.assert_called_with(
