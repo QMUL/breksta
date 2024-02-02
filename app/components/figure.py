@@ -141,3 +141,12 @@ def display_placeholder_graph(width):
     # Convert the Plotly figure to HTML and load it
     raw_html = fig.to_html(full_html=False, include_plotlyjs='cdn')
     return raw_html
+
+
+def downsample_data(df: pd.DataFrame, step=10, max_points=10**5) -> pd.DataFrame:
+    """Trim down the dataframe to 1/step data points."""
+    points: int = len(df)
+    if points <= max_points:
+        return df
+
+    return df.iloc[::step]

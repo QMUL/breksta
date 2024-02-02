@@ -19,7 +19,7 @@ from app.database import PmtDb, setup_session
 from app.logger_config import setup_logger
 from app.capture_signal import DeviceCapture
 from ui.central_controlpanel import CentralizedControlManager, get_manager_instance
-from app.components.figure import initialize_figure, plot_data, display_placeholder_graph
+from app.components.figure import initialize_figure, plot_data, display_placeholder_graph, downsample_data
 
 # Programmatically set PYTHONPATH for breksta ONLY
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
@@ -527,23 +527,11 @@ class ExperimentGraph(QWebEngineView):
             self.logger.warning("Cannot create preview. Dataframe empty.")
             return
 
-        exp_data = self.downsample_data(df)
-
-        if exp_data is None:
-            self.logger.warning("No data to plot for the selected experiment.")
-
-        figure = plot_data(self.figure, exp_data)
+        df_scaled = downsample_data(df)
+        figure = plot_data(self.figure, df_scaled)
 
         raw_html = figure.to_html(full_html=False, include_plotlyjs='cdn')
         self.setHtml(raw_html)
-
-    def downsample_data(self, df, step=10, max_points=10**5):
-        """Trim down the dataframe to 1/step data points."""
-        points: int = len(df)
-        if points <= max_points:
-            return df
-
-        return df.iloc[::step]
 
 
 class ExperimentWidget(QWidget):

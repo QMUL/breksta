@@ -24,7 +24,7 @@ import pandas as pd
 
 from app.logger_config import setup_logger
 from app.cache_module import CacheWebProcess
-from app.components.figure import initialize_figure, plot_data, update_axes_layout
+from app.components.figure import initialize_figure, plot_data, update_axes_layout, downsample_data
 from app.components.layout import create_layout
 from app.database import PmtDb, setup_session
 
@@ -92,7 +92,8 @@ def draw_chart(pathname: str, n_intervals: int, stored_layout: dict) -> go.Figur
     dataframe: pd.DataFrame = fetch_data(experiment_id)
 
     # Generate the chart figure based on the fetched data and stored layout
-    app.figure = plot_data(app.figure, dataframe)
+    mini_df = downsample_data(dataframe)
+    app.figure = plot_data(app.figure, mini_df)
 
     return app.figure
 
