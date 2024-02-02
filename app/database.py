@@ -81,7 +81,7 @@ class PmtDb:
         self.experiment_id: Optional[int] = None
         self.start_time: Optional[datetime] = None
 
-    def start_experiment(self, name):
+    def start_experiment(self, name) -> int:
         """Starts a new experiment and writes it to the database.
         The start time is recorded as the current time.
 
@@ -91,7 +91,10 @@ class PmtDb:
         Returns:
             int: The ID of the started experiment.
         """
-        assert self.experiment_id is None
+        if self.experiment_id is not None:
+            error_msg = "Attempted to start a new experiment while another is active."
+            self.logger.error(error_msg)
+            raise ValueError(error_msg)
 
         with self.Session() as sess:
             self.start_time = datetime.now()
@@ -109,7 +112,11 @@ class PmtDb:
         """Stops the current experiment.
         The end time is recorded as the current time and the experiment ID is reset.
         """
-        assert self.experiment_id is not None
+        if self.experiment_id is None:
+            error_msg = "Attempted to stop an experiment when no experiment is active."
+            self.logger.error(error_msg)
+            raise ValueError(error_msg)
+
         self.start_time = None
         with self.Session() as sess:
             exp = sess.get(Experiment, self.experiment_id)
