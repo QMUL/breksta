@@ -120,6 +120,11 @@ class PmtDb:
         self.start_time = None
         with self.session() as sess:
             exp = sess.get(Experiment, self.experiment_id)
+            if exp is None:
+                error_msg = f"No experiment found with ID {self.experiment_id}."
+                self.logger.error(error_msg)
+                raise ValueError(error_msg)
+
             exp.end = datetime.now()
             sess.commit()
         self.experiment_id = None
@@ -158,6 +163,11 @@ class PmtDb:
         """
         with self.session() as sess:
             expt = sess.query(Experiment).filter(Experiment.id == experiment_id).first()
+
+            # Check if the experiment exists
+            if expt is None:
+                self.logger.warning("Experiment %s not found", experiment_id)
+                return None
 
             if since is None:
                 query = sess.query(PmtReading.ts, PmtReading.value).filter(
