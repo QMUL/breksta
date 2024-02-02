@@ -7,7 +7,6 @@ import os
 import shutil
 from typing import Optional
 
-import plotly.graph_objects as go
 from PySide6.QtCore import QProcess, QUrl, Signal, Slot, Qt, QDir
 from PySide6.QtGui import QAction, QKeySequence
 from PySide6.QtWidgets import (
@@ -20,7 +19,7 @@ from app.database import PmtDb, setup_session
 from app.logger_config import setup_logger
 from app.capture_signal import DeviceCapture
 from ui.central_controlpanel import CentralizedControlManager, get_manager_instance
-from app.components.figure import initialize_figure, plot_data
+from app.components.figure import initialize_figure, plot_data, display_placeholder_graph
 
 # Programmatically set PYTHONPATH for breksta ONLY
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
@@ -507,31 +506,10 @@ class ExperimentGraph(QWebEngineView):
         self.table = table
 
         # Display a placeholder graph initially
-        self.display_placeholder_graph(width)
+        preview = display_placeholder_graph(width)
+        self.setHtml(preview)
 
         self.figure = initialize_figure()
-
-    def display_placeholder_graph(self, width) -> None:
-        """Displays a placeholder text before an experiment is selected.
-        """
-        fig = go.Figure()
-
-        fig.add_trace(go.Scatter(
-            x=[0, 1], y=[0, 1], mode='markers',
-            marker={"size": [0, 0]}))  # invisible points
-
-        fig.update_layout(
-            annotations=[
-                go.layout.Annotation(
-                    x=0.5, y=0.5, text="GRAPH", showarrow=False,
-                    font={"size": 84})],
-            xaxis={"showgrid": False, "zeroline": False, "visible": False},
-            yaxis={"showgrid": False, "zeroline": False, "visible": False},
-            autosize=False, width=width / 2, height=width / 4)
-
-        # Convert the Plotly figure to HTML and load it
-        raw_html = fig.to_html(full_html=False, include_plotlyjs='cdn')
-        self.setHtml(raw_html)
 
     def refresh_graph(self) -> None:
         """Refresh the graph to reflect the data for the currently selected experiment.
