@@ -73,7 +73,7 @@ def _main():
     window: CentralizedControlManager = get_manager_instance(_logger)
     window.show()
     session = setup_session()
-    _database = PmtDb(Session=session, logger=_logger)
+    _database = PmtDb(session=session, logger=_logger)
 
     _ = DeviceCapture(manager=window, database=_database, logger=_logger)
 

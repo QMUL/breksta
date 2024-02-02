@@ -28,12 +28,12 @@ class TestDeviceCapture(unittest.TestCase):
     def setUp(self) -> None:
         # Create an SQLite database in memory
         self.engine = create_engine('sqlite:///:memory:', echo=False)
-        Session = sessionmaker(bind=self.engine)
-        self.session = Session()  # save the session instance
+        session = sessionmaker(bind=self.engine)
+        self.session = session()  # save the session instance
         Base.metadata.create_all(self.engine)  # Creates the database structure
 
         self.mock_logger = MagicMock()
-        self.mock_db = PmtDb(Session, self.mock_logger)
+        self.mock_db = PmtDb(session, self.mock_logger)
         self.central_manager: CentralizedControlManager = get_manager_instance(self.mock_logger)
         self.device_capture = DeviceCapture(self.central_manager, self.mock_db, self.mock_logger)
 

@@ -642,7 +642,7 @@ class MainWindow(QMainWindow):
     def instantiate_objects(self, win_width, logger) -> tuple[CaptureWidget, ExportWidget]:
         """Create the instances of all objects."""
         session = setup_session()
-        database = PmtDb(Session=session, logger=logger)
+        database = PmtDb(session=session, logger=logger)
         capture = CaptureWidget(win_width, database, logger)
         table = TableWidget(win_width, database, logger)
         export = ExportWidget(win_width, table, logger)

@@ -63,8 +63,8 @@ def setup_session():
     """Create the Session if it doesn't exist."""
     engine = create_engine('sqlite:///pmt.db')
     Base.metadata.create_all(engine)
-    Session = sessionmaker(bind=engine)
-    return Session
+    session = sessionmaker(bind=engine)
+    return session
 
 
 class PmtDb:
@@ -72,11 +72,11 @@ class PmtDb:
     The class provides functionalities to start and stop experiments, write readings to the database,
     fetch the latest readings, export data, delete experiments, and mark experiments as exported.
     """
-    def __init__(self, Session, logger) -> None:
+    def __init__(self, session, logger) -> None:
 
         self.logger = logger if logger else setup_logger()
 
-        self.Session = Session if Session else setup_session()
+        self.session = session if session else setup_session()
 
         self.experiment_id: Optional[int] = None
         self.start_time: Optional[datetime] = None
@@ -96,7 +96,7 @@ class PmtDb:
             self.logger.error(error_msg)
             raise ValueError(error_msg)
 
-        with self.Session() as sess:
+        with self.session() as sess:
             self.start_time = datetime.now()
             exp = Experiment(name=name, start=self.start_time)
             sess.add(exp)
@@ -118,7 +118,7 @@ class PmtDb:
             raise ValueError(error_msg)
 
         self.start_time = None
-        with self.Session() as sess:
+        with self.session() as sess:
             exp = sess.get(Experiment, self.experiment_id)
             exp.end = datetime.now()
             sess.commit()
@@ -137,7 +137,7 @@ class PmtDb:
             sqlalchemy.exc.SQLAlchemyError: If any error occurs while adding the reading to the session
             or committing the session.
         """
-        with self.Session() as sess:
+        with self.session() as sess:
             sess.add(PmtReading(
                 experiment=self.experiment_id,
                 value=val, ts=datetime.now()))
@@ -156,7 +156,7 @@ class PmtDb:
             DataFrame or None: A DataFrame containing the readings and their timestamps,
             or None if no readings were found.
         """
-        with self.Session() as sess:
+        with self.session() as sess:
             expt = sess.query(Experiment).filter(Experiment.id == experiment_id).first()
 
             if since is None:
@@ -193,7 +193,7 @@ class PmtDb:
                 return
 
             # Attempt to retrieve the experiment's start date
-            with self.Session() as sess:
+            with self.session() as sess:
                 exp = sess.get(Experiment, experiment_id)
                 if exp is not None:
                     stamp = exp.start.strftime("%Y%m%d-%H%M")
@@ -222,7 +222,7 @@ class PmtDb:
             experiment_id (int): The ID of the experiment to delete.
         """
         try:
-            with self.Session() as sess:
+            with self.session() as sess:
                 # Query for the experiment to delete
                 experiment = sess.query(Experiment).filter(Experiment.id == experiment_id).first()
 
@@ -250,7 +250,7 @@ class PmtDb:
             list: A list of tuples, each containing the ID, name, start time, end time,
             and exported status of an experiment.
         """
-        with self.Session() as sess:
+        with self.session() as sess:
             experiments = sess.query(Experiment).all()
             # Create a list of tuples, each containing the id, name, start time, end time of each experiment
             return [(expt.id, expt.name, expt.start, expt.end, expt.exported) for expt in experiments]
@@ -265,7 +265,7 @@ class PmtDb:
             bool: True if the experiment was successfully marked as exported, False otherwise.
         """
         try:
-            with self.Session() as sess:
+            with self.session() as sess:
                 if experiment_id is not None:
                     # Attempt to retrieve the experiment
                     exp = sess.get(Experiment, experiment_id)
