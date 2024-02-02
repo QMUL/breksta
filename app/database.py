@@ -18,7 +18,7 @@ from typing import Optional
 from pathvalidate import sanitize_filename
 
 import pandas as pd
-from sqlalchemy import create_engine, ForeignKey, String, exc, Boolean, Integer, DateTime
+from sqlalchemy import create_engine, ForeignKey, String, exc, Boolean, Integer, Float, DateTime
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 from app.logger_config import setup_logger
 
@@ -55,7 +55,7 @@ class PmtReading(Base):
     __tablename__ = "reading"
 
     experiment: Mapped[int] = mapped_column(Integer, ForeignKey("experiment.id"))
-    value: Mapped[int] = mapped_column(Integer)
+    value: Mapped[float] = mapped_column(Float)
     ts: Mapped[datetime] = mapped_column(DateTime, primary_key=True)
 
 
