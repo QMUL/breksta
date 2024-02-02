@@ -523,6 +523,10 @@ class ExperimentGraph(QWebEngineView):
         database = self.table.database
 
         df = database.latest_readings(experiment_id)
+        if df is None:
+            self.logger.warning("Cannot create preview. Dataframe empty.")
+            return
+
         exp_data = self.downsample_data(df)
 
         if exp_data is None:
