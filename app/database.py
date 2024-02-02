@@ -148,7 +148,7 @@ class PmtDb:
                 value=val, ts=datetime.now()))
             sess.commit()
 
-    def latest_readings(self, experiment_id, since=None):
+    def latest_readings(self, experiment_id, since=None) -> pd.DataFrame | None:
         """Fetches the latest readings from the database.
         On experiment ID provided, fetches readings for that experiment.
         The timestamps are returned as integer seconds relative to the start time of the experiment.
@@ -176,12 +176,18 @@ class PmtDb:
                 query = sess.query(PmtReading.ts, PmtReading.value).filter(
                     PmtReading.experiment == experiment_id, PmtReading.ts > since)
 
-            df = pd.DataFrame(query)
-            if df.empty:
+            readings = query.all()
+
+            # Check if readings were found
+            if not readings:
                 self.logger.warning("No readings found for experiment %s", experiment_id)
                 return None
 
-            df['ts'] = (df.ts - expt.start).dt.total_seconds()
+            # Convert query results to a DataFrame
+            df = pd.DataFrame(readings, columns=['ts', 'value'])
+
+            # Calculate timestamps relative to the experiment's start time
+            df['ts'] = df['ts'].apply(lambda ts: (ts - expt.start).total_seconds())
 
         return df
 
