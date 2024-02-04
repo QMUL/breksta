@@ -29,5 +29,5 @@ class SineWaveGenerator(ADCReader):
         noise: float = (0.08 * random.random()) - 0.04  # Generate random noise
         signal: float = 0.92 * math.sin(self.omega * (datetime.now() - self.start_time).total_seconds())  # Sine wave signal
         reading: int = 32768 + int(32768 * (signal + noise))  # Convert to simulated reading
-        self.logger.debug("Simulated ADC reading: %s", reading)
+        # self.logger.debug("Simulated ADC reading: %s", reading)
         return float(reading)

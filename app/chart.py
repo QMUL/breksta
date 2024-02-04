@@ -199,7 +199,7 @@ def store_layout(relayout_data, stored_layout):
         if 'autosize' in stored_layout:
             del stored_layout['autosize']
 
-    logger.debug("relayoutdata: %s", stored_layout)
+    # logger.debug("relayoutdata: %s", stored_layout)
 
     return stored_layout
 

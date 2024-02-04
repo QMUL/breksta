@@ -91,7 +91,7 @@ def update_axes_layout(fig: go.Figure, stored_layout: Optional[dict]) -> go.Figu
 
     # If stored_layout is empty, no user customizations are available to restore
     if not stored_layout:
-        logger.debug("Stored layout is empty. Returning early.")
+        # logger.debug("Stored layout is empty. Returning early.")
         return fig
 
     # Turn on autorange when 'autosize' is set to adjust the graph to optimal dimensions
