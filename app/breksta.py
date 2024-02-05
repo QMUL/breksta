@@ -40,6 +40,17 @@ class ChartWidget(QWebEngineView):
         self.logger = logger if logger else setup_logger()
         self.logger.debug("WebEngineView initialized.")
 
+    def _on_downloadRequested(self, download) -> None:
+        """Handles the download request signal from the web view.
+
+        Parameters:
+            download: The download request object.
+
+        Returns:
+            None
+        """
+        download.accept()
+
     @Slot(int)
     def plot_experiment(self, experiment_id: int) -> str:
         """Plots the experiment data in a web view by loading a local web server URL.
@@ -85,6 +96,8 @@ class CaptureWidget(QWidget):
 
         self.controls.setFixedWidth(int(0.2 * width))
         self.chart.setFixedWidth(int(0.8 * width))
+
+        self.chart.page().profile().downloadRequested.connect(self.chart._on_downloadRequested)
 
         # Signal from capture_signal to the chart routed here. Helps avoid a hideous God Object.
         self.capture_db.experiment_started_signal.connect(self.chart.plot_experiment)
