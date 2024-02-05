@@ -48,6 +48,7 @@ class CentralizedControlManager(QWidget):
         self.adc_manager = adc_manager
         self.channel = self.DEFAULT_CHANNEL
         self.adc_reader: Optional[ADCReader] = None
+        self.timer = self.capture_manager.sampling_timer
 
         self.create_layout(self.capture_ui, self.adc_ui)
         self.setup_connections()
@@ -75,10 +76,9 @@ class CentralizedControlManager(QWidget):
         adc_config = self.adc_manager.get_adc_config()
         period: int = self.capture_manager.frequency
 
-        timer = self.capture_manager.sampling_timer
         self.adc_reader = self.adc_manager.get_device(adc_config, self.channel, period)
 
-        self.start_reading(self.adc_reader, timer, period)
+        self.start_reading(self.adc_reader, self.timer, period)
 
     def on_experiment_stopped(self) -> None:
         """
@@ -94,7 +94,8 @@ class CentralizedControlManager(QWidget):
         # Handle ADC-related logic
         self.adc_ui.setEnabled(True)
         self.logger.debug("Experiment stopped - ADC controls enabled.")
-        self.capture_manager.sampling_timer.stop()
+        self.timer.stop()
+        self.timer.timeout.disconnect()
 
     def start_reading(self, adc_reader, timer, period) -> None:
         """Checks the ADC is initialized successfully and starts the timer."""
@@ -105,7 +106,7 @@ class CentralizedControlManager(QWidget):
                 self.output_signal.emit(result)
 
             timer.timeout.connect(on_timeout)
-            self.capture_manager.set_timer(timer, period)
+            timer.start(period * 1000)
 
     def create_layout(self, capture, adc) -> None:
         """Creates the final Capture tab layout, which encompasses UI elements in their own box."""

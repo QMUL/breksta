@@ -135,9 +135,6 @@ class CaptureControlManager:
         self.capture_ui.dur_box.setEnabled(False)
         self.capture_ui.name_box.setEnabled(False)
 
-        # Start the timer
-        self.set_timer(self.sampling_timer, self.frequency)
-
     def on_stop_button_click(self) -> None:
         """Handle user interaction with the "Stop" button.
 
@@ -161,7 +158,3 @@ class CaptureControlManager:
         """Handle the frequency change."""
         self.frequency = int(self.capture_ui.freq_box.currentText())
         self.logger.debug("Frequency changed to: %ss", self.frequency)
-
-    def set_timer(self, timer, frequency) -> None:
-        """Handle the timer signal and timeout logic."""
-        timer.start(1000 * frequency)

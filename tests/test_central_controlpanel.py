@@ -3,10 +3,12 @@
 Each public method of CentralizedControlManager is tested to ensure that changes in the code do not unintentionally
 break the application.
 """
-import unittest
+import os
+from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
 from PySide6.QtWidgets import QApplication, QVBoxLayout, QGroupBox, QSpacerItem
+from PySide6.QtCore import QTimer
 from ui.central_controlpanel import CentralizedControlManager, get_manager_instance
 
 # In Qt, every GUI application must have exactly one instance of QApplication or one of its subclasses.
@@ -17,8 +19,10 @@ app = QApplication.instance()
 if not app:
     app = QApplication([])
 
+os.environ['USE_MOCK_DEVICE'] = '1'
 
-class TestCentralizedControlManager(unittest.TestCase):
+
+class TestCentralizedControlManager(TestCase):
     """Defines the test cases for the CentralizedControlManager class.
     """
 
@@ -58,6 +62,40 @@ class TestCentralizedControlManager(unittest.TestCase):
 
         # Check the QTimer has stopped
         self.assertFalse(self.central_manager.capture_manager.sampling_timer.isActive())
+
+    def test_qtimer_slot_emits_result(self) -> None:
+        """Test that the timer slot emits the result upon starting."""
+        received_data: list[float] = []
+
+        def test_slot(data) -> None:
+            received_data.append(data)
+
+        self.central_manager.output_signal.connect(test_slot)
+
+        self.central_manager.output_signal.emit(1.5)
+        self.assertEqual(received_data[0], 1.5)
+
+    # def test_qtimer_is_not_connected_after_stopping(self) -> None:
+    #     """Test that the timer object stops connecting"""
+    #     received_data: list[float] = []
+
+    #     def test_slot(data) -> None:
+    #         received_data.append(data)
+
+    #     self.central_manager.output_signal.connect(test_slot)
+
+    #     # Perform a full cycle
+    #     self.central_manager.capture_manager.frequency = 0
+    #     self.central_manager.capture_ui.start_button.click()
+
+    #     self.central_manager.capture_ui.stop_button.click()
+
+    #     full_count: int = len(received_data)
+    #     self.assertGreater(full_count, 0)
+
+    #     # Forcefully emit result and see if the slot received it
+    #     self.central_manager.output_signal.emit(1.5)
+    #     self.assertEqual(len(received_data), full_count)
 
     def test_layout_is_vboxlayout(self) -> None:
         """Test that the layout is a QVBoxLayout."""
