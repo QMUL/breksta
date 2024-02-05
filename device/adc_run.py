@@ -28,20 +28,32 @@ class ADCReader(ABC):
         is_operational: Checks if the ADCReader is properly initialized and operational.
         run_adc: Abstract method to be implemented for ADC data acquisition.
     """
-    def __init__(self, config, channel, period, logger) -> None:
-        self.logger = logger if logger else setup_logger()
+    _instances = {}
 
-        self.adc = initialize_adc(adc_config=config)
-        self.is_initialized = self.adc is not None
-        if not self.adc:
-            self.logger.critical("ADC could not be initialized.")
-            return
+    def __new__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            instance = super().__new__(cls)
+            cls._instances[cls] = instance
+            # Moved initialization logic to an init_instance method
+            instance.init_instance(*args, **kwargs)
+        return cls._instances[cls]
 
-        self.channel: int = channel
-        self.period: int = period
+    def init_instance(self, config, channel, period, logger) -> None:
+        if not hasattr(self, 'is_initialized') or not self.is_initialized:
+            self.logger = logger if logger else setup_logger()
+            self.adc = initialize_adc(adc_config=config)
+            self.is_initialized: bool = self.adc is not None
+            if not self.adc:
+                self.logger.critical("ADC could not be initialized.")
+                return
 
-        if hasattr(self.adc, 'toVoltage'):
-            self.to_voltage: float = self.adc.toVoltage()
+            self.channel: int = channel
+            self.period: int = period
+
+            if hasattr(self.adc, 'toVoltage'):
+                self.to_voltage: float = self.adc.toVoltage()
+            else:
+                self.to_voltage = None
 
     def is_operational(self) -> bool:
         """ Check if the ADCReader is in a valid state. """

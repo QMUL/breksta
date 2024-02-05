@@ -94,6 +94,7 @@ class CentralizedControlManager(QWidget):
         # Handle ADC-related logic
         self.adc_ui.setEnabled(True)
         self.logger.debug("Experiment stopped - ADC controls enabled.")
+        self.adc_reader = None
         self.timer.stop()
         self.timer.timeout.disconnect()
 
