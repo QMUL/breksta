@@ -43,25 +43,25 @@ class TestCentralizedControlManager(TestCase):
     def test_qtimer_has_started(self) -> None:
         """Test that the QTimer object has initialized and is running."""
         # Check the QTimer has not started yet
-        self.assertFalse(self.central_manager.capture_manager.sampling_timer.isActive())
+        self.assertFalse(self.central_manager.timer.isActive())
 
         # Simulate a click on the start button
         self.central_manager.capture_ui.start_button.click()
 
         # Check the QTimer has started
-        self.assertTrue(self.central_manager.capture_manager.sampling_timer.isActive())
+        self.assertTrue(self.central_manager.timer.isActive())
 
     def test_qtimer_has_stopped(self) -> None:
         """Test that the QTimer object has stopped running."""
         # Check the QTimer has started
         self.central_manager.capture_ui.start_button.click()
-        self.assertTrue(self.central_manager.capture_manager.sampling_timer.isActive())
+        self.assertTrue(self.central_manager.timer.isActive())
 
         # Simulate a click on the stop button
         self.central_manager.capture_ui.stop_button.click()
 
         # Check the QTimer has stopped
-        self.assertFalse(self.central_manager.capture_manager.sampling_timer.isActive())
+        self.assertFalse(self.central_manager.timer.isActive())
 
     def test_qtimer_slot_emits_result(self) -> None:
         """Test that the timer slot emits the result upon starting."""
