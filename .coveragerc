@@ -1,2 +1,5 @@
 [run]
-source = app/,tests/
+source = app/,ui/,device/
+omit =
+    **/__init__.py
+    ui/*_test.py

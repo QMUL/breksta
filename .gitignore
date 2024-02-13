@@ -104,7 +104,7 @@ celerybeat.pid
 # Environments
 .env
 .venv
-env/
+env*/
 venv/
 ENV/
 env.bak/
@@ -131,3 +131,4 @@ dmypy.json
 # Output
 **/*.csv
 **/*.db
+output*/

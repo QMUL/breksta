@@ -215,6 +215,7 @@ class ADCConfigManager:
             button_id: The identifier of the radio button that triggered the event.
             checked: A boolean indicating whether the radio button is checked.
         """
+        mode: str = "Error in radio button."
         # Only act on the signal when a button is checked, not unchecked
         if checked:
             if button_id == Mode.poll_mode_single.value:
@@ -225,7 +226,7 @@ class ADCConfigManager:
                 self.config_widget.data_rate_combo.setEnabled(True)
             self.logger.debug("Polling Mode changed to: %s", mode)
 
-            polling_mode_id = self.config_widget.polling_mode_group.checkedId()
+            polling_mode_id: int = self.config_widget.polling_mode_group.checkedId()
             self.polling_mode = Mode(polling_mode_id)  # Convert to Mode enum
 
     def get_adc_config(self) -> ADCConfig:
@@ -242,7 +243,7 @@ class ADCConfigManager:
         self.logger.debug("Pushing ADC Configuration: %s", config)
         return config
 
-    def get_adc_reader(self, config, channel, period) -> ADCReader:
+    def get_adc_reader(self, config: ADCConfig, channel: int, period: int) -> ADCReader:
         """Selects the appropriate ADC Reader object, according to the operation mode."""
         self.logger.debug("Selecting ADC Reader for %s operation", config.poll_mode)
 
