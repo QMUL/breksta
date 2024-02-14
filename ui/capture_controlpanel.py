@@ -2,7 +2,7 @@
 Module that houses all the UI element creation and initialization for signal capturing.
 """
 from PySide6.QtWidgets import QWidget, QLabel, QComboBox, QVBoxLayout, QPushButton, QLineEdit
-from PySide6.QtCore import Signal, QTimer
+from PySide6.QtCore import Signal, QTimer, Slot
 from app.logger_config import setup_logger
 from ui.layout import create_horizontal_box
 
@@ -113,12 +113,12 @@ class CaptureControlManager:
         This method connects the change signals from the UI elements to their respective slot functions.
         Ensures the signal capture controls are updated dynamically as the user interacts with the control panel.
         """
-        # Connect UI events to the corresponding methods
         self.capture_ui.start_button.clicked.connect(self.on_start_button_click)
         self.capture_ui.stop_button.clicked.connect(self.on_stop_button_click)
         self.capture_ui.freq_box.currentTextChanged.connect(self.on_frequency_change)
         self.capture_ui.dur_box.currentTextChanged.connect(self.on_duration_change)
 
+    @Slot()
     def on_start_button_click(self) -> None:
         """Handle user interaction with the "Start" button.
 
@@ -135,6 +135,7 @@ class CaptureControlManager:
         self.capture_ui.dur_box.setEnabled(False)
         self.capture_ui.name_box.setEnabled(False)
 
+    @Slot()
     def on_stop_button_click(self) -> None:
         """Handle user interaction with the "Stop" button.
 
@@ -149,11 +150,13 @@ class CaptureControlManager:
         self.capture_ui.dur_box.setEnabled(True)
         self.capture_ui.name_box.setEnabled(True)
 
+    @Slot()
     def on_duration_change(self) -> None:
         """Handle the experiment duration change."""
         self.duration = int(self.capture_ui.dur_box.currentText())
         self.logger.debug("Experiment duration changed to: %sh", self.duration)
 
+    @Slot()
     def on_frequency_change(self) -> None:
         """Handle the frequency change."""
         self.frequency = int(self.capture_ui.freq_box.currentText())

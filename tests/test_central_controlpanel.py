@@ -8,7 +8,6 @@ from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
 from PySide6.QtWidgets import QApplication, QVBoxLayout, QGroupBox, QSpacerItem
-from PySide6.QtCore import QTimer
 from ui.central_controlpanel import CentralizedControlManager, get_manager_instance
 
 # In Qt, every GUI application must have exactly one instance of QApplication or one of its subclasses.
@@ -35,7 +34,7 @@ class TestCentralizedControlManager(TestCase):
         # Replace start_reading with a mock
         with patch('ui.central_controlpanel.CentralizedControlManager.start_reading') as mock_start_reading:
             # Simulate a click on the start button
-            self.central_manager.capture_ui.start_button.click()
+            self.central_manager.on_experiment_started()
 
             # Check that start_reading was called
             mock_start_reading.assert_called_once()
@@ -46,7 +45,7 @@ class TestCentralizedControlManager(TestCase):
         self.assertFalse(self.central_manager.timer.isActive())
 
         # Simulate a click on the start button
-        self.central_manager.capture_ui.start_button.click()
+        self.central_manager.on_experiment_started()
 
         # Check the QTimer has started
         self.assertTrue(self.central_manager.timer.isActive())
@@ -54,11 +53,11 @@ class TestCentralizedControlManager(TestCase):
     def test_qtimer_has_stopped(self) -> None:
         """Test that the QTimer object has stopped running."""
         # Check the QTimer has started
-        self.central_manager.capture_ui.start_button.click()
+        self.central_manager.on_experiment_started()
         self.assertTrue(self.central_manager.timer.isActive())
 
         # Simulate a click on the stop button
-        self.central_manager.capture_ui.stop_button.click()
+        self.central_manager.on_experiment_stopped()
 
         # Check the QTimer has stopped
         self.assertFalse(self.central_manager.timer.isActive())
@@ -75,6 +74,33 @@ class TestCentralizedControlManager(TestCase):
         self.central_manager.output_signal.emit(1.5)
         self.assertEqual(received_data[0], 1.5)
 
+    def test_start_experiment_successfully(self) -> None:
+        """starts experiment successfully, disables ADC UI, starts ADC reading process, starts timer."""
+        # Simulate start button signal
+        self.central_manager.on_experiment_started()
+
+        # Check that ADC UI is disabled
+        self.assertFalse(self.central_manager.adc_ui.isEnabled())
+
+        # Check that ADC reader is initialized
+        self.assertIsNotNone(self.central_manager.adc_reader)
+
+        # Check that timer is started
+        self.assertTrue(self.central_manager.timer.isActive())
+
+    def test_stop_experiment_successfully(self) -> None:
+        """stops experiment successfully, re-enables ADC UI, stops ADC reading process, stops timer."""
+        # Simulate start button signal
+        self.central_manager.on_experiment_started()
+
+        # Simulate stop button signal
+        self.central_manager.on_experiment_stopped()
+
+        # Check that ADC UI is enabled
+        self.assertTrue(self.central_manager.adc_ui.isEnabled())
+
+        # Check that timer is stopped
+        self.assertFalse(self.central_manager.timer.isActive())
     # def test_qtimer_is_not_connected_after_stopping(self) -> None:
     #     """Test that the timer object stops connecting"""
     #     received_data: list[float] = []

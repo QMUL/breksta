@@ -62,18 +62,9 @@ class ADCReader(ABC):
         """ Check if the ADCReader is in a valid state. """
         return self.is_initialized
 
-    def __enter__(self):
-        # Setup actions (if any)
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        # Teardown actions (like closing resources)
-        pass
-
     @abstractmethod
     def run_adc(self) -> float | None:
         """Method must perform a single data ADC acquisition."""
-        pass
 
 
 class SingleShotADCReader(ADCReader):

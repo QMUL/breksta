@@ -19,6 +19,7 @@ class SineWaveGenerator(ADCReader):
         self.start_time = datetime.now()
         self.omega = 2.0 * math.pi / 60  # Omega for sine wave, assuming a 1-minute cycle
         self.is_initialized = True
+        self.adc = True
 
     def run_adc(self) -> float:
         """Simulates taking an ADC reading, matching the ADCReader interface.

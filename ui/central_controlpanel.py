@@ -4,7 +4,7 @@ Glues together all UI and Manager classes for the Capture Tab.
 import sys
 from typing import Optional
 from PySide6.QtWidgets import QApplication, QVBoxLayout, QWidget
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Signal, Slot, Qt
 from app.logger_config import setup_logger
 from device.adc_run import ADCReader
 from ui.adc_controlpanel import ADCConfigWidget, ADCConfigManager
@@ -55,9 +55,10 @@ class CentralizedControlManager(QWidget):
 
     def setup_connections(self) -> None:
         """Connect signals to slots"""
-        self.capture_ui.start_button_signal.connect(self.on_experiment_started)
-        self.capture_ui.stop_button_signal.connect(self.on_experiment_stopped)
+        self.capture_ui.start_button_signal.connect(self.on_experiment_started, Qt.ConnectionType.QueuedConnection)
+        self.capture_ui.stop_button_signal.connect(self.on_experiment_stopped, Qt.ConnectionType.QueuedConnection)
 
+    @Slot()
     def on_experiment_started(self) -> None:
         """
         Handles the logic to be executed when an experiment starts.
@@ -78,8 +79,15 @@ class CentralizedControlManager(QWidget):
 
         self.adc_reader = self.adc_manager.get_device(adc_config, self.channel, period)
 
+        if self.adc_reader.adc is None:
+            # Failure cascading - STOP the experiment
+            self.logger.error("Stopping the experiment...")
+            self.capture_ui.stop_button.click()
+            return
+
         self.start_reading(self.adc_reader, self.timer, period)
 
+    @Slot()
     def on_experiment_stopped(self) -> None:
         """
         Handles the necessary actions when an experiment is stopped.
@@ -94,9 +102,9 @@ class CentralizedControlManager(QWidget):
         # Handle ADC-related logic
         self.adc_ui.setEnabled(True)
         self.logger.debug("Experiment stopped - ADC controls enabled.")
-        self.adc_reader = None
         self.timer.stop()
-        self.timer.timeout.disconnect()
+        if self.adc_reader.adc is not None:
+            self.timer.timeout.disconnect()
 
     def start_reading(self, adc_reader, timer, period) -> None:
         """Checks the ADC is initialized successfully and starts the timer."""
