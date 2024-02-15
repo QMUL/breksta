@@ -4,7 +4,6 @@ from typing import Optional
 from datetime import datetime
 
 import pandas as pd
-from app.logger_config import setup_logger
 
 
 class CacheWebProcess:
@@ -16,7 +15,7 @@ class CacheWebProcess:
         last_datetime: Timestamp of the last cache update.
         current_datetime: Timestamp of the current cache state.
     """
-    def __init__(self, database) -> None:
+    def __init__(self, database, logger) -> None:
         """Initializes CacheWebProcess with optional database object.
 
         Args:
@@ -25,7 +24,7 @@ class CacheWebProcess:
         # If a database object is provided, use it; otherwise, create a PmtDb instance
         self.database = database
 
-        self.logger = setup_logger()
+        self.logger = logger
 
         # Create empty Dictionary to hold DataFrames keyed by experiment_id
         self.cached_data: dict[int, pd.DataFrame] = {}

@@ -29,8 +29,18 @@ from app.components.layout import create_layout
 from app.database import PmtDb, setup_session
 
 logger = setup_logger()
-session = setup_session()
-database = PmtDb(session, logger)
+
+
+def setup_auxiliaries() -> tuple[CacheWebProcess, go.Figure]:
+    """Create a figure and a Cache object."""
+    session = setup_session()
+    database = PmtDb(session, logger)
+    _cache = CacheWebProcess(database, logger)
+    _figure: go.Figure = initialize_figure()
+    return _cache, _figure
+
+
+cache, figure = setup_auxiliaries()
 
 # Control signals
 GO_SIGNAL = '1'
@@ -47,11 +57,7 @@ app = Dash(
 app.title = "Breksta - Data Acquisition App"
 app.config["suppress_callback_exceptions"] = True
 
-# Attach the cache object to the app
-app.cache = CacheWebProcess(database)
-
 app.layout = create_layout(app)
-app.figure = initialize_figure()
 
 
 @app.callback(Output('dynamic-graph', 'figure'),
@@ -78,7 +84,7 @@ def draw_chart(pathname: str, n_intervals: int, stored_layout: dict) -> go.Figur
     # Due to Dash's callback behavior, we need to manually halt updates when STOP_SIGNAL is active
     control = read_control_file()
     if control == STOP_SIGNAL:
-        return dash.no_update
+        return figure
 
     # The experiment ID is crucial for fetching the relevant data
     logger.debug("pathname is %s", pathname)
@@ -86,19 +92,19 @@ def draw_chart(pathname: str, n_intervals: int, stored_layout: dict) -> go.Figur
     experiment_id = extract_experiment_id_from_url(pathname)
 
     # Update the layout to preserve user customizations between sessions
-    app.figure = update_axes_layout(app.figure, stored_layout)
+    _figure = update_axes_layout(figure, stored_layout)
 
     # Fetch the required data to populate the chart
-    dataframe: pd.DataFrame = fetch_data(experiment_id)
+    dataframe: pd.DataFrame = fetch_data(experiment_id, cache)
 
     # Generate the chart figure based on the fetched data and stored layout
     mini_df = downsample_data(dataframe)
-    app.figure = plot_data(app.figure, mini_df)
+    _figure = plot_data(_figure, mini_df)
 
-    return app.figure
+    return _figure
 
 
-def extract_experiment_id_from_url(url):
+def extract_experiment_id_from_url(url) -> int | None:
     """Extract experiment_id from a given URL.
 
     Args:
@@ -124,7 +130,7 @@ def extract_experiment_id_from_url(url):
     return experiment_id
 
 
-def fetch_data(experiment_id) -> pd.DataFrame:
+def fetch_data(experiment_id, _cache) -> pd.DataFrame:
     """Fetch data for a specific experiment and update the cache.
 
     This function optimizes data retrieval by using a caching mechanism,
@@ -139,10 +145,10 @@ def fetch_data(experiment_id) -> pd.DataFrame:
 
     # Update the cache to ensure that the most recent data is available for rendering
     logger.debug("Fetching data from cache for experiment ID: %s", experiment_id)
-    app.cache.handle_data_update(experiment_id)
+    _cache.handle_data_update(experiment_id)
 
     # Retrieve the most recent data from the cache to minimize database reads
-    dataframe: pd.DataFrame = app.cache.get_cached_data(experiment_id)
+    dataframe: pd.DataFrame = _cache.get_cached_data(experiment_id)
 
     if dataframe.empty:
         # Log a warning and return the empty DataFrame if no data is found, which will result in an empty plot
