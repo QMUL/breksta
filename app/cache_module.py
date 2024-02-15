@@ -21,7 +21,6 @@ class CacheWebProcess:
         Args:
             database: Optional database object for custom database interactions.
         """
-        # If a database object is provided, use it; otherwise, create a PmtDb instance
         self.database = database
 
         self.logger = logger
@@ -52,8 +51,8 @@ class CacheWebProcess:
         Returns:
             pd.DataFrame: An empty DataFrame with columns 'ts' and 'value'.
         """
-        cache_empty = pd.DataFrame(columns=['ts', 'value'])
-        return cache_empty
+        empty_cache = pd.DataFrame(columns=['ts', 'value'], dtype=float)
+        return empty_cache
 
     def fetch_latest_data(self, experiment_id, last_timestamp=None) -> pd.DataFrame | None:
         """Fetches new data since the last update for a given experiment.
@@ -86,8 +85,8 @@ class CacheWebProcess:
         # Check for new data entries
         new_data = self.fetch_latest_data(experiment_id, last_timestamp)
 
-        if new_data is None:
-            self.logger.warning("DataFrame requested is empty. No cache update.")
+        if new_data is None or new_data.empty:
+            self.logger.debug("DataFrame requested is empty. No cache update.")
             return self.cached_data.get(experiment_id, pd.DataFrame())
 
         # Append new data to the existing cached dataframe
@@ -108,7 +107,7 @@ class CacheWebProcess:
             - Calls `update_cache` to update the cache for the specified experiment.
         """
         self.save_datetime()
-        _ = self.update_cache(experiment_id, self.last_datetime)
+        self.update_cache(experiment_id, self.last_datetime)
 
     def save_datetime(self) -> None:
         """Updates the timestamp tracking mechanism.
@@ -119,8 +118,8 @@ class CacheWebProcess:
             - Updates `self.last_datetime` to the value of `self.current_datetime`.
             - Updates `self.current_datetime` to the current system datetime.
         """
-        self.last_datetime = self.current_datetime  # Move current to last
-        self.current_datetime = datetime.now()  # Update current
+        self.last_datetime = self.current_datetime
+        self.current_datetime = datetime.now()
 
     def handle_completed_experiment(self, experiment_id) -> None:
         """Facade method to update the cache for a completed experiment.
@@ -134,25 +133,24 @@ class CacheWebProcess:
         Side Effects:
             - Finalizes the cache for the specified completed experiment.
         """
-        _ = self.update_cache(experiment_id)
+        self.update_cache(experiment_id)
 
-    def cache_size(self) -> None:
-        """TODO: The function should return the size of the cache.
-        size/number of rows?
-        actual size in MBs?
-        Args:
-            cached_data (pd.DataFrame): The cached Dataframe which resides in memory.
+    def cache_size(self) -> int:
+        """Returns the size of the cache.
+
         Returns:
-            size?
-            boolean checked vs threshold?
+            int: The number of rows in the cache.
         """
+        return sum(len(df) for df in self.cached_data.values())
 
     def clear_cache(self, key) -> pd.DataFrame:
-        """TODO: Clears the cache if conditions met.
+        """Clears the cache for a specific experiment.
+
         Args:
-            Cache key (experiment_id-specific?)
+            key: The experiment ID to clear the cache for.
+
         Returns:
-            dataframe (pd.DataFrame): An empty
-            """
-        empty_cache = self.initialize_empty_cache()
-        return empty_cache
+            pd.DataFrame: An empty DataFrame.
+        """
+        self.cached_data.pop(key, None)
+        return self.initialize_empty_cache()
