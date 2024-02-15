@@ -225,7 +225,7 @@ def update_refresh_rate(value):
 
     if control == STOP_SIGNAL:
         return dash.no_update, True  # Disable the interval
-
+    logger.debug("Chart Refresh rate: %ss", value)
     return value * 1000, False
 
 

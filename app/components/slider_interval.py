@@ -16,10 +16,10 @@ class SliderValues:
     It may seem like overengineering, but it sets the stage for easier adjustments and testing.
     Also, it offers a much needed example in dataclasses, which the author needed at the time.
     """
-    MIN = 2.0
-    MAX = 10.0
-    STEP = 2
-    VALUE = 2
+    MIN: int = 2
+    MAX: int = 60
+    STEP: int = 1
+    VALUE: int = 2
 
 
 def render() -> html.Div:
@@ -40,13 +40,14 @@ def render() -> html.Div:
                 id='interval-refresh',  # Hook to update_refresh_rate@chart
                 min=SliderValues.MIN,
                 max=SliderValues.MAX,
-                step=SliderValues.STEP,
+                step=None,
                 value=SliderValues.VALUE,
-                marks={i: f"{i}s" for i in range(
-                    int(SliderValues.MIN),
-                    int(SliderValues.MAX) + 1,
-                    SliderValues.STEP
-                )}
+                marks={
+                    2: "2s",
+                    10: "10s",
+                    30: "30s",
+                    60: "60s"
+                }
             )
         ],
         style={'width': '20%'}
