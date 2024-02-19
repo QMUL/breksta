@@ -11,6 +11,7 @@ from ui.layout import create_group_box
 
 class TestWindow(QWidget):
     """Test harness class for manual inspection of the Capture tab UI elements."""
+
     def __init__(self) -> None:
         super().__init__()
         self.logger = setup_logger()

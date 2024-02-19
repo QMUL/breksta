@@ -22,8 +22,8 @@ from ui.layout import create_horizontal_box
 
 
 class ADCConfigWidget(QWidget):
-    """Handles the creation and initialization of the ADC configuration UI elements.
-    """
+    """Handles the creation and initialization of the ADC configuration UI elements."""
+
     BUS = 1
     ADDRESS_DEFAULT = Address.GND
     GAIN_DEFAULT = Gain.PGA_6_144V
@@ -37,8 +37,7 @@ class ADCConfigWidget(QWidget):
         self.setup_ui()  # Directly call the setup_ui method to initialize UI components
 
     def setup_ui(self) -> None:
-        """Creates the box layout, then creates the UI elements and adds them to the layout.
-        """
+        """Creates the box layout, then creates the UI elements and adds them to the layout."""
         layout = QVBoxLayout(self)
         self.address_combo = QComboBox()
         self.gain_combo = QComboBox()
@@ -63,12 +62,7 @@ class ADCConfigWidget(QWidget):
         address_label = QLabel("Address:")
 
         # Mapping of addresses to descriptive strings
-        address_mapping: dict[int, str] = {
-            Address.GND: "GND",
-            Address.VDD: "VDD",
-            Address.SDA: "SDA",
-            Address.SCL: "SCL"
-        }
+        address_mapping: dict[int, str] = {Address.GND: "GND", Address.VDD: "VDD", Address.SDA: "SDA", Address.SCL: "SCL"}
 
         for index, (address, description) in enumerate(address_mapping.items()):
             self.address_combo.addItem(f"0x{address:X} ({description})", address)
@@ -93,7 +87,7 @@ class ADCConfigWidget(QWidget):
             Gain.PGA_2_048V: "±2.048V",
             Gain.PGA_1_024V: "±1.024V",
             Gain.PGA_0_512V: "±0.512V",
-            Gain.PGA_0_256V: "±0.256V"
+            Gain.PGA_0_256V: "±0.256V",
         }
 
         for index, (gain_value, gain_text) in enumerate(gain_mapping.items()):
@@ -121,7 +115,7 @@ class ADCConfigWidget(QWidget):
             DR.DR_ADS111X_128: "128 SPS (Default)",
             DR.DR_ADS111X_250: "250 SPS",
             DR.DR_ADS111X_475: "475 SPS",
-            DR.DR_ADS111X_860: "860 SPS (Fastest)"
+            DR.DR_ADS111X_860: "860 SPS (Fastest)",
         }
 
         for index, (data_rate_value, data_rate_text) in enumerate(data_rate_mapping.items()):
@@ -164,6 +158,7 @@ class ADCConfigManager:
     Attributes:
         config_widget (ADCConfigWidget): The associated class that creates the UI elements.
     """
+
     def __init__(self, config_widget: ADCConfigWidget, logger) -> None:
         self.logger = logger if logger is not None else setup_logger()
 
@@ -236,7 +231,7 @@ class ADCConfigManager:
             address=self.address,
             gain=self.gain,
             data_rate=self.data_rate,
-            poll_mode=self.polling_mode
+            poll_mode=self.polling_mode,
         )
 
         self.logger.debug("Pushing ADC Configuration: %s", config)
@@ -257,7 +252,7 @@ class ADCConfigManager:
     def get_device(self, config, channel, period) -> ADCReader:
         """Wrapper method to select between real and mock ADC Readers based on application context."""
 
-        if os.getenv('USE_MOCK_DEVICE', '0') == '1':
+        if os.getenv("USE_MOCK_DEVICE", "0") == "1":
             self.logger.info("Using Mock Sine Wave Generator for testing")
             return SineWaveGenerator(config, channel, period, self.logger)
 

@@ -17,6 +17,7 @@ class SliderValues:
     It may seem like overengineering, but it sets the stage for easier adjustments and testing.
     Also, it offers a much needed example in dataclasses, which the author needed at the time.
     """
+
     MIN: int = 2
     MAX: int = 60
     STEP: int = 1
@@ -38,18 +39,13 @@ def render() -> html.Div:
             html.H6("Refresh Rate"),
             # Slider component for controlling the refresh rate
             dcc.Slider(
-                id='interval-refresh',  # Hook to update_refresh_rate@chart
+                id="interval-refresh",  # Hook to update_refresh_rate@chart
                 min=SliderValues.MIN,
                 max=SliderValues.MAX,
                 step=None,
                 value=SliderValues.VALUE,
-                marks={
-                    2: "2s",
-                    10: "10s",
-                    30: "30s",
-                    60: "60s"
-                }
-            )
+                marks={2: "2s", 10: "10s", 30: "30s", 60: "60s"},
+            ),
         ],
-        style={'width': '20%'}
+        style={"width": "20%"},
     )

@@ -31,16 +31,17 @@ class CentralizedControlManager(QWidget):
         adc_manager (ADCConfigManager): Manages ADC configurations and operations.
         logger: Used for logging events and activities within the manager.
     """
+
     DEFAULT_CHANNEL = 0
     output_signal = Signal(float)
 
     def __init__(
-            self,
-            capture_ui: CaptureControlUI,
-            capture_manager: CaptureControlManager,
-            adc_ui: ADCConfigWidget,
-            adc_manager: ADCConfigManager,
-            logger
+        self,
+        capture_ui: CaptureControlUI,
+        capture_manager: CaptureControlManager,
+        adc_ui: ADCConfigWidget,
+        adc_manager: ADCConfigManager,
+        logger,
     ) -> None:
         super().__init__()
         self.logger = logger if logger else setup_logger()

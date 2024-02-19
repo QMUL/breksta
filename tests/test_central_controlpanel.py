@@ -19,12 +19,11 @@ app = QApplication.instance()
 if not app:
     app = QApplication([])
 
-os.environ['USE_MOCK_DEVICE'] = '1'
+os.environ["USE_MOCK_DEVICE"] = "1"
 
 
 class TestCentralizedControlManager(TestCase):
-    """Defines the test cases for the CentralizedControlManager class.
-    """
+    """Defines the test cases for the CentralizedControlManager class."""
 
     def setUp(self) -> None:
         self.mock_logger = MagicMock()
@@ -33,7 +32,7 @@ class TestCentralizedControlManager(TestCase):
     def test_initiate_data_capture_takes_reading(self) -> None:
         """Test that initiate_data_capture takes a reading."""
         # Replace start_reading with a mock
-        with patch('ui.central_controlpanel.CentralizedControlManager.start_reading') as mock_start_reading:
+        with patch("ui.central_controlpanel.CentralizedControlManager.start_reading") as mock_start_reading:
             # Simulate a click on the start button
             self.central_manager.on_experiment_started()
 
@@ -102,6 +101,7 @@ class TestCentralizedControlManager(TestCase):
 
         # Check that timer is stopped
         self.assertFalse(self.central_manager.timer.isActive())
+
     # def test_qtimer_is_not_connected_after_stopping(self) -> None:
     #     """Test that the timer object stops connecting"""
     #     received_data: list[float] = []

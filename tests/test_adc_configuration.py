@@ -9,6 +9,7 @@ from device.adc_config import ADCConfig, ADS1115Address, ADS1115DataRate, ADS111
 
 class TestADCConfig(unittest.TestCase):
     """Check the configuration assembly for validity."""
+
     def setUp(self) -> None:
         self.mock_logger = MagicMock()
         # Mock the logger within adc_config module
@@ -31,9 +32,8 @@ class TestADCConfig(unittest.TestCase):
     def test_valid_values_all_attributes(self) -> None:
         """ADCConfig is instantiated with valid values for all attributes."""
         config = ADCConfig(
-            i2c_bus=2, address=ADS1115Address.VDD,
-            gain=ADS1115Gain.PGA_4_096V,
-            data_rate=ADS1115DataRate.DR_ADS111X_64)
+            i2c_bus=2, address=ADS1115Address.VDD, gain=ADS1115Gain.PGA_4_096V, data_rate=ADS1115DataRate.DR_ADS111X_64
+        )
         self.assertEqual(config.i2c_bus, 2)
         self.assertEqual(config.address, ADS1115Address.VDD)
         self.assertEqual(config.gain, ADS1115Gain.PGA_4_096V)

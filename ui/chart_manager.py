@@ -12,7 +12,7 @@ def start_chart_process(logger) -> None:
     that the chart callback should run.
     """
     try:
-        with open(CONTROL_FILE, 'w', encoding='utf-8') as file:
+        with open(CONTROL_FILE, "w", encoding="utf-8") as file:
             file.write(START_SIGNAL)
         logger.debug("Sent start/resume signal to chart control file...")
     except OSError as err:
@@ -24,7 +24,7 @@ def stop_chart_process(logger) -> None:
     that the chart callback should stop.
     """
     try:
-        with open(CONTROL_FILE, 'w', encoding='utf-8') as file:
+        with open(CONTROL_FILE, "w", encoding="utf-8") as file:
             file.write(STOP_SIGNAL)
         logger.debug("Sent stop signal to chart control file...")
     except OSError as err:

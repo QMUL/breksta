@@ -58,7 +58,7 @@ def read_adc_values_all_channels(adc) -> dict:
     for channel in range(4):
         value = adc.readADC(channel)
         voltage = value * voltage_factor
-        adc_values[f'channel_{channel}'] = {'raw': value, 'voltage': voltage}
+        adc_values[f"channel_{channel}"] = {"raw": value, "voltage": voltage}
 
     return adc_values
 

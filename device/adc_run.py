@@ -30,6 +30,7 @@ class ADCReader(ABC):
         is_operational: Checks if the ADCReader is properly initialized and operational.
         run_adc: Abstract method to be implemented for ADC data acquisition.
     """
+
     _instances: dict[Any, Any] = {}
 
     def __new__(cls, *args, **kwargs):
@@ -42,7 +43,7 @@ class ADCReader(ABC):
 
     def init_instance(self, config, channel, period, logger) -> None:
         """Constructor method. Replaces __init__"""
-        if not hasattr(self, 'is_initialized') or not self.is_initialized:
+        if not hasattr(self, "is_initialized") or not self.is_initialized:
             self.logger = logger if logger else setup_logger()
             self.adc = initialize_adc(adc_config=config)
             self.is_initialized: bool = self.adc is not None
@@ -53,14 +54,14 @@ class ADCReader(ABC):
             self.channel: int = channel
             self.period: int = period
 
-            if hasattr(self.adc, 'toVoltage'):
+            if hasattr(self.adc, "toVoltage"):
                 self.to_voltage: float = self.adc.toVoltage()
             else:
                 self.to_voltage = 0.0
                 self.logger.error("ADC toVoltage could not be located.")
 
     def is_operational(self) -> bool:
-        """ Check if the ADCReader is in a valid state. """
+        """Check if the ADCReader is in a valid state."""
         return self.is_initialized
 
     @abstractmethod

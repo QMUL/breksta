@@ -43,16 +43,14 @@ class DeviceCapture(QObject):
         self.experiment_name = self.manager.capture_ui.name_box.text()
         self.experiment_id = self.database.start_experiment(self.experiment_name)
         self.experiment_started_signal.emit(self.experiment_id)
-        self.logger.debug(
-            "Experiment started named: %s and ID: %d", self.experiment_name, self.experiment_id)
+        self.logger.debug("Experiment started named: %s and ID: %d", self.experiment_name, self.experiment_id)
 
     @Slot()
     def stop_experiment(self) -> None:
         """Database actions when Stopping an experiment."""
         # Close up database entry and clean up
         self.database.stop_experiment()
-        self.logger.debug(
-            "Experiment stopping named: %s and ID: %d", self.experiment_name, self.experiment_id)
+        self.logger.debug("Experiment stopping named: %s and ID: %d", self.experiment_name, self.experiment_id)
         self.experiment_id = None
 
     @Slot(float)

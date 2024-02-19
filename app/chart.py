@@ -44,16 +44,18 @@ def setup_auxiliaries() -> tuple[CacheWebProcess, go.Figure]:
 cache, figure = setup_auxiliaries()
 
 # Control signals
-GO_SIGNAL = '1'
-STOP_SIGNAL = '0'
+GO_SIGNAL = "1"
+STOP_SIGNAL = "0"
 
 app = Dash(
     __name__,
-    meta_tags=[{
-        "name": "viewport",
-        "content": "width=device-width, initial-scale=1",
-    }],
-    external_stylesheets=[dbc.themes.SUPERHERO]
+    meta_tags=[
+        {
+            "name": "viewport",
+            "content": "width=device-width, initial-scale=1",
+        }
+    ],
+    external_stylesheets=[dbc.themes.SUPERHERO],
 )
 app.title = "Breksta - Data Acquisition App"
 app.config["suppress_callback_exceptions"] = True
@@ -61,10 +63,11 @@ app.config["suppress_callback_exceptions"] = True
 app.layout = create_layout(app)
 
 
-@app.callback(Output('dynamic-graph', 'figure'),
-              [Input('url', 'href'),
-              Input('interval-component', 'n_intervals')],
-              [State('stored-layout', 'data')])
+@app.callback(
+    Output("dynamic-graph", "figure"),
+    [Input("url", "href"), Input("interval-component", "n_intervals")],
+    [State("stored-layout", "data")],
+)
 def draw_chart(pathname: str, n_intervals: int, stored_layout: dict) -> go.Figure:
     """Callback function to draw the chart.
     The chart content is updated based on the pathname and the number of intervals passed.
@@ -118,7 +121,7 @@ def extract_experiment_id_from_url(url) -> int | None:
     parsed = urllib.parse.urlparse(url)
     parsed_dict = urllib.parse.parse_qs(parsed.query)
 
-    parsed_list = parsed_dict.get('experiment')
+    parsed_list = parsed_dict.get("experiment")
 
     if parsed_list:
         # Get the first element since it's a list
@@ -159,10 +162,7 @@ def fetch_data(experiment_id, _cache) -> pd.DataFrame:
 
 
 # Callback to persist the graph's layout for user-defined settings
-@app.callback(
-    Output('stored-layout', 'data'),
-    [Input('dynamic-graph', 'relayoutData')],
-    [State('stored-layout', 'data')])
+@app.callback(Output("stored-layout", "data"), [Input("dynamic-graph", "relayoutData")], [State("stored-layout", "data")])
 def store_layout(relayout_data, stored_layout):
     """Store and update the layout configuration of the Dash graph.
 
@@ -188,16 +188,16 @@ def store_layout(relayout_data, stored_layout):
     if stored_layout == relayout_data:
         raise PreventUpdate
 
-    if relayout_data.get('xaxis.autorange', False) and relayout_data.get('yaxis.autorange', False):
+    if relayout_data.get("xaxis.autorange", False) and relayout_data.get("yaxis.autorange", False):
         # Opt for autosize to adapt the graph layout dynamically to optimal dimensions
-        stored_layout = {'autosize': True}
+        stored_layout = {"autosize": True}
     else:
         # Incorporate any user-defined layout customizations into stored_layout for ongoing use
         stored_layout.update(relayout_data)
 
         # Remove autosize to maintain user-defined axis ranges without conflict
-        if 'autosize' in stored_layout:
-            del stored_layout['autosize']
+        if "autosize" in stored_layout:
+            del stored_layout["autosize"]
 
     logger.debug("relayoutdata: %s", stored_layout)
 
@@ -206,10 +206,11 @@ def store_layout(relayout_data, stored_layout):
 
 @app.callback(
     [
-        Output(component_id='interval-component', component_property='interval'),
-        Output(component_id='interval-component', component_property='disabled')
+        Output(component_id="interval-component", component_property="interval"),
+        Output(component_id="interval-component", component_property="disabled"),
     ],
-    [Input('interval-refresh', 'value')])
+    [Input("interval-refresh", "value")],
+)
 def update_refresh_rate(value):
     """Callback function to update the refresh rate of the chart based on user input and control signal.
 
@@ -236,7 +237,7 @@ def update_refresh_rate(value):
     return value * 1000, False
 
 
-def read_control_file(file_path: str = 'app/control.txt', default_value: str = "1") -> str:
+def read_control_file(file_path: str = "app/control.txt", default_value: str = "1") -> str:
     """Reads the control file "app/control.txt".
     If the control file is successfully read, the stripped content of the file is returned.
 
@@ -244,7 +245,7 @@ def read_control_file(file_path: str = 'app/control.txt', default_value: str = "
         control (str): The binary control parameter, or default if an error occurs.
     """
     try:
-        with open(file_path, encoding='utf-8') as file:
+        with open(file_path, encoding="utf-8") as file:
             control = file.read().strip()
     except (OSError, PermissionError) as err:
         logger.error("Failed to read control file: %s", err)
@@ -259,7 +260,7 @@ def get_script_level_logs() -> None:
     logger.debug("Parent process ID: %s", os.getppid())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Entry point for the script.
     # Starts the Dash server with debugging enabled if the script is run directly.
     # Autoupdate is True by default. Debug=True creates two chart.py processes

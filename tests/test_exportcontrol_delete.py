@@ -57,7 +57,7 @@ class TestExportControl(unittest.TestCase):
         """Test that delete button calls delete_experiment with correct id when an experiment is selected"""
         with tempfile.TemporaryDirectory() as tmpdirname:
             # Mock the choose_directory method to return the temporary directory path
-            with mock.patch.object(self.export_control, 'choose_directory', return_value=tmpdirname):
+            with mock.patch.object(self.export_control, "choose_directory", return_value=tmpdirname):
                 self.export_control.folder_path = tmpdirname
                 print(self.export_control.folder_path)
                 # Create a mock for the delete_experiment method
@@ -65,11 +65,11 @@ class TestExportControl(unittest.TestCase):
 
                 # Mock the return value of the table item's text method
                 mock_item = MagicMock()
-                mock_item.text.return_value = 'True'
+                mock_item.text.return_value = "True"
                 self.export_control.table.item = MagicMock(return_value=mock_item)
 
                 # Mock the QMessageBox.question method to return 'Yes'
-                with mock.patch('PySide6.QtWidgets.QMessageBox.question', return_value=QMessageBox.Yes):  # type: ignore
+                with mock.patch("PySide6.QtWidgets.QMessageBox.question", return_value=QMessageBox.Yes):  # type: ignore
                     # Select an experiment and try to delete it
                     self.export_control.selected_experiment_id = 1
                     self.export_control.table.selected_row = 0
@@ -82,7 +82,7 @@ class TestExportControl(unittest.TestCase):
         """Test that delete button calls delete_experiment with correct id when an experiment is not exported"""
         with tempfile.TemporaryDirectory() as tmpdirname:
             # Mock the choose_directory method to return the temporary directory path
-            with mock.patch.object(self.export_control, 'choose_directory', return_value=tmpdirname):
+            with mock.patch.object(self.export_control, "choose_directory", return_value=tmpdirname):
                 self.export_control.folder_path = tmpdirname
                 # Create a mock for the delete_experiment method
                 self.mock_db.delete_experiment = MagicMock()
@@ -90,12 +90,11 @@ class TestExportControl(unittest.TestCase):
                 # Mock the return value of the table item's text method
                 mock_item = MagicMock()
                 # This time we're simulating the case when the experiment is not exported
-                mock_item.text.return_value = 'False'
+                mock_item.text.return_value = "False"
                 self.export_control.table.item = MagicMock(return_value=mock_item)
 
                 # Mock the QMessageBox.question method to return 'Yes'
-                with mock.patch('PySide6.QtWidgets.QMessageBox.question', return_value=QMessageBox.Yes):  # type: ignore
-
+                with mock.patch("PySide6.QtWidgets.QMessageBox.question", return_value=QMessageBox.Yes):  # type: ignore
                     # Select an experiment and try to delete it
                     self.export_control.selected_experiment_id = 1
                     self.export_control.table.selected_row = 0
@@ -114,16 +113,14 @@ class TestExportControl(unittest.TestCase):
         """
         # Use a temporary directory to mock the chosen directory path.
         with tempfile.TemporaryDirectory() as tmpdirname:
-
             # Mock the directory choice to return the temporary directory.
-            with mock.patch.object(self.export_control, 'choose_directory', return_value=tmpdirname):
+            with mock.patch.object(self.export_control, "choose_directory", return_value=tmpdirname):
                 self.export_control.folder_path = tmpdirname
 
             # Simulate a user response of "No" via the QMessageBox.
             # This mock ensures that the user's decision to decline deletion
             # is captured and affects the behavior of the method under test.
-            with mock.patch('PySide6.QtWidgets.QMessageBox.question', return_value=QMessageBox.No):  # type: ignore
-
+            with mock.patch("PySide6.QtWidgets.QMessageBox.question", return_value=QMessageBox.No):  # type: ignore
                 # Create a mock item with a text method.
                 # You can adjust this mock's return value to align with the specific
                 # behavior you're testing.
@@ -131,8 +128,7 @@ class TestExportControl(unittest.TestCase):
                 mock_item.text.return_value = "False"  # Assuming the experiment is exported by default.
 
                 # Mock the table's item method to return the mock item.
-                with mock.patch.object(self.export_control.table, 'item', return_value=mock_item):
-
+                with mock.patch.object(self.export_control.table, "item", return_value=mock_item):
                     # Set the experiment and row to be "selected" in the test.
                     self.export_control.selected_experiment_id = 1
                     self.export_control.table.selected_row = 0
@@ -154,17 +150,19 @@ class TestExportControl(unittest.TestCase):
         # Use a temporary directory to mock the chosen directory path.
         with tempfile.TemporaryDirectory() as tmpdirname:
             # Mock the directory choice to return the temporary directory.
-            with mock.patch.object(self.export_control, 'choose_directory', return_value=tmpdirname):
+            with mock.patch.object(self.export_control, "choose_directory", return_value=tmpdirname):
                 self.export_control.folder_path = tmpdirname
 
             # Simulate two user responses via the QMessageBox: first Yes, then No.
             # The order of these responses is crucial to the test, as the logic
             # of the method being tested depends on the exported status of the experiment.
-            with mock.patch('PySide6.QtWidgets.QMessageBox.question', side_effect=[
-                QMessageBox.Yes,  # type: ignore
-                QMessageBox.No  # type: ignore
-            ]):
-
+            with mock.patch(
+                "PySide6.QtWidgets.QMessageBox.question",
+                side_effect=[
+                    QMessageBox.Yes,  # type: ignore
+                    QMessageBox.No,  # type: ignore
+                ],
+            ):
                 # Create a mock item with a text method that always returns "True".
                 # This ensures that the is_exported status will always be True,
                 # which, in turn, affects the behavior of the method being tested.
@@ -172,8 +170,7 @@ class TestExportControl(unittest.TestCase):
                 mock_item.text.return_value = "False"
 
                 # Mock the table's item method to return the mock item.
-                with mock.patch.object(self.export_control.table, 'item', return_value=mock_item):
-
+                with mock.patch.object(self.export_control.table, "item", return_value=mock_item):
                     # Set the experiment and row to be "selected" in the test.
                     self.export_control.selected_experiment_id = 1
                     self.export_control.table.selected_row = 0
