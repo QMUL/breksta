@@ -112,8 +112,7 @@ class TestExportControl(unittest.TestCase):
 
         self.export_control.on_export_button_clicked()
 
-        self.export_control.table.database.export_data_single.assert_called_once_with(
-            test_experiment_id, "/mock/directory")
+        self.export_control.table.database.export_data_single.assert_called_once_with(test_experiment_id, "/mock/directory")
 
     @patch.object(ExportControl, "choose_directory", return_value="/mock/directory")
     def test_failed_export_on_export_button_clicked(self, mock_choose_directory) -> None:
@@ -132,5 +131,5 @@ class TestExportControl(unittest.TestCase):
         formatted_errors = [call_args[0][0] % call_args[0][1] for call_args in calls_to_critical if len(call_args[0]) == 2]
 
         # Now, we just check if our expected message appears in any of the formatted messages
-        expected_message = "Export button failed due to: %s" % "mock error"
+        expected_message = "Export button failed due to: {}".format("mock error")
         self.assertIn(expected_message, formatted_errors)

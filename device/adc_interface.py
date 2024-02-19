@@ -44,7 +44,7 @@ def initialize_adc(adc_config: ADCConfig) -> ads.ADS1115 | None:
     set_adc_polling_mode(adc, adc_config)
 
     # Check if a critical method exists
-    if not hasattr(adc, 'setGain'):
+    if not hasattr(adc, "setGain"):
         logger.error("Initializing ADS failed: missing method 'setGain'.")
         return None
 
@@ -100,8 +100,7 @@ def commit_adc_config(adc) -> bool:
 
 
 def is_adc_config_match(adc, config: ADCConfig) -> bool:
-    """Use the getter device functions to ascertain the config has been correctly set.
-    """
+    """Use the getter device functions to ascertain the config has been correctly set."""
     gain = adc.getGain()  # Get programmable gain amplifier configuration
     if config.gain != gain:
         logger.error("ADC Configuration mismatch gain: input %s vs device %s", config.gain, gain)

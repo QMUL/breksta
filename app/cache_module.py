@@ -14,6 +14,7 @@ class CacheWebProcess:
         last_datetime: Timestamp of the last cache update.
         current_datetime: Timestamp of the current cache state.
     """
+
     def __init__(self, database, logger) -> None:
         """Initializes CacheWebProcess with optional database object.
 
@@ -50,7 +51,7 @@ class CacheWebProcess:
         Returns:
             pd.DataFrame: An empty DataFrame with columns 'ts' and 'value'.
         """
-        empty_cache = pd.DataFrame(columns=['ts', 'value'], dtype=float)
+        empty_cache = pd.DataFrame(columns=["ts", "value"], dtype=float)
         return empty_cache
 
     def fetch_latest_data(self, experiment_id, last_timestamp=None) -> pd.DataFrame | None:

@@ -12,6 +12,7 @@ class CaptureControlUI(QWidget):
     """QWidget subclass that houses all UI control elements for data capture.
     It is responsible for setting up the UI layout and elements.
     """
+
     DEFAULT_EXPERIMENT_NAME = "experiment-name"
     DEFAULT_EXPERIMENT_DURATION = 1  # 1 hour
     DEFAULT_EXPERIMENT_POLLRATE = 2  # 2 seconds
@@ -31,8 +32,8 @@ class CaptureControlUI(QWidget):
         dropdown menus. It also configures the layout of these elements within the widget.
         """
         layout = QVBoxLayout()
-        self.start_button = QPushButton('Start')
-        self.stop_button = QPushButton('Stop')
+        self.start_button = QPushButton("Start")
+        self.stop_button = QPushButton("Stop")
         self.name_box = QLineEdit()
         self.freq_box = QComboBox()
         self.dur_box = QComboBox()
@@ -60,7 +61,7 @@ class CaptureControlUI(QWidget):
 
     def setup_experiment_name(self, name_box, layout: QVBoxLayout) -> None:
         """Creates the Experiment Name UI element."""
-        name_label = QLabel('Experiment name')
+        name_label = QLabel("Experiment name")
         name_box.setText(self.DEFAULT_EXPERIMENT_NAME)
 
         box = create_horizontal_box(name_box, name_label)
@@ -68,7 +69,7 @@ class CaptureControlUI(QWidget):
 
     def setup_frequency_box(self, freq_box, layout: QVBoxLayout) -> None:
         """Creates the capturing frequency combo box."""
-        freq_label = QLabel('Frequency (s)')
+        freq_label = QLabel("Frequency (s)")
         freq_box.addItems(list(map(str, (2, 4, 8, 10, 15, 30, 60, 120))))
         freq_box.setCurrentIndex(0)
 
@@ -77,7 +78,7 @@ class CaptureControlUI(QWidget):
 
     def setup_experiment_duration_box(self, dur_box, layout: QVBoxLayout) -> None:
         """Creates the experiment duration combo box."""
-        dur_label = QLabel('Experiment duration (hr)')
+        dur_label = QLabel("Experiment duration (hr)")
         dur_box.addItems(list(map(str, (1, 2, 4, 6, 8, 10, 12, 24, 36, 48, 72, 240))))
         dur_box.setCurrentIndex(0)
 

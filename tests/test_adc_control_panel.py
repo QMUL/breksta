@@ -14,8 +14,8 @@ if not app:
 
 
 class TestADCConfigWidget(unittest.TestCase):
-    """Tests the Factory class, responsible for creating and initializing the UI elements.
-    """
+    """Tests the Factory class, responsible for creating and initializing the UI elements."""
+
     def setUp(self) -> None:
         mock_logger = Mock()
         self.widget = ADCConfigWidget(logger=mock_logger)
@@ -33,6 +33,7 @@ class TestADCConfigManager(unittest.TestCase):
     """Tests the Manager class, responsible for the signal slot integration
     to the UI elements.
     """
+
     def setUp(self) -> None:
         mock_logger = Mock()
         self.widget = ADCConfigWidget(logger=mock_logger)

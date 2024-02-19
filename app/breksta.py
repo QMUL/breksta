@@ -40,10 +40,10 @@ class ChartWidget(QWebEngineView):
     Probably want to sub-class from QWidget, embded the Web#view in a
     layout with some more native UI to control scaling, etc...
     """
+
     DASH_APP_PORT = 8050
 
     def __init__(self, logger) -> None:
-
         QWebEngineView.__init__(self)
 
         self.logger = logger if logger else setup_logger()
@@ -81,8 +81,8 @@ class ChartWidget(QWebEngineView):
             self.logger.error("experiment_id is None. Invalid value.")
 
         # Constuct URL
-        base_url = f'http://localhost:{self.DASH_APP_PORT}/'
-        url = QUrl(f'{base_url}?experiment={experiment_id}')
+        base_url = f"http://localhost:{self.DASH_APP_PORT}/"
+        url = QUrl(f"{base_url}?experiment={experiment_id}")
         self.logger.debug("Emitting URL: %s", url.toString())
 
         # Serve QUrl object on the server
@@ -92,10 +92,9 @@ class ChartWidget(QWebEngineView):
 
 
 class CaptureWidget(QWidget):
-    """Stick the capture and chart widgets in a parent layout.
-    """
-    def __init__(self, width, database, logger) -> None:
+    """Stick the capture and chart widgets in a parent layout."""
 
+    def __init__(self, width, database, logger) -> None:
         QWidget.__init__(self)
 
         self.logger = logger if logger else setup_logger()
@@ -136,6 +135,7 @@ class ExportControl(QWidget):
     """A QWidget subclass that provides control buttons and functionalities for
     exporting data from the database.
     """
+
     def __init__(self, table, logger) -> None:
         """Initializes the export control panel with the 'Export' and 'Delete' buttons.
         Args:
@@ -216,7 +216,7 @@ class ExportControl(QWidget):
         try:
             database.export_data_single(self.selected_experiment_id, self.folder_path)
 
-        except (OSError) as err:
+        except OSError as err:
             # catch pmt.db permissions issues
             self.logger.critical("Export button failed due to: %s", err)
 
@@ -283,7 +283,7 @@ class ExportControl(QWidget):
 
             # item.text() does not return a boolean, handle truthiness
             is_exported = item.text() == "True"
-            export_status = 'exported' if is_exported else 'not exported'
+            export_status = "exported" if is_exported else "not exported"
             self.logger.debug("Experiment is %s", export_status)
 
             reply = self.confirm_delete(is_exported)
@@ -310,20 +310,17 @@ class ExportControl(QWidget):
         If the experiment hasn't been exported yet, it prompts for an additional confirmation.
         Returns True if deletion is confirmed, False otherwise.
         """
+
         def confirm_dialog(title, text):
-            reply = QMessageBox.question(
-                self, title, text,
-                QMessageBox.Yes | QMessageBox.No, QMessageBox.No)  # type: ignore
+            reply = QMessageBox.question(self, title, text, QMessageBox.Yes | QMessageBox.No, QMessageBox.No)  # type: ignore
             return reply == QMessageBox.Yes  # type: ignore
 
         if not is_exported and not confirm_dialog(
-                'Delete Unexported Experiment',
-                "This experiment has not been exported. Are you sure you want to delete?"):
+            "Delete Unexported Experiment", "This experiment has not been exported. Are you sure you want to delete?"
+        ):
             return False
 
-        return confirm_dialog(
-            'Delete Experiment',
-            "Are you sure you want to delete this experiment?")
+        return confirm_dialog("Delete Experiment", "Are you sure you want to delete this experiment?")
 
     def backup_database(self, filename=None):
         """Creates a database backup.
@@ -343,10 +340,10 @@ class ExportControl(QWidget):
 
         if filename:
             # If a filename is provided, use it as a prefix to the timestamp
-            backup_path = os.path.join(self.folder_path, f'{filename}_{timestamp}.db')
+            backup_path = os.path.join(self.folder_path, f"{filename}_{timestamp}.db")
         else:
             # If no filename is provided, create an automatic backup named "backup.db"
-            backup_path = os.path.join(self.folder_path, 'backup.db')
+            backup_path = os.path.join(self.folder_path, "backup.db")
 
         shutil.copy(db_path, backup_path)
         return backup_path
@@ -364,7 +361,7 @@ class ExportControl(QWidget):
             if filename:
                 backup_path = os.path.join(self.folder_path, filename)
             else:
-                backup_path = os.path.join(self.folder_path, 'backup.db')
+                backup_path = os.path.join(self.folder_path, "backup.db")
         else:
             raise ValueError("self.folder_path is None")
 
@@ -375,11 +372,10 @@ class ExportControl(QWidget):
         shutil.copy(backup_path, db_path)
 
     def get_root_dir(self) -> str:
-        """Grabs root directory - by default where we save 'pmt.db'
-        """
+        """Grabs root directory - by default where we save 'pmt.db'"""
         script_path = os.path.dirname(os.path.realpath(__file__))
         root_path = os.path.dirname(script_path)
-        db_path = os.path.join(root_path, 'pmt.db')
+        db_path = os.path.join(root_path, "pmt.db")
         return db_path
 
 
@@ -388,8 +384,8 @@ class ExportWidget(QWidget):
     It includes TableWidget for displaying the experiment information and
     ExportControl for controlling the data export and refreshing the table.
     """
-    def __init__(self, width, table, logger) -> None:
 
+    def __init__(self, width, table, logger) -> None:
         QWidget.__init__(self)
 
         self.logger = logger if logger else setup_logger()
@@ -440,7 +436,7 @@ class TableWidget(QTableWidget):
         self.selected_row: int | None = None
 
         # set the column labels
-        self.setHorizontalHeaderLabels(['Id', 'Name', 'Date started', 'Date ended', 'Exported'])
+        self.setHorizontalHeaderLabels(["Id", "Name", "Date started", "Date ended", "Exported"])
 
         # make the rows selectable
         self.setSelectionBehavior(QTableWidget.SelectRows)  # type: ignore
@@ -483,7 +479,7 @@ class TableWidget(QTableWidget):
         for row, experiment in enumerate(experiments):
             for col, entry in enumerate(experiment):
                 if isinstance(entry, datetime.datetime):
-                    new_item = QTableWidgetItem(entry.strftime('%Y-%m-%d %H:%M'))
+                    new_item = QTableWidgetItem(entry.strftime("%Y-%m-%d %H:%M"))
                 else:
                     new_item = QTableWidgetItem(str(entry))
                 new_item.setTextAlignment(Qt.AlignCenter)  # type: ignore # Sets text alignment to center
@@ -501,8 +497,7 @@ class TableWidget(QTableWidget):
             self.selected_row = row
             # emit the signal
             self.experimentSelected.emit(self.selected_experiment_id)
-            self.logger.debug(
-                "Cell clicked, row %s, experiment id %s", row, self.selected_experiment_id)
+            self.logger.debug("Cell clicked, row %s, experiment id %s", row, self.selected_experiment_id)
 
     def mousePressEvent(self, event) -> None:
         """Overrides the QTableWidget's mousePressEvent.
@@ -519,6 +514,7 @@ class ExperimentGraph(QWebEngineView):
     """A QWebEngineView subclass.
     Displays a Plotly graph for the selected experiment.
     """
+
     def __init__(self, width, table, logger) -> None:
         QWebEngineView.__init__(self)
 
@@ -534,8 +530,7 @@ class ExperimentGraph(QWebEngineView):
         self.figure = initialize_figure()
 
     def refresh_graph(self) -> None:
-        """Refresh the graph to reflect the data for the currently selected experiment.
-        """
+        """Refresh the graph to reflect the data for the currently selected experiment."""
 
         experiment_id: int = self.table.selected_experiment_id
         if experiment_id is None:
@@ -552,7 +547,7 @@ class ExperimentGraph(QWebEngineView):
         df_scaled = downsample_data(df)
         figure = plot_data(self.figure, df_scaled)
 
-        raw_html = figure.to_html(full_html=False, include_plotlyjs='cdn')
+        raw_html = figure.to_html(full_html=False, include_plotlyjs="cdn")
         self.setHtml(raw_html)
 
 
@@ -562,8 +557,8 @@ class ExperimentWidget(QWidget):
     It includes a TableWidget for displaying the experiment list
     and an ExperimentGraph for displaying experiment data.
     """
-    def __init__(self, width, table, export_control, logger) -> None:
 
+    def __init__(self, width, table, export_control, logger) -> None:
         QWidget.__init__(self)
 
         self.logger = logger if logger else setup_logger()
@@ -595,14 +590,14 @@ class MainWindow(QMainWindow):
     Includes all widgets and controls. It also handles the lifecycle of the
     web process running the Dash server.
     """
-    def __init__(self) -> None:
 
+    def __init__(self) -> None:
         QMainWindow.__init__(self)
 
         # Initialize logging
         self.logger = setup_logger()
-        self.logger.info('=' * 50)
-        self.logger.info('APP SPOOLING UP!')
+        self.logger.info("=" * 50)
+        self.logger.info("APP SPOOLING UP!")
 
         # Launch the plotly/dash web-app in here:
         self.web_process = QProcess(self)
@@ -622,8 +617,8 @@ class MainWindow(QMainWindow):
 
         tabs = QTabWidget()
         tabs.setTabPosition(QTabWidget.North)  # type: ignore
-        tabs.addTab(self.capture, 'Capture')
-        tabs.addTab(self.export, 'Export')
+        tabs.addTab(self.capture, "Capture")
+        tabs.addTab(self.export, "Export")
 
         self.setCentralWidget(tabs)
 
@@ -667,18 +662,18 @@ class MainWindow(QMainWindow):
                 self.logger.warning("Failed to start web process. Attempt %d of %d.", attempt + 1, retry_attempts)
 
             except (TypeError, RuntimeError, QProcess.StartFailed) as err:  # type: ignore
-                self.logger.debug('web process fell over: %s', err)
+                self.logger.debug("web process fell over: %s", err)
         else:
             # Alert the user of the failure with a QMessageBox
             QMessageBox.critical(
                 self,
                 "Web Process Error",
-                "Failed to start the web process after several attempts. The application may not work correctly.")
+                "Failed to start the web process after several attempts. The application may not work correctly.",
+            )
             self.logger.critical("Failed to start web process after %d attempts.", retry_attempts)
 
     def handle_error(self, error) -> None:
-        """Handles errors that occur in the web process
-        """
+        """Handles errors that occur in the web process"""
         self.logger.debug("An error occurred in the web process: %s", error)
 
     def handle_stderr(self) -> None:
@@ -710,8 +705,8 @@ class MainWindow(QMainWindow):
             if not self.web_process.waitForFinished(1000):
                 self.web_process.kill()
 
-        self.logger.info('APP WINDING DOWN!')
-        self.logger.info('=' * 50)
+        self.logger.info("APP WINDING DOWN!")
+        self.logger.info("=" * 50)
 
         # Accept the close event, allowing the main window to close
         event.accept()

@@ -24,12 +24,11 @@ if not app:
 
 
 class TestDeviceCapture(unittest.TestCase):
-    """Defines the test cases for the CentralizedControlManager class.
-    """
+    """Defines the test cases for the CentralizedControlManager class."""
 
     def setUp(self) -> None:
         # Create an SQLite database in memory
-        self.engine = create_engine('sqlite:///:memory:', echo=False)
+        self.engine = create_engine("sqlite:///:memory:", echo=False)
         session = sessionmaker(bind=self.engine)
         self.session = session()  # save the session instance
         Base.metadata.create_all(self.engine)  # Creates the database structure

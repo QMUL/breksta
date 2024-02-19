@@ -29,18 +29,12 @@ def create_layout(app: Dash) -> html.Div:
             # Include the interval slider component for user control over refresh rate
             slider_interval.render(),
             # Capture the current URL for dynamic routing and content rendering
-            dcc.Location(
-                id='url',
-                refresh=False),
+            dcc.Location(id="url", refresh=False),
             # Main graph display for data visualization
-            dcc.Graph(id='dynamic-graph'),
+            dcc.Graph(id="dynamic-graph"),
             # Interval component to trigger periodic data updates
-            dcc.Interval(
-                id='interval-component',
-                interval=2000,
-                n_intervals=0
-            ),
+            dcc.Interval(id="interval-component", interval=2000, n_intervals=0),
             # Store component to hold and manage the graph's layout settings
-            dcc.Store(id='stored-layout')
+            dcc.Store(id="stored-layout"),
         ],
     )

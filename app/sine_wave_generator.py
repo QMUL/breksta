@@ -11,6 +11,7 @@ class SineWaveGenerator(ADCReader):
     """Class that simulates a data capture device, aligned with the ADCReader interface.
     Simulates ADC reading using a sine wave with some noise.
     """
+
     def init_instance(self, config, channel, period, logger) -> None:
         super().init_instance(config, channel, period, logger)
         self.logger = logger

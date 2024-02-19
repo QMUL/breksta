@@ -1,4 +1,3 @@
-
 """While data is being captured it could be simultaenously being read by the local chart plotter,
 remotely (if we want to do that) and by the export functionality. Negotiating locks on flat
 .csv files will Not Be Fun. We could keep everything in shared memory, but we'd probably
@@ -31,6 +30,7 @@ class Base(DeclarativeBase):
     The pass keyword is used when you need to create a block of code syntactically, but you
     want that block to do nothing
     """
+
     pass
 
 
@@ -38,6 +38,7 @@ class Experiment(Base):
     """Metadata for each experiment run.
     Add whatever else we need.
     """
+
     __tablename__ = "experiment"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -52,6 +53,7 @@ class PmtReading(Base):
     Might as well have wall-clock time as the time-stamp so
     it can be a unique primary key.
     """
+
     __tablename__ = "reading"
 
     experiment: Mapped[int] = mapped_column(Integer, ForeignKey("experiment.id"))
@@ -61,7 +63,7 @@ class PmtReading(Base):
 
 def setup_session():
     """Create the Session if it doesn't exist."""
-    engine = create_engine('sqlite:///pmt.db')
+    engine = create_engine("sqlite:///pmt.db")
     Base.metadata.create_all(engine)
     session = sessionmaker(bind=engine)
     return session
@@ -72,8 +74,8 @@ class PmtDb:
     The class provides functionalities to start and stop experiments, write readings to the database,
     fetch the latest readings, export data, delete experiments, and mark experiments as exported.
     """
-    def __init__(self, session, logger) -> None:
 
+    def __init__(self, session, logger) -> None:
         self.logger = logger if logger else setup_logger()
 
         self.session = session if session else setup_session()
@@ -143,9 +145,7 @@ class PmtDb:
             or committing the session.
         """
         with self.session() as sess:
-            sess.add(PmtReading(
-                experiment=self.experiment_id,
-                value=val, ts=datetime.now()))
+            sess.add(PmtReading(experiment=self.experiment_id, value=val, ts=datetime.now()))
             sess.commit()
 
     def latest_readings(self, experiment_id, since=None) -> pd.DataFrame | None:
@@ -170,11 +170,11 @@ class PmtDb:
                 return None
 
             if since is None:
-                query = sess.query(PmtReading.ts, PmtReading.value).filter(
-                    PmtReading.experiment == experiment_id)
+                query = sess.query(PmtReading.ts, PmtReading.value).filter(PmtReading.experiment == experiment_id)
             else:
                 query = sess.query(PmtReading.ts, PmtReading.value).filter(
-                    PmtReading.experiment == experiment_id, PmtReading.ts > since)
+                    PmtReading.experiment == experiment_id, PmtReading.ts > since
+                )
 
             readings = query.all()
 
@@ -184,10 +184,10 @@ class PmtDb:
                 return None
 
             # Convert query results to a DataFrame
-            df = pd.DataFrame(readings, columns=['ts', 'value'])
+            df = pd.DataFrame(readings, columns=["ts", "value"])
 
             # Calculate timestamps relative to the experiment's start time
-            df['ts'] = df['ts'].apply(lambda ts: (ts - expt.start).total_seconds())
+            df["ts"] = df["ts"].apply(lambda ts: (ts - expt.start).total_seconds())
 
         return df
 
@@ -203,9 +203,7 @@ class PmtDb:
             # create dataframe for "experiment_id"
             df = self.latest_readings(experiment_id)
             if df is None:
-                self.logger.critical(
-                    "Cannot export data for experiment %s because there are no readings.",
-                    experiment_id)
+                self.logger.critical("Cannot export data for experiment %s because there are no readings.", experiment_id)
                 return
 
             # Attempt to retrieve the experiment's start date
@@ -244,7 +242,8 @@ class PmtDb:
 
                 if experiment is None:
                     self.logger.critical(
-                        "Cannot delete data for experiment %s because there are no readings.", experiment_id)
+                        "Cannot delete data for experiment %s because there are no readings.", experiment_id
+                    )
                     return
 
             # Delete the experiment and commit the changes

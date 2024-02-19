@@ -21,9 +21,10 @@ class TestExperiment(unittest.TestCase):
     The tests include creating a new experiment, updating an existing experiment,
     handling future start times, and validating the length of the experiment name.
     """
+
     def setUp(self) -> None:
         # Create an SQLite database in memory
-        self.engine = sqlalchemy.create_engine('sqlite:///:memory:', echo=False)
+        self.engine = sqlalchemy.create_engine("sqlite:///:memory:", echo=False)
         session = sessionmaker(bind=self.engine)
         self.session = session()  # save the session instance
         Base.metadata.create_all(self.engine)  # Creates the database structure
@@ -31,7 +32,7 @@ class TestExperiment(unittest.TestCase):
 
         self.mock_logger = MagicMock()
         # self.mock_db = PmtDb(session, self.mock_logger)
-        self.name = 'test_experiment'
+        self.name = "test_experiment"
 
     def tearDown(self) -> None:
         self.session.close()
@@ -87,6 +88,7 @@ class TestPmtReading(unittest.TestCase):
     and primary key nature of the timestamp, retrieving reading values from the object,
     and ensuring that the experiment id cannot be null.
     """
+
     def setUp(self):
         self.experiment_id = 1
         self.value = 10

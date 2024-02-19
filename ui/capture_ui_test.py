@@ -9,6 +9,7 @@ from ui.capture_controlpanel import CaptureControlManager, CaptureControlUI
 
 class TestWindow(QWidget):
     """Test harness class for manual inspection of Capture Control UI elements."""
+
     def __init__(self) -> None:
         super().__init__()
         self.logger = setup_logger()

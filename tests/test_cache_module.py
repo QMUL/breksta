@@ -15,7 +15,7 @@ class TestCacheWebProcess(TestCase):
         self.mock_logger = MagicMock()
         self.mock_db = MagicMock()
         # Initialize database behaviour to return a filled Dataframe.
-        self.mock_db.latest_readings.return_value = pd.DataFrame({'data': [1, 2, 3]})
+        self.mock_db.latest_readings.return_value = pd.DataFrame({"data": [1, 2, 3]})
         self.cache_instance = CacheWebProcess(database=self.mock_db, logger=self.mock_logger)
 
     def test_handle_data_update(self) -> None:

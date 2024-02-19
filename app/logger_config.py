@@ -22,7 +22,7 @@ def setup_logger() -> logging.Logger:
     Returns:
         logging.Logger: The logger for the application.
     """
-    my_app = 'Breksta'
+    my_app = "Breksta"
     logger = logging.getLogger(my_app)
 
     # Check if the logger already has handlers. If not, add them.
@@ -31,13 +31,13 @@ def setup_logger() -> logging.Logger:
 
         # Create handlers
         c_handler = logging.StreamHandler()
-        f_handler = logging.FileHandler('file.log')
+        f_handler = logging.FileHandler("file.log")
         c_handler.setLevel(logging.WARNING)
         f_handler.setLevel(logging.DEBUG)
 
         # Create formatters and add it to handlers
-        c_format = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
-        f_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        c_format = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
+        f_format = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
         c_handler.setFormatter(c_format)
         f_handler.setFormatter(f_format)
 

@@ -25,7 +25,7 @@ class TestPmtDb(unittest.TestCase):
 
     def setUp(self) -> None:
         # Create an SQLite database in memory
-        self.engine = create_engine('sqlite:///:memory:', echo=False)
+        self.engine = create_engine("sqlite:///:memory:", echo=False)
         session = sessionmaker(bind=self.engine)
         self.session = session()  # save the session instance
         Base.metadata.create_all(self.engine)  # Creates the database structure
@@ -33,7 +33,7 @@ class TestPmtDb(unittest.TestCase):
 
         self.mock_logger = MagicMock()
         self.mock_db = PmtDb(session, self.mock_logger)
-        self.name = 'test_experiment'
+        self.name = "test_experiment"
 
     def tearDown(self) -> None:
         self.session.close()
@@ -63,10 +63,7 @@ class TestPmtDb(unittest.TestCase):
         self.mock_db.experiment_id = self.mock_db.start_experiment(self.name)
         # Assertion #2
         self.assertIsNotNone(self.mock_db.experiment_id)
-        self.assertEqual(
-            self.mock_db.experiment_id,
-            old_experiment_id + 1
-        )
+        self.assertEqual(self.mock_db.experiment_id, old_experiment_id + 1)
 
     def test_start_experiment_creates_new_experiment_chain(self) -> None:
         """Test that start_experiment creates a new experiment_id when called,

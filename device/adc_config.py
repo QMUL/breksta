@@ -24,6 +24,7 @@ class ADS1115Address:
     Class Methods:
         is_valid(address): Checks if a given address matches one of the defined constants.
     """
+
     GND = 0x48  # Default
     VDD = 0x49
     SDA = 0x4A
@@ -62,6 +63,7 @@ class ADS1115Gain:
     Class Methods:
         is_valid(gain): Validates if the provided gain value is among the defined constants.
     """
+
     PGA_6_144V = 0  # Default
     PGA_4_096V = 1
     PGA_2_048V = 2
@@ -80,8 +82,7 @@ class ADS1115Gain:
         Returns:
             bool: True if the gain setting is valid, False otherwise.
         """
-        return gain in [cls.PGA_6_144V, cls.PGA_4_096V, cls.PGA_2_048V,
-                        cls.PGA_1_024V, cls.PGA_0_512V, cls.PGA_0_256V]
+        return gain in [cls.PGA_6_144V, cls.PGA_4_096V, cls.PGA_2_048V, cls.PGA_1_024V, cls.PGA_0_512V, cls.PGA_0_256V]
 
 
 class ADS1115DataRate:
@@ -105,6 +106,7 @@ class ADS1115DataRate:
     Class Methods:
         is_valid(gain): Validates if the provided data rate value is among the defined constants.
     """
+
     DR_ADS111X_8 = 0  # slowest
     DR_ADS111X_16 = 1
     DR_ADS111X_32 = 2
@@ -125,8 +127,16 @@ class ADS1115DataRate:
         Returns:
             bool: True if the data rate setting is valid, False otherwise.
         """
-        return data_rate in [cls.DR_ADS111X_8, cls.DR_ADS111X_16, cls.DR_ADS111X_32, cls.DR_ADS111X_64,
-                             cls.DR_ADS111X_128, cls.DR_ADS111X_250, cls.DR_ADS111X_475, cls.DR_ADS111X_860]
+        return data_rate in [
+            cls.DR_ADS111X_8,
+            cls.DR_ADS111X_16,
+            cls.DR_ADS111X_32,
+            cls.DR_ADS111X_64,
+            cls.DR_ADS111X_128,
+            cls.DR_ADS111X_250,
+            cls.DR_ADS111X_475,
+            cls.DR_ADS111X_860,
+        ]
 
 
 class ADS1115Mode(Enum):
@@ -137,6 +147,7 @@ class ADS1115Mode(Enum):
         poll_mode_continuous (int): reads in continuously
         poll_mode_single (int): reads in single-shot results
     """
+
     poll_mode_single = 1
     poll_mode_continuous = 0
 
