@@ -1,8 +1,9 @@
 """
 Module that houses all the UI element creation and initialization for signal capturing.
 """
-from PySide6.QtWidgets import QWidget, QLabel, QComboBox, QVBoxLayout, QPushButton, QLineEdit
-from PySide6.QtCore import Signal, QTimer, Slot
+from PySide6.QtCore import QTimer, Signal, Slot
+from PySide6.QtWidgets import QComboBox, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget
+
 from app.logger_config import setup_logger
 from ui.layout import create_horizontal_box
 

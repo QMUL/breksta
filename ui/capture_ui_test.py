@@ -1,8 +1,10 @@
 """Module for manual inspection of the Capture control UI elements."""
 import sys
-from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout
-from ui.capture_controlpanel import CaptureControlUI, CaptureControlManager
+
+from PySide6.QtWidgets import QApplication, QVBoxLayout, QWidget
+
 from app.logger_config import setup_logger
+from ui.capture_controlpanel import CaptureControlManager, CaptureControlUI
 
 
 class TestWindow(QWidget):

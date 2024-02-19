@@ -73,13 +73,22 @@ For contributions, please open a Pull Request detailing the changes made, issues
 
 ### Code Quality
 
-- **Linting**: We use `flake8`, `pylint`, and `mypy` to maintain code quality.
+- **Linting**: We use `flake8`, `pylint`, and `mypy` to maintain code quality. Additionally, we've introduced `ruff` to the mix, which covers both linting and formatting. Built in Rust, `ruff` encompasses most of `flake8` and `pylint` functionality (and a bunch of others) but is still under development. The config file includes a lot of up-to-date rules.
   - Run them regularly to pick up issues early.
     ```bash
     flake8 app/*
     pylint app/*
     mypy app/
+    ruff check [optional: file]  # to list linting warnings and errors
+    ruff check --fix [optional: file]  # to fix them
     ```
+
+- **Formatting**: Ruff handles formatting in a similar way that `black` does; it can be very opinionated but also customizable.
+```bash
+ruff format --help  # to see all available options
+ruff format --diff [file]  # will print the proposed changes
+ruff format [file]  # regular formatting operation
+```
 
 - **Testing**: `pytest` is used for running tests.
   - Run tests:

@@ -1,6 +1,7 @@
 """Manages ADC configuration settings like gain and address."""
 from dataclasses import dataclass
 from enum import Enum
+
 from app.logger_config import setup_logger
 
 logger = setup_logger()

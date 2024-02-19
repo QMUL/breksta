@@ -6,9 +6,10 @@ break the application.
 import unittest
 from unittest.mock import MagicMock
 
-from PySide6.QtWidgets import QApplication, QPushButton, QLineEdit, QComboBox
 from PySide6.QtCore import QTimer
-from ui.capture_controlpanel import CaptureControlUI, CaptureControlManager
+from PySide6.QtWidgets import QApplication, QComboBox, QLineEdit, QPushButton
+
+from ui.capture_controlpanel import CaptureControlManager, CaptureControlUI
 
 # In Qt, every GUI application must have exactly one instance of QApplication or one of its subclasses.
 # It's a requirement for managing a lot of application-wide resources, for initializing various Qt

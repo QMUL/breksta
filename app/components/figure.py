@@ -8,9 +8,9 @@ Functions:
 - `plot_data`: Adds the data to the plotting dataframe.
 - `update_axes_layout`: Updates the axis layout of a given Plotly figure based on stored user preferences.
 """
-from typing import Optional
-import plotly.graph_objects as go
+
 import pandas as pd
+import plotly.graph_objects as go
 
 from app.logger_config import setup_logger
 
@@ -77,7 +77,7 @@ def plot_data(fig: go.Figure, df: pd.DataFrame) -> go.Figure:
     return fig
 
 
-def update_axes_layout(fig: go.Figure, stored_layout: Optional[dict]) -> go.Figure:
+def update_axes_layout(fig: go.Figure, stored_layout: dict | None) -> go.Figure:
     """Update the figure layout based on stored settings.
 
     This function applies the layout settings stored in 'stored_layout' to the given figure.

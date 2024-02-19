@@ -2,15 +2,17 @@
 Glues together all UI and Manager classes for the Capture Tab.
 """
 import sys
-from typing import Optional
+
+from PySide6.QtCore import Qt, Signal, Slot
 from PySide6.QtWidgets import QApplication, QVBoxLayout, QWidget
-from PySide6.QtCore import Signal, Slot, Qt
+
 from app.logger_config import setup_logger
 from device.adc_run import ADCReader
-from ui.adc_controlpanel import ADCConfigWidget, ADCConfigManager
-from ui.capture_controlpanel import CaptureControlUI, CaptureControlManager
+from ui.adc_controlpanel import ADCConfigManager, ADCConfigWidget
+from ui.capture_controlpanel import CaptureControlManager, CaptureControlUI
+from ui.chart_manager import start_chart_process as start_chart
+from ui.chart_manager import stop_chart_process as stop_chart
 from ui.layout import create_group_box
-from ui.chart_manager import start_chart_process as start_chart, stop_chart_process as stop_chart
 
 
 class CentralizedControlManager(QWidget):
@@ -47,7 +49,7 @@ class CentralizedControlManager(QWidget):
         self.adc_ui = adc_ui
         self.adc_manager = adc_manager
         self.channel = self.DEFAULT_CHANNEL
-        self.adc_reader: Optional[ADCReader] = None
+        self.adc_reader: ADCReader | None = None
         self.timer = self.capture_manager.sampling_timer
 
         self.create_layout(self.capture_ui, self.adc_ui)

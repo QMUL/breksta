@@ -1,6 +1,5 @@
 """Cache subsystem for the web process and Dash application."""
 
-from typing import Optional
 from datetime import datetime
 
 import pandas as pd
@@ -29,8 +28,8 @@ class CacheWebProcess:
         self.cached_data: dict[int, pd.DataFrame] = {}
 
         # Initialize datetimes for precise fetching
-        self.last_datetime: Optional[datetime] = None
-        self.current_datetime: Optional[datetime] = None
+        self.last_datetime: datetime | None = None
+        self.current_datetime: datetime | None = None
 
     def get_cached_data(self, experiment_id) -> pd.DataFrame:
         """Retrieves cached data for a given experiment ID.

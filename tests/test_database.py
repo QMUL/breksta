@@ -3,12 +3,14 @@ Two tests classes: TestExperiment and TestPmtReading. Each class contains multip
 methods that test different aspects of the Experiment and PmtReading classes respectively.
 """
 
-from datetime import datetime, timedelta
 import unittest
+from datetime import datetime, timedelta
 from unittest.mock import MagicMock
+
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
-from app.database import Experiment, PmtReading, Base
+
+from app.database import Base, Experiment, PmtReading
 
 
 class TestExperiment(unittest.TestCase):

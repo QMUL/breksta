@@ -3,12 +3,13 @@
 Each public method of ExportControl is tested to ensure that changes in the code do not unintentionally
 break the application.
 """
-import unittest
 import tempfile
+import unittest
 from unittest import mock
 from unittest.mock import MagicMock
 
 from PySide6.QtWidgets import QApplication, QMessageBox
+
 from app.breksta import ExportControl, TableWidget
 
 # In Qt, every GUI application must have exactly one instance of QApplication or one of its subclasses.

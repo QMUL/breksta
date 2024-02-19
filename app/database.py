@@ -14,12 +14,12 @@ QuestDB, a column-store for IOT time-series:
 """
 import os
 from datetime import datetime
-from typing import Optional
-from pathvalidate import sanitize_filename
 
 import pandas as pd
-from sqlalchemy import create_engine, ForeignKey, String, exc, Boolean, Integer, Float, DateTime
+from pathvalidate import sanitize_filename
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, create_engine, exc
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
+
 from app.logger_config import setup_logger
 
 
@@ -43,7 +43,7 @@ class Experiment(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(64), index=True)
     start: Mapped[datetime] = mapped_column(DateTime)
-    end: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    end: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     exported: Mapped[bool] = mapped_column(Boolean, default=False)
 
 
@@ -78,8 +78,8 @@ class PmtDb:
 
         self.session = session if session else setup_session()
 
-        self.experiment_id: Optional[int] = None
-        self.start_time: Optional[datetime] = None
+        self.experiment_id: int | None = None
+        self.start_time: datetime | None = None
 
     def start_experiment(self, name) -> int:
         """Starts a new experiment and writes it to the database.

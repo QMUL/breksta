@@ -1,5 +1,5 @@
 """Encapsulates all Dash layout logic and methods"""
-from dash import Dash, html, dcc
+from dash import Dash, dcc, html
 
 from app.components import slider_interval
 
