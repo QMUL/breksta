@@ -9,7 +9,7 @@ from unittest.mock import MagicMock
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.database import PmtDb, Base, Experiment
+from app.database import Base, Experiment, PmtDb
 
 
 class TestPmtDb(unittest.TestCase):

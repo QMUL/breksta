@@ -1,25 +1,34 @@
 """This module contains the main application for managing experiments.
 It includes the main window UI, the data capture and charting functionalities.
 """
-import sys
 import datetime
 import os
 import shutil
-from typing import Optional
+import sys
 
-from PySide6.QtCore import QProcess, QUrl, Signal, Slot, Qt, QDir
+from PySide6.QtCore import QDir, QProcess, Qt, QUrl, Signal, Slot
 from PySide6.QtGui import QAction, QKeySequence
-from PySide6.QtWidgets import (
-    QApplication, QHBoxLayout, QMainWindow,
-    QPushButton, QTabWidget, QVBoxLayout, QWidget, QTableWidget,
-    QTableWidgetItem, QStyledItemDelegate, QFileDialog, QMessageBox)
 from PySide6.QtWebEngineWidgets import QWebEngineView
+from PySide6.QtWidgets import (
+    QApplication,
+    QFileDialog,
+    QHBoxLayout,
+    QMainWindow,
+    QMessageBox,
+    QPushButton,
+    QStyledItemDelegate,
+    QTableWidget,
+    QTableWidgetItem,
+    QTabWidget,
+    QVBoxLayout,
+    QWidget,
+)
 
+from app.capture_signal import DeviceCapture
+from app.components.figure import display_placeholder_graph, downsample_data, initialize_figure, plot_data
 from app.database import PmtDb, setup_session
 from app.logger_config import setup_logger
-from app.capture_signal import DeviceCapture
 from ui.central_controlpanel import CentralizedControlManager, get_manager_instance
-from app.components.figure import initialize_figure, plot_data, display_placeholder_graph, downsample_data
 
 # Programmatically set PYTHONPATH for breksta ONLY
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
@@ -155,14 +164,14 @@ class ExportControl(QWidget):
         self.setLayout(layout)
 
         # Initialize the experiment_id to receive signal
-        self.selected_experiment_id: Optional[int] = None
+        self.selected_experiment_id: int | None = None
 
         # Link to TableWidget instance
         self.table = table
         self.table.experimentSelected.connect(self.update_selected_experiment)
 
         # Initialize attributes with default values
-        self.folder_path: Optional[str] = None
+        self.folder_path: str | None = None
 
     @Slot(int)
     def update_selected_experiment(self, experiment_id) -> None:
@@ -427,8 +436,8 @@ class TableWidget(QTableWidget):
         self.database = database
 
         # initialise with invalid id, test
-        self.selected_experiment_id: Optional[int] = None
-        self.selected_row: Optional[int] = None
+        self.selected_experiment_id: int | None = None
+        self.selected_row: int | None = None
 
         # set the column labels
         self.setHorizontalHeaderLabels(['Id', 'Name', 'Date started', 'Date ended', 'Exported'])

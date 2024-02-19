@@ -3,8 +3,10 @@ Also tests the ADC manager handles the business logic appropriately.
 """
 import unittest
 from unittest.mock import Mock
-from PySide6.QtWidgets import QApplication, QComboBox, QButtonGroup
-from ui.adc_controlpanel import ADCConfigWidget, ADCConfigManager
+
+from PySide6.QtWidgets import QApplication, QButtonGroup, QComboBox
+
+from ui.adc_controlpanel import ADCConfigManager, ADCConfigWidget
 
 app = QApplication.instance()
 if not app:

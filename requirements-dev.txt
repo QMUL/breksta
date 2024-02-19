@@ -4,3 +4,4 @@ pytest
 coverage
 mypy
 pandas-stubs
+ruff

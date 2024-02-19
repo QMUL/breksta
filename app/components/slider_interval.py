@@ -5,6 +5,7 @@ the slider that controls the refresh rate of the main graph in the Dash app.
 """
 
 from dataclasses import dataclass
+
 from dash import dcc, html
 
 

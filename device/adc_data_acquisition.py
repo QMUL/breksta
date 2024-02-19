@@ -5,6 +5,7 @@ Focuses on acquiring data from the ADC.
 - Data processing or filtering methods specific to ADC data.
 """
 import time
+
 from app.logger_config import setup_logger
 from device.adc_config import ADCConfig
 from device.adc_interface import initialize_adc

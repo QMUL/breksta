@@ -3,8 +3,8 @@ import unittest
 from unittest import mock
 
 from app.sine_wave_generator import SineWaveGenerator
-from device.adc_run import SingleShotADCReader, ContinuousADCReader
 from device.adc_config import ADCConfig
+from device.adc_run import ContinuousADCReader, SingleShotADCReader
 
 
 class TestADCReaderImplementations(unittest.TestCase):

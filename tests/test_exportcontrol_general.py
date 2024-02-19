@@ -9,6 +9,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from PySide6.QtWidgets import QApplication
+
 from app.breksta import ExportControl, TableWidget
 
 # In Qt, every GUI application must have exactly one instance of QApplication or one of its subclasses.

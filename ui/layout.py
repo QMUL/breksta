@@ -1,5 +1,5 @@
 """Contains helper functions to create layouts."""
-from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QGroupBox
+from PySide6.QtWidgets import QGroupBox, QHBoxLayout, QVBoxLayout
 
 
 def create_group_box(widget, name: str) -> QGroupBox:

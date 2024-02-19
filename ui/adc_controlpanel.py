@@ -7,17 +7,16 @@ Includes:
 - selecting the ADC reading operation mode
 """
 import os
-from PySide6.QtWidgets import QWidget, QLabel, QComboBox, QRadioButton, QVBoxLayout, QButtonGroup
+
+from PySide6.QtWidgets import QButtonGroup, QComboBox, QLabel, QRadioButton, QVBoxLayout, QWidget
 
 from app.logger_config import setup_logger
 from app.sine_wave_generator import SineWaveGenerator
-from device.adc_config import (
-    ADS1115Address as Address,
-    ADS1115Gain as Gain,
-    ADS1115Mode as Mode,
-    ADS1115DataRate as DR,
-    ADCConfig
-)
+from device.adc_config import ADCConfig
+from device.adc_config import ADS1115Address as Address
+from device.adc_config import ADS1115DataRate as DR
+from device.adc_config import ADS1115Gain as Gain
+from device.adc_config import ADS1115Mode as Mode
 from device.adc_run import ADCReader, ContinuousADCReader, SingleShotADCReader
 from ui.layout import create_horizontal_box
 

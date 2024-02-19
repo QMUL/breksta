@@ -4,9 +4,10 @@ in order to write readings to the database.
 """
 
 import sys
-from typing import Optional
+
+from PySide6.QtCore import QObject, Signal, Slot
 from PySide6.QtWidgets import QApplication
-from PySide6.QtCore import QObject, Slot, Signal
+
 from app.database import PmtDb, setup_session
 from app.logger_config import setup_logger
 from ui.central_controlpanel import CentralizedControlManager, get_manager_instance
@@ -24,8 +25,8 @@ class DeviceCapture(QObject):
         self.manager = manager
         self.database = database
 
-        self.experiment_id: Optional[int] = None
-        self.experiment_name: Optional[str] = None
+        self.experiment_id: int | None = None
+        self.experiment_name: str | None = None
 
         self.setup_connections()
 

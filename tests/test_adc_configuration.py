@@ -4,7 +4,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 import device.adc_config as adcC
-from device.adc_config import ADCConfig, ADS1115Address, ADS1115Gain, ADS1115DataRate
+from device.adc_config import ADCConfig, ADS1115Address, ADS1115DataRate, ADS1115Gain
 
 
 class TestADCConfig(unittest.TestCase):

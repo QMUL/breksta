@@ -15,7 +15,7 @@ def start_chart_process(logger) -> None:
         with open(CONTROL_FILE, 'w', encoding='utf-8') as file:
             file.write(START_SIGNAL)
         logger.debug("Sent start/resume signal to chart control file...")
-    except IOError as err:
+    except OSError as err:
         logger.error("Failed to send start/resume signal to chart control file: %s", err)
 
 
@@ -27,5 +27,5 @@ def stop_chart_process(logger) -> None:
         with open(CONTROL_FILE, 'w', encoding='utf-8') as file:
             file.write(STOP_SIGNAL)
         logger.debug("Sent stop signal to chart control file...")
-    except IOError as err:
+    except OSError as err:
         logger.error("Failed to send stop signal to chart control file: %s", err)

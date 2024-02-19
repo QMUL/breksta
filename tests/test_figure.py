@@ -7,11 +7,11 @@ Tests figure components and helpers:
 """
 
 import unittest
-from unittest.mock import MagicMock, patch
 from unittest import mock
+from unittest.mock import MagicMock, patch
 
-import plotly.graph_objects as go
 import pandas as pd
+import plotly.graph_objects as go
 
 from app.components import figure
 

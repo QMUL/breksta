@@ -7,7 +7,8 @@ import os
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
-from PySide6.QtWidgets import QApplication, QVBoxLayout, QGroupBox, QSpacerItem
+from PySide6.QtWidgets import QApplication, QGroupBox, QSpacerItem, QVBoxLayout
+
 from ui.central_controlpanel import CentralizedControlManager, get_manager_instance
 
 # In Qt, every GUI application must have exactly one instance of QApplication or one of its subclasses.

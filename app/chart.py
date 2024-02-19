@@ -10,23 +10,24 @@ to reduce network traffic:
 TODO: Add components only visible remotely to faciliate remote .csv download.
 """
 
-import urllib.parse
 import os
+import urllib.parse
 
-# Import plotly before dash due to dependency issues
-import plotly.graph_objects as go
 import dash
-from dash import Dash, State
-from dash.dependencies import Input, Output
-from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc  # BOOTSTRAP, CYBORG,SUPERHERO
 import pandas as pd
 
-from app.logger_config import setup_logger
+# Import plotly before dash due to dependency issues
+import plotly.graph_objects as go
+from dash import Dash, State
+from dash.dependencies import Input, Output
+from dash.exceptions import PreventUpdate
+
 from app.cache_module import CacheWebProcess
-from app.components.figure import initialize_figure, plot_data, update_axes_layout, downsample_data
+from app.components.figure import downsample_data, initialize_figure, plot_data, update_axes_layout
 from app.components.layout import create_layout
 from app.database import PmtDb, setup_session
+from app.logger_config import setup_logger
 
 logger = setup_logger()
 
@@ -243,9 +244,9 @@ def read_control_file(file_path: str = 'app/control.txt', default_value: str = "
         control (str): The binary control parameter, or default if an error occurs.
     """
     try:
-        with open(file_path, 'r', encoding='utf-8') as file:
+        with open(file_path, encoding='utf-8') as file:
             control = file.read().strip()
-    except (IOError, PermissionError) as err:
+    except (OSError, PermissionError) as err:
         logger.error("Failed to read control file: %s", err)
         control = default_value
 

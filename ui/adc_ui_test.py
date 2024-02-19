@@ -1,10 +1,12 @@
 """Manual inspection module for the creation and instantiation of Capture tab UI elements."""
 import sys
-from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout
-from ui.adc_controlpanel import ADCConfigWidget, ADCConfigManager
-from ui.capture_controlpanel import CaptureControlUI, CaptureControlManager
-from ui.layout import create_group_box
+
+from PySide6.QtWidgets import QApplication, QVBoxLayout, QWidget
+
 from app.logger_config import setup_logger
+from ui.adc_controlpanel import ADCConfigManager, ADCConfigWidget
+from ui.capture_controlpanel import CaptureControlManager, CaptureControlUI
+from ui.layout import create_group_box
 
 
 class TestWindow(QWidget):
