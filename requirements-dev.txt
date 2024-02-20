@@ -5,3 +5,4 @@ coverage
 mypy
 pandas-stubs
 ruff
+pre-commit

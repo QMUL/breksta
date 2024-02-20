@@ -3,8 +3,8 @@ This module encapsulates all functionality related to controlling the Dash app p
 and the charting functionality.
 """
 CONTROL_FILE: str = "app/control.txt"
-START_SIGNAL: str = "1"
-STOP_SIGNAL: str = "0"
+START_SIGNAL: str = "1\n"
+STOP_SIGNAL: str = "0\n"
 
 
 def start_chart_process(logger) -> None:

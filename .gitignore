@@ -132,3 +132,5 @@ dmypy.json
 **/*.csv
 **/*.db
 output*/
+
+.ruff_cache/
