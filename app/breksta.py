@@ -5,13 +5,13 @@ import datetime
 import os
 import shutil
 import sys
+from pathlib import Path
 
-from PySide6.QtCore import QDir, QProcess, Qt, QUrl, Signal, Slot
+from PySide6.QtCore import QProcess, Qt, QUrl, Signal, Slot
 from PySide6.QtGui import QAction, QKeySequence
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import (
     QApplication,
-    QFileDialog,
     QHBoxLayout,
     QMainWindow,
     QMessageBox,
@@ -28,6 +28,8 @@ from app.capture_signal import DeviceCapture
 from app.components.figure import display_placeholder_graph, downsample_data, initialize_figure, plot_data
 from app.database import PmtDb, setup_session
 from app.logger_config import setup_logger
+from app.ui_utils import choose_directory
+from app.utils import get_db_path
 from ui.central_controlpanel import CentralizedControlManager, get_manager_instance
 
 # Programmatically set PYTHONPATH for breksta ONLY
@@ -171,7 +173,7 @@ class ExportControl(QWidget):
         self.table.experimentSelected.connect(self.update_selected_experiment)
 
         # Initialize attributes with default values
-        self.folder_path: str | None = None
+        self.folder_path: Path | None = None
 
     @Slot(int)
     def update_selected_experiment(self, experiment_id) -> None:
@@ -203,7 +205,7 @@ class ExportControl(QWidget):
         # first time export is invoked, choose export folder
         # if cancelled, return control to parent
         if not self.folder_path:
-            chosen_dir = self.choose_directory()
+            chosen_dir = choose_directory()
             if not chosen_dir:
                 self.logger.warning("No folder chosen.. Please, try again")
                 self.export_button.setEnabled(True)
@@ -229,25 +231,6 @@ class ExportControl(QWidget):
             # always runs - return control to button
             self.export_button.setEnabled(True)
 
-    def choose_directory(self) -> str | None:
-        """Opens a dialog for the user to choose an export folder for the experiment data.
-        The default directory opened in the dialog is the user's home directory ($HOME).
-        Note: To open the dialog at the current working directory ($CWD) instead,
-        replace QDir.homePath() with QDir.currentPath().
-
-        Returns:
-            str or None: The chosen directory path, or None if no directory was chosen.
-        """
-        dialog = QFileDialog()
-        chosen_path = dialog.getExistingDirectory(None, "Select Folder", QDir.homePath())
-
-        # Upon cancelling, chosen_path will return an empty string, reset
-        if not chosen_path:
-            return None
-
-        self.logger.debug("Exporting directory chosen as: %s", chosen_path)
-        return chosen_path
-
     def on_delete_button_clicked(self) -> None:
         """Deletes the selected experiment when the delete button is clicked.
         Also refreshes the table widget after the deletion.
@@ -264,19 +247,19 @@ class ExportControl(QWidget):
         # first time delete is invoked, choose database folder
         # if cancelled, return control to parent
         if not self.folder_path:
-            chosen_dir = self.choose_directory()
+            chosen_dir: Path | None = choose_directory()
             if not chosen_dir:
                 self.logger.warning("No folder chosen.. Please, try again")
                 self.delete_button.setEnabled(True)
                 return
             self.folder_path = chosen_dir
-
+        self.logger.debug("Exporting directory chosen as: %s", self.folder_path)
         # Propagate the database connection
         database = self.table.database
 
         try:
             # backup the database in preparation of destructive manipulation
-            self.backup_database()
+            self.backup_database(self.folder_path)
             # find if exported and handle deletion user prompting
             item = self.table.item(self.table.selected_row, 4)
             self.logger.debug("selected row is: %s", self.table.selected_row)
@@ -294,7 +277,7 @@ class ExportControl(QWidget):
 
         except OSError as err:
             self.logger.exception("Operation failed due to: %s", err)
-            self.restore_database()
+            self.restore_database(self.folder_path)
 
         else:
             if reply:  # only if the user confirmed
@@ -322,7 +305,7 @@ class ExportControl(QWidget):
 
         return confirm_dialog("Delete Experiment", "Are you sure you want to delete this experiment?")
 
-    def backup_database(self, filename=None):
+    def backup_database(self, folder_path: Path, filename=None) -> Path:
         """Creates a database backup.
 
         If a filename is provided, it is used as a prefix to the timestamp in the backup filename.
@@ -336,47 +319,29 @@ class ExportControl(QWidget):
         """
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M")
 
-        db_path = self.get_root_dir()
+        db_path: Path = get_db_path()
+        explicit_db_name: str = f"{filename}_{timestamp}.db"
+        db_name: str = "backup.db"
 
-        if filename:
-            # If a filename is provided, use it as a prefix to the timestamp
-            backup_path = os.path.join(self.folder_path, f"{filename}_{timestamp}.db")
-        else:
-            # If no filename is provided, create an automatic backup named "backup.db"
-            backup_path = os.path.join(self.folder_path, "backup.db")
+        backup_path: Path = folder_path / explicit_db_name if filename else folder_path / db_name
 
         shutil.copy(db_path, backup_path)
         return backup_path
 
-    def restore_database(self, filename=None) -> None:
+    def restore_database(self, folder_path: Path, filename=None) -> None:
         """Restores the database from a backup.
         If a filename is provided, it is used as the name of the backup file.
         Otherwise, a default name "backup.db" is used.
         """
-        db_path = self.get_root_dir()
-
-        # folder_path has to be str for the join()
-        if self.folder_path is not None:
-            # Set backup_path based on whether filename is provided or not
-            if filename:
-                backup_path = os.path.join(self.folder_path, filename)
-            else:
-                backup_path = os.path.join(self.folder_path, "backup.db")
-        else:
-            raise ValueError("self.folder_path is None")
+        db_path: Path = get_db_path()
+        db_name: str = "backup.db"
+        backup_path: Path = folder_path / filename if filename else folder_path / db_name
 
         # Then check if backup file exists
-        if not os.path.isfile(backup_path):
+        if not backup_path.is_file():
             raise FileNotFoundError(f"Backup file {backup_path} does not exist.")
 
-        shutil.copy(backup_path, db_path)
-
-    def get_root_dir(self) -> str:
-        """Grabs root directory - by default where we save 'pmt.db'"""
-        script_path = os.path.dirname(os.path.realpath(__file__))
-        root_path = os.path.dirname(script_path)
-        db_path = os.path.join(root_path, "pmt.db")
-        return db_path
+        shutil.copy(str(backup_path), db_path)
 
 
 class ExportWidget(QWidget):
@@ -628,7 +593,8 @@ class MainWindow(QMainWindow):
 
     def instantiate_objects(self, win_width, logger) -> tuple[CaptureWidget, ExportWidget]:
         """Create the instances of all objects."""
-        session = setup_session()
+        db_path = get_db_path()
+        session = setup_session(db_path)
         database = PmtDb(session=session, logger=logger)
         capture = CaptureWidget(win_width, database, logger)
         table = TableWidget(win_width, database, logger)
