@@ -13,6 +13,7 @@ QuestDB, a column-store for IOT time-series:
 """
 import os
 from datetime import datetime
+from pathlib import Path
 
 import pandas as pd
 from pathvalidate import sanitize_filename
@@ -20,6 +21,9 @@ from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, cr
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 
 from app.logger_config import setup_logger
+from app.utils import get_db_path
+
+pmt_db_path: Path = get_db_path()
 
 
 class Base(DeclarativeBase):
@@ -61,9 +65,17 @@ class PmtReading(Base):
     ts: Mapped[datetime] = mapped_column(DateTime, primary_key=True)
 
 
-def setup_session():
-    """Create the Session if it doesn't exist."""
-    engine = create_engine("sqlite:///pmt.db")
+def setup_session(db_path: Path) -> sessionmaker:
+    """Create the Session if it doesn't exist, using the given database path.
+
+    Args:
+        db_path (Path): The path to the database file.
+
+    Returns:
+        sessionmaker: A sessionmaker instance bound to the engine.
+    """
+    # Convert Path object to a string and prepend with sqlite URI scheme
+    engine = create_engine(f"sqlite:///{str(db_path)}")
     Base.metadata.create_all(engine)
     session = sessionmaker(bind=engine)
     return session
@@ -78,7 +90,7 @@ class PmtDb:
     def __init__(self, session, logger) -> None:
         self.logger = logger if logger else setup_logger()
 
-        self.session = session if session else setup_session()
+        self.session = session if session else setup_session(pmt_db_path)
 
         self.experiment_id: int | None = None
         self.start_time: datetime | None = None

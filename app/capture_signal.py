@@ -1,6 +1,6 @@
 """
-EXPERIMENTAL module that tries to encapsulate the Capture controls and Database access
-in order to write readings to the database.
+Encapsulates the Capture controls and Database access
+Performs write operations to the database upon receiving the appropriate device signals.
 """
 
 import sys
@@ -66,12 +66,14 @@ class DeviceCapture(QObject):
 
 def _main():
     """Entry point to perform manual testing. Private method."""
+    from pathlib import Path
+
     app = QApplication(sys.argv)
     _logger = setup_logger()
 
     window: CentralizedControlManager = get_manager_instance(_logger)
     window.show()
-    session = setup_session()
+    session = setup_session(Path("test.db"))
     _database = PmtDb(session=session, logger=_logger)
 
     _ = DeviceCapture(manager=window, database=_database, logger=_logger)

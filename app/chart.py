@@ -28,13 +28,15 @@ from app.components.figure import downsample_data, initialize_figure, plot_data,
 from app.components.layout import create_layout
 from app.database import PmtDb, setup_session
 from app.logger_config import setup_logger
+from app.utils import get_db_path
 
 logger = setup_logger()
 
 
 def setup_auxiliaries() -> tuple[CacheWebProcess, go.Figure]:
     """Create a figure and a Cache object."""
-    session = setup_session()
+    db_path = get_db_path()
+    session = setup_session(db_path)
     database = PmtDb(session, logger)
     _cache = CacheWebProcess(database, logger)
     _figure: go.Figure = initialize_figure()

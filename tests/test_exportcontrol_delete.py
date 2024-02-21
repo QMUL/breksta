@@ -5,6 +5,7 @@ break the application.
 """
 import tempfile
 import unittest
+from pathlib import Path
 from unittest import mock
 from unittest.mock import MagicMock
 
@@ -55,53 +56,54 @@ class TestExportControl(unittest.TestCase):
 
     def test_delete_button_experiment_selected(self) -> None:
         """Test that delete button calls delete_experiment with correct id when an experiment is selected"""
-        with tempfile.TemporaryDirectory() as tmpdirname:
-            # Mock the choose_directory method to return the temporary directory path
-            with mock.patch.object(self.export_control, "choose_directory", return_value=tmpdirname):
-                self.export_control.folder_path = tmpdirname
-                print(self.export_control.folder_path)
-                # Create a mock for the delete_experiment method
-                self.mock_db.delete_experiment = MagicMock()
+        with tempfile.TemporaryDirectory() as tmpdirname, mock.patch(
+            "app.breksta.choose_directory", return_value=Path(tmpdirname)
+        ):
+            self.export_control.folder_path = Path(tmpdirname)
+            # Create a mock for the delete_experiment method
+            self.mock_db.delete_experiment = MagicMock()
 
-                # Mock the return value of the table item's text method
-                mock_item = MagicMock()
-                mock_item.text.return_value = "True"
-                self.export_control.table.item = MagicMock(return_value=mock_item)
+            # Mock the return value of the table item's text method
+            mock_item = MagicMock()
+            mock_item.text.return_value = "True"
+            self.export_control.table.item = MagicMock(return_value=mock_item)
 
-                # Mock the QMessageBox.question method to return 'Yes'
-                with mock.patch("PySide6.QtWidgets.QMessageBox.question", return_value=QMessageBox.Yes):  # type: ignore
-                    # Select an experiment and try to delete it
-                    self.export_control.selected_experiment_id = 1
-                    self.export_control.table.selected_row = 0
-                    self.export_control.on_delete_button_clicked()
+            # Mock the QMessageBox.question method to return 'Yes'
+            with mock.patch("PySide6.QtWidgets.QMessageBox.question", return_value=QMessageBox.Yes):  # type: ignore
+                # Select an experiment and try to delete it
+                self.export_control.selected_experiment_id = 1
+                self.export_control.table.selected_row = 0
+                self.export_control.on_delete_button_clicked()
 
-                    # Check that delete_experiment was called with the correct id
-                    self.mock_db.delete_experiment.assert_called_with(1)
+                # Check that delete_experiment was called with the correct id
+                self.mock_db.delete_experiment.assert_called_with(1)
 
     def test_delete_button_experiment_not_exported(self) -> None:
         """Test that delete button calls delete_experiment with correct id when an experiment is not exported"""
-        with tempfile.TemporaryDirectory() as tmpdirname:
-            # Mock the choose_directory method to return the temporary directory path
-            with mock.patch.object(self.export_control, "choose_directory", return_value=tmpdirname):
-                self.export_control.folder_path = tmpdirname
-                # Create a mock for the delete_experiment method
-                self.mock_db.delete_experiment = MagicMock()
+        with tempfile.TemporaryDirectory() as tmpdirname, mock.patch(
+            "app.breksta.choose_directory", return_value=Path(tmpdirname)
+        ):
+            # Create a mock backup file
+            backup_path = Path(tmpdirname)
+            backup_path.touch()
+            # Create a mock for the delete_experiment method
+            self.mock_db.delete_experiment = MagicMock()
 
-                # Mock the return value of the table item's text method
-                mock_item = MagicMock()
-                # This time we're simulating the case when the experiment is not exported
-                mock_item.text.return_value = "False"
-                self.export_control.table.item = MagicMock(return_value=mock_item)
+            # Mock the return value of the table item's text method
+            mock_item = MagicMock()
+            # This time we're simulating the case when the experiment is not exported
+            mock_item.text.return_value = "False"
+            self.export_control.table.item = MagicMock(return_value=mock_item)
 
-                # Mock the QMessageBox.question method to return 'Yes'
-                with mock.patch("PySide6.QtWidgets.QMessageBox.question", return_value=QMessageBox.Yes):  # type: ignore
-                    # Select an experiment and try to delete it
-                    self.export_control.selected_experiment_id = 1
-                    self.export_control.table.selected_row = 0
-                    self.export_control.on_delete_button_clicked()
+            # Mock the QMessageBox.question method to return 'Yes'
+            with mock.patch("PySide6.QtWidgets.QMessageBox.question", return_value=QMessageBox.Yes):  # type: ignore
+                # Select an experiment and try to delete it
+                self.export_control.selected_experiment_id = 1
+                self.export_control.table.selected_row = 0
+                self.export_control.on_delete_button_clicked()
 
-                    # Check that delete_experiment was called with the correct id
-                    self.mock_db.delete_experiment.assert_called_with(1)
+                # Check that delete_experiment was called with the correct id
+                self.mock_db.delete_experiment.assert_called_with(1)
 
     def test_delete_experiment_when_declined(self) -> None:
         """Test that delete_experiment is not called if the user declines deletion.
@@ -114,8 +116,8 @@ class TestExportControl(unittest.TestCase):
         # Use a temporary directory to mock the chosen directory path.
         with tempfile.TemporaryDirectory() as tmpdirname:
             # Mock the directory choice to return the temporary directory.
-            with mock.patch.object(self.export_control, "choose_directory", return_value=tmpdirname):
-                self.export_control.folder_path = tmpdirname
+            with mock.patch("app.breksta.choose_directory", return_value=Path(tmpdirname)):
+                self.export_control.folder_path = Path(tmpdirname)
 
             # Simulate a user response of "No" via the QMessageBox.
             # This mock ensures that the user's decision to decline deletion
@@ -150,8 +152,8 @@ class TestExportControl(unittest.TestCase):
         # Use a temporary directory to mock the chosen directory path.
         with tempfile.TemporaryDirectory() as tmpdirname:
             # Mock the directory choice to return the temporary directory.
-            with mock.patch.object(self.export_control, "choose_directory", return_value=tmpdirname):
-                self.export_control.folder_path = tmpdirname
+            with mock.patch("app.breksta.choose_directory", return_value=Path(tmpdirname)):
+                self.export_control.folder_path = Path(tmpdirname)
 
             # Simulate two user responses via the QMessageBox: first Yes, then No.
             # The order of these responses is crucial to the test, as the logic

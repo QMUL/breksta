@@ -6,11 +6,13 @@ Each public method of ExportControl is tested to ensure that changes in the code
 unintentionally break the application.
 """
 import unittest
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from PySide6.QtWidgets import QApplication
 
 from app.breksta import ExportControl, TableWidget
+from app.ui_utils import choose_directory
 
 # In Qt, every GUI application must have exactly one instance of QApplication or one of its subclasses.
 # It's a requirement for managing a lot of application-wide resources, for initializing various Qt
@@ -40,7 +42,7 @@ class TestExportControl(unittest.TestCase):
         self.table = TableWidget(width, self.mock_db, self.mock_logger)
         self.export_control = ExportControl(self.table, self.mock_logger)
 
-    @patch.object(ExportControl, "choose_directory", return_value=None)
+    @patch("app.breksta.choose_directory", return_value=None)
     def test_choose_directory_no_folder_chosen(self, mock_choose_directory) -> None:
         """Test that cancelling the file dialog and not choosing a folder returns
         control to parent; does not export."""
@@ -57,15 +59,15 @@ class TestExportControl(unittest.TestCase):
         """Test that choosing an export folder returns a valid filepath."""
 
         # Mock the QFileDialog's getExistingDirectory method to return a fake directory path.
-        mock_path = "/fake/directory/path"
+        mock_path = Path("/fake/directory/path")
         mock_get_existing_directory.return_value = mock_path
 
-        result = self.export_control.choose_directory()
+        result = choose_directory()
 
         mock_get_existing_directory.assert_called_once()
         self.assertEqual(result, mock_path)
 
-    @patch.object(ExportControl, "choose_directory")
+    @patch("app.breksta.choose_directory")
     def test_filepath_set_on_export_button_click(self, mock_choose_directory) -> None:
         """Test that on_export_button_click assigns a valid filepath to folder_path"""
 
@@ -100,25 +102,27 @@ class TestExportControl(unittest.TestCase):
 
         self.mock_logger.warning.assert_called_once_with("To export, please choose an experiment from the list")
 
-    @patch.object(ExportControl, "choose_directory", return_value="/mock/directory")
+    @patch("app.breksta.choose_directory", return_value=Path("/mock/directory"))
     def test_successful_export_on_export_button_clicked(self, mock_choose_directory) -> None:
         """Test that clicking the export button successfully exports the data."""
         test_experiment_id = 123  # mock ID
         self.export_control.selected_experiment_id = test_experiment_id
-        self.export_control.folder_path = "/mock/directory"
+        self.export_control.folder_path = Path("/mock/directory")
 
         # Mock the instance's method
         self.export_control.table.database.export_data_single = MagicMock()
 
         self.export_control.on_export_button_clicked()
 
-        self.export_control.table.database.export_data_single.assert_called_once_with(test_experiment_id, "/mock/directory")
+        self.export_control.table.database.export_data_single.assert_called_once_with(
+            test_experiment_id, Path("/mock/directory")
+        )
 
-    @patch.object(ExportControl, "choose_directory", return_value="/mock/directory")
+    @patch("app.breksta.choose_directory", return_value=Path("/mock/directory"))
     def test_failed_export_on_export_button_clicked(self, mock_choose_directory) -> None:
         """Test that clicking the export button raises an OSError and is logged as a critical error."""
         self.export_control.selected_experiment_id = 123  # mock ID
-        self.export_control.folder_path = "/mock/directory"
+        self.export_control.folder_path = Path("/mock/directory")
 
         mock_export_data_single = MagicMock(side_effect=OSError("mock error"))
         self.export_control.table.database.export_data_single = mock_export_data_single
