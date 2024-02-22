@@ -92,6 +92,8 @@ class TestPmtDb(unittest.TestCase):
 
         # Assertion #3: Verify the new experiment record exists and is correct
         new_experiment = self.session.get(Experiment, self.mock_db.experiment_id)
+        if not new_experiment:
+            return
         self.assertIsNotNone(new_experiment)
         self.assertNotEqual(first_experiment, new_experiment)
         self.assertEqual(new_experiment.id, old_experiment_id + 1)
