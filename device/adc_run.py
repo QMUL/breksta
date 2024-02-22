@@ -45,7 +45,7 @@ class ADCReader(ABC):
         """Constructor method. Replaces __init__"""
         if not hasattr(self, "is_initialized") or not self.is_initialized:
             self.logger = logger if logger else setup_logger()
-            self.adc = initialize_adc(adc_config=config)
+            self.adc = initialize_adc(adc_config=config, logger=logger)
             self.is_initialized: bool = self.adc is not None
             if not self.adc:
                 self.logger.critical("ADC could not be initialized.")
