@@ -5,19 +5,17 @@ If the device changes, the initializer will also have to change.
 """
 import ADS1x15 as ads
 
-from app.logger_config import setup_logger
 from device.adc_config import ADCConfig, ADS1115Mode
 
-logger = setup_logger()
 
-
-def initialize_adc(adc_config: ADCConfig) -> ads.ADS1115 | None:
+def initialize_adc(adc_config: ADCConfig, logger) -> ads.ADS1115 | None:
     """
     Initializes and configures the ADC using the provided configuration.
 
     Args:
         adc_config (ADCConfig): Configuration object containing settings for the ADC,
                                 including I2C bus number, address, gain, and data rate.
+        logger: The main logger object, dependency injected by parents.
 
     Returns:
         ads.ADS1115 | None: Configured ADC object or None if initialization fails.
@@ -41,7 +39,7 @@ def initialize_adc(adc_config: ADCConfig) -> ads.ADS1115 | None:
         return None
 
     # Set the polling mode before the single read
-    set_adc_polling_mode(adc, adc_config)
+    set_adc_polling_mode(adc, adc_config, logger)
 
     # Check if a critical method exists
     if not hasattr(adc, "setGain"):
@@ -52,12 +50,12 @@ def initialize_adc(adc_config: ADCConfig) -> ads.ADS1115 | None:
     adc.setDataRate(adc_config.data_rate)
 
     # commit changes
-    singular_read = commit_adc_config(adc)
+    singular_read = commit_adc_config(adc, logger)
     if not singular_read:
         return None
 
     # validate the device's reported configuration matches the adc_config
-    if not is_adc_config_match(adc, adc_config):
+    if not is_adc_config_match(adc, adc_config, logger):
         return None
 
     logger.info("Initialization of ADC/I2C interface completed.")
@@ -65,7 +63,7 @@ def initialize_adc(adc_config: ADCConfig) -> ads.ADS1115 | None:
     return adc
 
 
-def set_adc_polling_mode(adc, config: ADCConfig) -> None:
+def set_adc_polling_mode(adc, config: ADCConfig, logger) -> None:
     """
     Sets the ADC polling mode to single-shot or continuous operation.
     """
@@ -81,7 +79,7 @@ def set_adc_polling_mode(adc, config: ADCConfig) -> None:
         adc.setMode(adc.MODE_SINGLE)
 
 
-def commit_adc_config(adc) -> bool:
+def commit_adc_config(adc, logger) -> bool:
     """
     Performs a test read to commit the ADC configuration.
 
@@ -99,7 +97,7 @@ def commit_adc_config(adc) -> bool:
     return True
 
 
-def is_adc_config_match(adc, config: ADCConfig) -> bool:
+def is_adc_config_match(adc, config: ADCConfig, logger) -> bool:
     """Use the getter device functions to ascertain the config has been correctly set."""
     gain = adc.getGain()  # Get programmable gain amplifier configuration
     if config.gain != gain:

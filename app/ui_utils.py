@@ -5,10 +5,12 @@ from PySide6.QtWidgets import QFileDialog
 
 from app.utils import get_db_path
 
-default: Path = get_db_path()
+default_db_path: Path = get_db_path()
 
 
-def choose_directory(default_path: Path = default, dialog_title: str = "Select Folder to export and backup") -> Path | None:
+def choose_directory(
+    default_path: Path = default_db_path, dialog_title: str = "Select Folder to export and backup"
+) -> Path | None:
     """
     Opens a dialog for the user to choose an export folder for the experiment data.
     Utilizes pathlib for path manipulation, setting the default directory to the user's home directory,

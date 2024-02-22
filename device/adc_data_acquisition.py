@@ -76,7 +76,7 @@ def adc_regular_read(period: float) -> None:
     # Set up ADC configuration
     config = ADCConfig()
     # Initialize the ADC
-    adc = initialize_adc(adc_config=config)
+    adc = initialize_adc(adc_config=config, logger=logger)
     if not adc:
         logger.error("Failed to initialize the ADC. Exiting.")
         return
