@@ -106,7 +106,7 @@ class CentralizedControlManager(QWidget):
         self.adc_ui.setEnabled(True)
         self.logger.debug("Experiment stopped - ADC controls enabled.")
         self.timer.stop()
-        if self.adc_reader.adc is not None:
+        if self.adc_reader is not None and self.adc_reader.adc is not None:
             self.timer.timeout.disconnect()
 
     def start_reading(self, adc_reader, timer, period) -> None:
