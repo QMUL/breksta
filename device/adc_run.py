@@ -92,7 +92,6 @@ class SingleShotADCReader(ADCReader):
             return None
 
         result: float = read_adc_single_channel(self.adc, self.channel)
-        self.logger.debug(result * self.to_voltage)
         return result * self.to_voltage
 
 
@@ -122,5 +121,4 @@ class ContinuousADCReader(ADCReader):
             return None
 
         result: float = read_adc_single_channel(self.adc, self.channel)
-        self.logger.debug(result * self.to_voltage)
         return result * self.to_voltage
