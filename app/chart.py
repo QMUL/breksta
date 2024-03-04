@@ -92,8 +92,6 @@ def draw_chart(pathname: str, n_intervals: int, stored_layout: dict) -> go.Figur
     if control == STOP_SIGNAL:
         return figure
 
-    # The experiment ID is crucial for fetching the relevant data
-    logger.debug("pathname is %s", pathname)
     # Extract the experiment ID from the URL
     experiment_id = extract_experiment_id_from_url(pathname)
 
@@ -126,9 +124,8 @@ def extract_experiment_id_from_url(url) -> int | None:
     parsed_list = parsed_dict.get("experiment")
 
     if parsed_list:
-        # Get the first element since it's a list
+        # Get the list's first element
         experiment_id = int(parsed_list[0])
-        logger.debug("experiment_id found in URL %s.", url)
     else:
         experiment_id = None
         logger.critical("URL %s did not return correct experiment_id", url)
@@ -196,12 +193,11 @@ def store_layout(relayout_data, stored_layout):
     else:
         # Incorporate any user-defined layout customizations into stored_layout for ongoing use
         stored_layout.update(relayout_data)
+        logger.debug("Layout changed: %s", stored_layout)
 
         # Remove autosize to maintain user-defined axis ranges without conflict
         if "autosize" in stored_layout:
             del stored_layout["autosize"]
-
-    logger.debug("relayoutdata: %s", stored_layout)
 
     return stored_layout
 

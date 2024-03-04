@@ -58,7 +58,6 @@ class DeviceCapture(QObject):
         """Logic to write data to the database"""
         try:
             self.database.write_reading(data)
-            self.logger.debug("Reading: %s", data)
         except Exception as err:
             self.logger.error(f"Error writing to database: {err}", exc_info=True)
             raise
