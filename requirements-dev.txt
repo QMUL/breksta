@@ -3,6 +3,7 @@ flake8
 pytest
 coverage
 mypy
+mypy-extensions
 pandas-stubs
 ruff
 pre-commit

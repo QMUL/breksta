@@ -4,11 +4,29 @@
 
 ***Breksta*** is a specialized data acquisition system focusing on photomultiplier tubes. The application operates on a Raspberry Pi interfacing via an ADC. It integrates multiple technologies, including Qt (via `PySide6`), `pandas` for data manipulation, `Plotly`/`Dash` for visualization, and `SQLAlchemy` for database operations.
 
+- [Introduction](#introduction)
+- [Pre-requisites](#pre-requisites)
+- [Installation](#installation)
+  - [Setup](#setup)
+  - [Running the Application](#running-the-application)
+- [Development](#development)
+  - [Setting up Development Environment](#setting-up-development-environment)
+  - [Selecting mock device for development](#selecting-mock-device-for-development)
+  - [Contributing](#contributing)
+  - [Code Quality](#code-quality)
+- [License](#license)
+- [Contact](#contact)
+- [Appendix](#appendix)
+  - [ADC Integration](#adc-integration)
+  - [Installing `uv`](#installing-uv)
+  - [Using `uv`](#using-uv)
+
 ## Pre-requisites
 
 - Linux-based OS
 - Python `3.10` minimum, tested on `3.11`, `3.12`
 - Qt C++ libraries, pre-requisite for `PySide6`
+- `uv` - How to [install](#installing-uv) and [use](#using-uv) `uv`.
 
 ## Installation
 
@@ -17,19 +35,19 @@
 1. **Create a Virtual Environment**:
 
 ```bash
-python3 -m venv env
+uv venv
 ```
 
 2. **Activate the Virtual Environment**:
 
 ```bash
-source env/bin/activate
+source .venv/bin/activate
 ```
 
 3. **Install Required Packages**:
 
 ```bash
-pip install -r requirements.txt
+uv pip install -r pyproject.toml
 ```
 
 ### Running the Application
@@ -42,11 +60,7 @@ To run the application:
 export PYTHONPATH="$PWD:$PYTHONPATH"
 ```
 
-2. Activate the virtual environment:
-
-```bash
-source env/bin/activate
-```
+2. Activate the virtual environment
 
 3. Start the application:
 
@@ -58,19 +72,14 @@ python -m app.breksta
 
 ### Setting up Development Environment
 
-1. **Activate the Virtual Environment**:
-
-```bash
-source env/bin/activate
-```
-
+1. **Activate the Virtual Environment**
 2. **Install Development Packages**:
 
 ```bash
-pip install -r requirements-dev.txt
+uv pip install -r requirements-dev.txt
 ```
 
-### Selecting devices
+### Selecting mock device for development
 
 To bypass ADC selection and use the Sine Wave generator, before starting the app use:
 
@@ -137,15 +146,34 @@ SKIP pytest-check git commit -m "Commit message.."
 
 ## License
 
-The project is operating under an Open License.
+The project is operating under an [MIT](./LICENSE) license.
 
 ## Contact
 
-For questions or suggestions, please contact us at [email](mailto:example@example.com) or open an issue.
-
+For questions or suggestions, please contact us at [email](m.alexandrakis@qmul.ac.uk) or open an issue.
 
 ## Appendix
 
 ### ADC Integration
 
-The notes can be found [here](./docs/adc_integration.md)
+The notes can be found [here](./docs/adc_integration.md).
+
+### Installing `uv`
+
+From your terminal, execute: `$ curl -LsSf https://astral.sh/uv/install.sh | sh`
+
+Note: It's recommended to review scripts from the internet before executing them. You can view the script at `https://astral.sh/uv/install.sh` before running the above command.
+
+Then restart terminal. To update it, simply invoke `uv self update`.
+
+### Using `uv`
+
+```bash
+# Create a virtual environment
+uv venv
+source .venv/bin/activate  # to activate
+
+# Install dependencies
+uv pip install -r pyproject.toml  # runtime
+uv pip install -r requirements-dev.txt  # development
+```
