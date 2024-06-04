@@ -4,6 +4,7 @@ Focuses on acquiring data from the ADC.
 - Functions for reading from ADC channels.
 - Data processing or filtering methods specific to ADC data.
 """
+
 import time
 
 from app.logger_config import setup_logger

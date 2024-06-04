@@ -1,4 +1,5 @@
 """Manages ADC configuration settings like gain and address."""
+
 from dataclasses import dataclass
 from enum import Enum
 

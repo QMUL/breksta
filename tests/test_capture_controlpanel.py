@@ -3,6 +3,7 @@
 The public methods both classes are tested to ensure that changes in the code do not unintentionally
 break the application.
 """
+
 import unittest
 from unittest.mock import MagicMock
 

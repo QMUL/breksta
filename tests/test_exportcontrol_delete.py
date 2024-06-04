@@ -3,6 +3,7 @@
 Each public method of ExportControl is tested to ensure that changes in the code do not unintentionally
 break the application.
 """
+
 import tempfile
 import unittest
 from pathlib import Path
@@ -56,8 +57,9 @@ class TestExportControl(unittest.TestCase):
 
     def test_delete_button_experiment_selected(self) -> None:
         """Test that delete button calls delete_experiment with correct id when an experiment is selected"""
-        with tempfile.TemporaryDirectory() as tmpdirname, mock.patch(
-            "app.breksta.choose_directory", return_value=Path(tmpdirname)
+        with (
+            tempfile.TemporaryDirectory() as tmpdirname,
+            mock.patch("app.breksta.choose_directory", return_value=Path(tmpdirname)),
         ):
             self.export_control.folder_path = Path(tmpdirname)
             # Create a mock for the delete_experiment method
@@ -80,8 +82,9 @@ class TestExportControl(unittest.TestCase):
 
     def test_delete_button_experiment_not_exported(self) -> None:
         """Test that delete button calls delete_experiment with correct id when an experiment is not exported"""
-        with tempfile.TemporaryDirectory() as tmpdirname, mock.patch(
-            "app.breksta.choose_directory", return_value=Path(tmpdirname)
+        with (
+            tempfile.TemporaryDirectory() as tmpdirname,
+            mock.patch("app.breksta.choose_directory", return_value=Path(tmpdirname)),
         ):
             # Create a mock backup file
             backup_path = Path(tmpdirname)

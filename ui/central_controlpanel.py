@@ -1,6 +1,7 @@
 """
 Glues together all UI and Manager classes for the Capture Tab.
 """
+
 import sys
 
 from PySide6.QtCore import Qt, Signal, Slot

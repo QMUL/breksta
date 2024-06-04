@@ -6,6 +6,7 @@ Includes:
 - creating the ADC configuration object
 - selecting the ADC reading operation mode
 """
+
 import os
 
 from PySide6.QtWidgets import QButtonGroup, QComboBox, QLabel, QRadioButton, QVBoxLayout, QWidget

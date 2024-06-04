@@ -1,4 +1,5 @@
 """Tests all ui_utils helper functions."""
+
 import unittest
 from pathlib import Path
 from unittest import mock

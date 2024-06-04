@@ -3,6 +3,7 @@
 Each public method of CentralizedControlManager is tested to ensure that changes in the code do not unintentionally
 break the application.
 """
+
 import os
 from unittest import TestCase
 from unittest.mock import MagicMock, patch

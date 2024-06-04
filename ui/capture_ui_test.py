@@ -1,4 +1,5 @@
 """Module for manual inspection of the Capture control UI elements."""
+
 import sys
 
 from PySide6.QtWidgets import QApplication, QVBoxLayout, QWidget

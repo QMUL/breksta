@@ -1,5 +1,6 @@
 """Tests the ADC configuration is correctly assembled, shown in the UI,
 and committed to the device."""
+
 import unittest
 from unittest.mock import MagicMock, patch
 

@@ -1,4 +1,5 @@
 """This module houses the more general functionality."""
+
 from pathlib import Path
 
 import appdirs

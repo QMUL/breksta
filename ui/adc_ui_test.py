@@ -1,4 +1,5 @@
 """Manual inspection module for the creation and instantiation of Capture tab UI elements."""
+
 import sys
 
 from PySide6.QtWidgets import QApplication, QVBoxLayout, QWidget

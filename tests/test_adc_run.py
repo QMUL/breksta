@@ -1,4 +1,5 @@
 """Tests the Abstract ADC Reader implementations."""
+
 import unittest
 from unittest import mock
 

@@ -1,6 +1,7 @@
 """This module contains the main application for managing experiments.
 It includes the main window UI, the data capture and charting functionalities.
 """
+
 import datetime
 import os
 import shutil

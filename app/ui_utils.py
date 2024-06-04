@@ -1,4 +1,5 @@
 """Encapsulates all UI-related helper functionality."""
+
 from pathlib import Path
 
 from PySide6.QtWidgets import QFileDialog

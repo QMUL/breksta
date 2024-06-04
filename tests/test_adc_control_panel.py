@@ -1,6 +1,7 @@
 """Tests the ADC control panel is correctly created and initialized.
 Also tests the ADC manager handles the business logic appropriately.
 """
+
 import unittest
 from unittest.mock import Mock
 
