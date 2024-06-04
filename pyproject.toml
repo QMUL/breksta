@@ -1,0 +1,36 @@
+[build-system]
+requires = ["uv"]
+
+[project]
+name = "Breksta"
+version = "0.9.0"
+dependencies = [
+  "dash",
+  "pandas",
+  "plotly",
+  "pyside6",
+  "sqlalchemy",
+  "pathvalidate",
+  "dash-bootstrap-components",
+  "pyarrow",
+  "appdirs",
+]
+requires-python = ">=3.10"
+authors = [
+  { name = "Matthew Alexandrakis", email = "m.alexandrakis@qmul.ac.uk" },
+]
+description = "Breksta - Signal and Data Acquisition App"
+readme = "README.md"
+license = { file = "LICENSE.txt" }
+keywords = ["python", "data acquisition"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+]
+
+[project.urls]
+Homepage = "https://github.qmul.ac.uk/itsr-rse/breksta"
+Documentation = "https://github.qmul.ac.uk/itsr-rse/breksta"
+Repository = "https://github.qmul.ac.uk/itsr-rse/breksta"
+"Bug Tracker" = "https://github.qmul.ac.uk/itsr-rse/breksta/issues"
+Changelog = "https://github.qmul.ac.uk/itsr-rse/breksta/blob/master/CHANGELOG.md"
