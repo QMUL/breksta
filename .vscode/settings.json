@@ -34,7 +34,7 @@
         "editor.findMatchBackground": "#ed4cb76f",
         "editor.findMatchBorder": "#f828ff",
         //"editor.findMatchBorder": "#d4540ab4",
-        "editor.findMatchHighlightBackground": "#ffc19d",
+        "editor.findMatchHighlightBackground": "#ffc19d7d",
         // "editorBracketHighlight.foreground1": "#642193",
         // "editorBracketHighlight.foreground2": "#1300e3"
     },
