@@ -29,4 +29,8 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     testWindow = TestWindow()
     testWindow.show()
+
+    print("Amplifier slider value:", testWindow.amplifier.get_slider_value())
+    print("Potentiometer slider value:", testWindow.potentiometer.get_slider_value())
+
     sys.exit(app.exec())

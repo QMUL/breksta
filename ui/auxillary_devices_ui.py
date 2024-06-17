@@ -33,28 +33,34 @@ class DeviceConfigBase(QWidget):
         """Override this method in subclasses to create specific device controls."""
         raise NotImplementedError("This method should be overridden in subclasses")
 
-    def add_slider_with_labels(self, layout: QVBoxLayout, name: str, min_val: int, max_val: int, tick_interval: int):
+    def add_slider_with_labels(self, layout: QVBoxLayout, name: str, min_val: int, max_val: int, tick_interval: int) -> None:
         """Helper method to add a slider with labels for start, end, and increments."""
         slider_layout = QVBoxLayout()
 
         label = QLabel(name)
-        slider = QSlider(Qt.Horizontal)
-        slider.setMinimum(min_val)
-        slider.setMaximum(max_val)
-        slider.setValue((max_val + min_val) // 2)
-        slider.setTickPosition(QSlider.TicksBelow)
-        slider.setTickInterval(tick_interval)
+        self.slider = QSlider(Qt.Horizontal)
+        self.slider.setMinimum(min_val)
+        self.slider.setMaximum(max_val)
+        self.slider.setValue((max_val + min_val) // 2)
+        self.slider.setTickPosition(QSlider.TicksBelow)
+        self.slider.setTickInterval(tick_interval)
 
         start_label = QLabel(str(min_val))
         end_label = QLabel(str(max_val))
-        current_value_label = QLabel(str(slider.value()))
+        current_value_label = QLabel(str(self.slider.value()))
 
         def update_label(value) -> None:
             current_value_label.setText(str(value))
 
-        slider.valueChanged.connect(update_label)
+        def log_value() -> None:
+            self.logger.info(f"{self.device_name} slider value changed to {self.slider.value()}")
+
+        # Known limitation. If clicked, the value will be updated but not logged.
+        self.slider.valueChanged.connect(update_label)
+        self.slider.sliderReleased.connect(log_value)
+
         slider_layout.addWidget(label)
-        slider_layout.addWidget(slider)
+        slider_layout.addWidget(self.slider)
 
         tick_layout = QHBoxLayout()
         tick_layout.addWidget(start_label)
@@ -65,6 +71,14 @@ class DeviceConfigBase(QWidget):
 
         slider_layout.addLayout(tick_layout)
         layout.addLayout(slider_layout)
+
+    def get_slider_value(self) -> int | None:
+        """Getter method to access the slider value."""
+        if self.slider.value() is not None:
+            return self.slider.value()
+
+        self.logger.info(f"No slider found in {self.device_name} configuration.")
+        return None
 
 
 class AmplifierConfig(DeviceConfigBase):
