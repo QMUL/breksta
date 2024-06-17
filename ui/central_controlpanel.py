@@ -10,6 +10,7 @@ from PySide6.QtWidgets import QApplication, QVBoxLayout, QWidget
 from app.logger_config import setup_logger
 from device.adc_run import ADCReader
 from ui.adc_controlpanel import ADCConfigManager, ADCConfigWidget
+from ui.auxillary_devices_ui import AmplifierConfig, PotentiometerConfig
 from ui.capture_controlpanel import CaptureControlManager, CaptureControlUI
 from ui.chart_manager import start_chart_process as start_chart
 from ui.chart_manager import stop_chart_process as stop_chart
@@ -53,6 +54,10 @@ class CentralizedControlManager(QWidget):
         self.channel = self.DEFAULT_CHANNEL
         self.adc_reader: ADCReader | None = None
         self.timer = self.capture_manager.sampling_timer
+
+        # Not injected - Careful!
+        self.aux1 = AmplifierConfig(self.logger)
+        self.aux2 = PotentiometerConfig(self.logger)
 
         self.create_layout(self.capture_ui, self.adc_ui)
         self.setup_connections()
@@ -130,6 +135,14 @@ class CentralizedControlManager(QWidget):
 
         adc_group_box = create_group_box(adc, "ADC Settings")
         layout.addWidget(adc_group_box)
+        layout.addStretch()
+
+        # Added through Class Attributes - Careful!
+        aux1_group_box = create_group_box(self.aux1, "Amplifier Settings")
+        layout.addWidget(aux1_group_box)
+        layout.addStretch()
+        aux2_group_box = create_group_box(self.aux2, "Potentiometer Settings")
+        layout.addWidget(aux2_group_box)
         layout.addStretch()
 
         self.setLayout(layout)

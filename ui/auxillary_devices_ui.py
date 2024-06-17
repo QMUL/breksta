@@ -25,8 +25,8 @@ class DeviceConfigBase(QWidget):
     def setup_ui(self) -> None:
         """Creates the box layout, then creates the UI elements and adds them to the layout."""
         layout = QVBoxLayout(self)
-        title = QLabel(f"{self.device_name} controls")
-        layout.addWidget(title)
+        # title = QLabel(f"{self.device_name} controls")
+        # layout.addWidget(title)
         self.setup_device_control(layout)
 
     def setup_device_control(self, layout: QVBoxLayout) -> None:
@@ -53,7 +53,7 @@ class DeviceConfigBase(QWidget):
             current_value_label.setText(str(value))
 
         def log_value() -> None:
-            self.logger.info(f"{self.device_name} slider value changed to {self.slider.value()}")
+            self.logger.debug(f"{self.device_name} slider value changed to {self.slider.value()}")
 
         # Known limitation. If clicked, the value will be updated but not logged.
         self.slider.valueChanged.connect(update_label)
@@ -77,7 +77,7 @@ class DeviceConfigBase(QWidget):
         if self.slider.value() is not None:
             return self.slider.value()
 
-        self.logger.info(f"No slider found in {self.device_name} configuration.")
+        self.logger.debug(f"No slider found in {self.device_name} configuration.")
         return None
 
 
@@ -90,6 +90,7 @@ class AmplifierConfig(DeviceConfigBase):
     def setup_device_control(self, layout: QVBoxLayout) -> None:
         """Create the UI elements to control the amplifier."""
         self.add_slider_with_labels(layout, "Gain", 0, 100, 10)
+        self.add_slider_with_labels(layout, "Resistance", 0, 100, 10)
 
 
 class PotentiometerConfig(DeviceConfigBase):

@@ -133,7 +133,8 @@ class TestCentralizedControlManager(TestCase):
     def test_layout_item_count(self) -> None:
         """Test the count of items in the layout."""
         layout = self.central_manager.layout()
-        expected_widget_count = 3
+        # sigh
+        expected_widget_count = 7
         actual_widget_count = layout.count()
         self.assertEqual(actual_widget_count, expected_widget_count)
 
