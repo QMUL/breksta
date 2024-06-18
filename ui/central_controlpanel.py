@@ -62,6 +62,20 @@ class CentralizedControlManager(QWidget):
         self.create_layout(self.capture_ui, self.adc_ui)
         self.setup_connections()
 
+    def init_aux_devices(self) -> None:
+        """Initialize Auxiliary devices before ADC."""
+        # Auxiliary devices UI Disabled
+        self.aux1.setEnabled(False)
+        self.aux2.setEnabled(False)
+
+        amp = self.aux1.get_slider_value("Amplifier_gain")
+        amp_res = self.aux1.get_slider_value("Amplifier_resistance")
+        pot = self.aux2.get_slider_value("Potentiometer_resistance")
+
+        print("Amplifier logged", amp)
+        print("Amplifier Resistance logged", amp_res)
+        print("Potentiometer logged", pot)
+
     def setup_connections(self) -> None:
         """Connect signals to slots"""
         self.capture_ui.start_button_signal.connect(self.on_experiment_started, Qt.ConnectionType.QueuedConnection)
@@ -79,6 +93,7 @@ class CentralizedControlManager(QWidget):
         """
         # Start/resume charting
         start_chart(self.logger)
+        self.init_aux_devices()
 
         # Handle ADC-related logic. Get a valid config, push it to ADC, initialize ADC, choose Reader
         self.adc_ui.setEnabled(False)
@@ -107,6 +122,10 @@ class CentralizedControlManager(QWidget):
         """
         # Stop charting
         stop_chart(self.logger)
+
+        # Auxiliary devices UI Enabled
+        self.aux1.setEnabled(True)
+        self.aux2.setEnabled(True)
 
         # Handle ADC-related logic
         self.adc_ui.setEnabled(True)
