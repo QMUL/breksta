@@ -1,5 +1,7 @@
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 
+<img src="./assets/breksta.png" style="align:center; width:256px" />
+
 ## Introduction
 
 ***Breksta*** is a specialized data acquisition system focusing on photomultiplier tubes. The application operates on a Raspberry Pi interfacing via an ADC. It integrates multiple technologies, including Qt (via `PySide6`), `pandas` for data manipulation, `Plotly`/`Dash` for visualization, and `SQLAlchemy` for database operations.
