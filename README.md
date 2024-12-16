@@ -7,19 +7,10 @@
 - [Introduction](#introduction)
 - [Pre-requisites](#pre-requisites)
 - [Installation](#installation)
-  - [Setup](#setup)
-  - [Running the Application](#running-the-application)
 - [Development](#development)
-  - [Setting up Development Environment](#setting-up-development-environment)
-  - [Selecting mock device for development](#selecting-mock-device-for-development)
-  - [Contributing](#contributing)
-  - [Code Quality](#code-quality)
 - [License](#license)
 - [Contact](#contact)
 - [Appendix](#appendix)
-  - [ADC Integration](#adc-integration)
-  - [Installing `uv`](#installing-uv)
-  - [Using `uv`](#using-uv)
 
 ## Pre-requisites
 
@@ -146,7 +137,7 @@ SKIP pytest-check git commit -m "Commit message.."
 
 ## License
 
-The project is operating under an [MIT](./LICENSE) license.
+The project operates under an [Apache v2.0](./LICENSE) license.
 
 ## Contact
 

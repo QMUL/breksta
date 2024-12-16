@@ -18,10 +18,11 @@ dependencies = [
 requires-python = ">=3.10"
 authors = [
   { name = "Matthew Alexandrakis", email = "m.alexandrakis@qmul.ac.uk" },
+  { name = "Giles Greenway", email = "g.greenway@qmul.ac.uk" },
 ]
 description = "Breksta - Signal and Data Acquisition App"
 readme = "README.md"
-license = { file = "LICENSE.txt" }
+license = { file = "LICENSE" }
 keywords = ["python", "data acquisition"]
 classifiers = [
   "Development Status :: 4 - Beta",
