@@ -6,4 +6,5 @@ sqlalchemy
 pathvalidate
 dash-bootstrap-components
 pyarrow
+appdirs
 #ADS1x15-ADC
