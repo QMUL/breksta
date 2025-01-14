@@ -15,14 +15,14 @@
 
 ## Introduction
 
-***Breksta*** is a data acquisition program that reads from photomultiplier tubes via the [ADS1115](https://www.adafruit.com/product/1085) ADC on a Raspberry Pi. It aims to simplify collecting, monitoring, and exporting photodiode/PMT data. The app can also operate in a simulated mode for testing.
+*Breksta* is a data acquisition program that reads from photomultiplier tubes via the [ADS1115](https://www.adafruit.com/product/1085) ADC on a Raspberry Pi. It aims to simplify collecting, monitoring, and exporting photodiode/PMT data. The app can also operate in a simulated mode for testing.
 
 ## Features
-- **Real-time charting** using `Plotly`.
-- **Export functionality** that records experiment data for later analysis.
-- **User interface** built with `PySide6` and integrated with `dash`/`plotly` for graphing.
-- **Database integration** for storing experiment metadata (via `sqlalchemy`).
-- **Mock device** for development and testing without dedicated hardware.
+
+- User interface built with `PySide6` and integrated with `dash`/`plotly` for real-time graphing.
+- Database integration for storing experiment metadata (via `sqlalchemy`).
+- Export functionality that records experiment data for later analysis.
+- Sine-wave generator algorithm to mock a signal for development and testing without dedicated hardware.
 
 ## App GUI examples
 
@@ -39,11 +39,12 @@
 
 ## Pre-requisites
 
-- **Linux-based OS** (tested on Manjaro, developed on Ubuntu)
-- **Python `3.10`+** (tested on `3.11` and `3.12`)
-- **Qt C++ libraries** for `PySide6`
-- **Hardware**:
-  - Raspberry Pi (tested on a 3/4, but any Pi with I2C support should work).
+- Linux-based OS (hardware tested on Manjaro, developed on Ubuntu)
+- Python `3.10`+ (tested on `3.11` and `3.12`)
+- Qt C++ libraries for `PySide6`
+- ADS1115 [Interface package](https://github.com/chandrawi/ADS1x15-ADC) (see [known issues](./docs/adc_integration.md#2-install-the-modified-ads1x15-library))
+- Hardware:
+  - Raspberry Pi (tested on a RPI4, but any Pi with I2C support should work if the libraries install correctly).
   - ADS1115 (address and gain configurable in the app).
 
 ## Installation
@@ -109,10 +110,14 @@ This project is licensed under the [Apache v2.0](./LICENSE) license.
 
 ## Funding
 
-***Breksta*** was developed by the [**IT Research Department**](https://www.qmul.ac.uk/its/its-research/) [**RSE team**](https://blog.hpc.qmul.ac.uk/what-is-the-itsr-rse-team/), which also provided the funding and resources necessary to bring this project to life. Sincere gratitude goes out to the entire department for their ongoing support.
+*Breksta* was developed by the Queen Mary University of London [IT Research Department](https://www.qmul.ac.uk/its/its-research/) [RSE team](https://blog.hpc.qmul.ac.uk/what-is-the-itsr-rse-team/). ITR provided the funding and resources necessary to bring this project to life.
 
 ## Appendix
 
 ### ADC Integration
 
 For detailed steps on enabling I2C on a Raspberry Pi, installing the modified ADS1x15 library, and troubleshooting permissions, see [adc_integration.md](./docs/adc_integration.md).
+
+### Troubleshooting & Advanced Setup
+
+For more information on environment setup, or errors like GPU acceleration, `libtiff` conflicts, or I2C permissions, see [troubleshooting.md](./docs/troubleshooting.md).
